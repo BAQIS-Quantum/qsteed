@@ -38,7 +38,7 @@ requirements = [
 
 setup(
     name="qsteed",
-    version="0.1.0",
+    version="0.1.1",
     author="Xuhongze",
     author_email="xhzby1995@163.com",
     url="https://github.com/BAQIS-Quantum/QSteed",
