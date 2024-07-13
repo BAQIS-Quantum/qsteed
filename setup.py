@@ -32,6 +32,7 @@ requirements = [
     "Pillow>=10.4.0",
     "pyquafu>=0.4.1",
     "rich>=13.7.1",
+    "pygraphviz>=1.13",
     "graphviz>=0.14.2",
     "tabulate>=0.9.0",
 ]
