@@ -4,9 +4,10 @@
 [![Current Release](https://img.shields.io/github/release/BAQIS-Quantum/qsteed.svg?)](https://github.com/BAQIS-Quantum/qsteed/releases)
 
 [//]: # ([![Downloads]&#40;https://img.shields.io/pypi/dm/qsteed.svg?&#41;]&#40;https://pypi.org/project/qsteed/&#41;)
+
 [//]: # (![PyPI - Python Version]&#40;https://img.shields.io/pypi/pyversions/qsteed&#41;)
 
-[//]: # (![Python versions]&#40;https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue&#41;)
+![Python versions](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 
 **QSteed** is a **Q**uantum **S**of**t**war**e** of 
 Compilation for supporting R**e**al Quantum **d**evice, 
