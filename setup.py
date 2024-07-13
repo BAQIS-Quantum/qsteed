@@ -32,14 +32,13 @@ requirements = [
     "Pillow>=10.4.0",
     "pyquafu>=0.4.1",
     "rich>=13.7.1",
-    "pygraphviz>=1.13",
     "graphviz>=0.14.2",
     "tabulate>=0.9.0",
 ]
 
 setup(
     name="qsteed",
-    version="0.1.0",
+    version="0.1.1",
     author="Xuhongze",
     author_email="xhzby1995@163.com",
     url="https://github.com/BAQIS-Quantum/QSteed",
