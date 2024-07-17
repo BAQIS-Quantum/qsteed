@@ -14,16 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Union
+from typing import Union
 
 from quafu import QuantumCircuit
 
 from qsteed.dag.circuit_dag_convert import dag_to_circuit
 from qsteed.dag.dagcircuit import DAGCircuit
-from qsteed.passes.basepass import BasePass
 from qsteed.passes.datadict import DataDict
-from qsteed.passflow.preset_passflow import PresetPassflow
 from qsteed.passflow.passflow import PassFlow
+from qsteed.passflow.preset_passflow import PresetPassflow
 
 
 class Transpiler:

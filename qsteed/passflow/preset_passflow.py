@@ -34,7 +34,7 @@ def level_1_passflow(basis_gates):
                SabreLayout(heuristic='distance', max_iterations=3),
                UnrollToBasis(basis_gates=basis_gates),
                GateCombineOptimization(),
-               # OneQubitGateOptimization(),
+               OneQubitGateOptimization(),
                ]
     return PassFlow(level_1)
 
@@ -44,7 +44,7 @@ def level_2_passflow(basis_gates):
                SabreLayout(heuristic='fidelity', max_iterations=3),
                UnrollToBasis(basis_gates=basis_gates),
                GateCombineOptimization(),
-               # OneQubitGateOptimization(),
+               OneQubitGateOptimization(),
                ]
     return PassFlow(level_2)
 
@@ -54,7 +54,7 @@ def level_3_passflow(basis_gates):
                SabreLayout(heuristic='mixture', max_iterations=3),
                UnrollToBasis(basis_gates=basis_gates),
                GateCombineOptimization(),
-               # OneQubitGateOptimization(),
+               OneQubitGateOptimization(),
                ]
     return PassFlow(level_3)
 
