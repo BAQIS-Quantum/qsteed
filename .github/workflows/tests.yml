@@ -25,6 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install 'pyquafu>=0.4.1'
         if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
     - name: Install qsteed
       run: python setup.py develop
