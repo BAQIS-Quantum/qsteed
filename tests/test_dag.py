@@ -14,24 +14,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from qsteed.dag.circuit_dag_convert import circuit_to_dag, dag_to_circuit, draw_dag, show_dag, nodelist_to_dag, gate_to_node, nodelist_qubit_mapping_dict
-from qsteed.utils.random_circuit import RandomCircuit
-import matplotlib.pyplot as plt
+from qsteed.dag.circuit_dag_convert import circuit_to_dag, dag_to_circuit, draw_dag, nodelist_to_dag, \
+    gate_to_node
+from tests.shared_utils import get_random_circuit
 
-rqc = RandomCircuit(num_qubit=5, gates_number=20, gates_list=['mcx', 'cx', 'ry', 'h'],  measure=False)
-qc = rqc.random_circuit()
-qc.plot_circuit()
-plt.show()
 
-dag = circuit_to_dag(qc)
-draw_dag(dag)
-show_dag(dag)
+class TestDAGConversion:
 
-re_qc = dag_to_circuit(dag, qubits=5)
-re_qc.plot_circuit()
-plt.show()
+    def test_circuit_to_dag_and_back(self):
+        qc = get_random_circuit(gates_number=20)
+        assert qc is not None
+        qc.draw_circuit()
 
-nodelist = [gate_to_node(gate, specific_label=i) for i, gate in enumerate(qc.gates)]
-dag1 = nodelist_to_dag(nodelist)
-draw_dag(dag1)
-show_dag(dag1)
+        dag = circuit_to_dag(qc)
+        draw_dag(dag)
+        # show_dag(dag)
+
+        re_qc = dag_to_circuit(dag, qubits=qc.num)
+        assert re_qc is not None
+        re_qc.draw_circuit()
+        assert len(qc.gates) == len(re_qc.gates), "Number of gates should be the same"
+
+    def test_nodelist_to_dag(self):
+        qc = get_random_circuit(gates_number=20)
+        assert qc is not None
+        qc.draw_circuit()
+
+        nodes_list = [gate_to_node(gate, specific_label=i) for i, gate in enumerate(qc.gates)]
+        dag = nodelist_to_dag(nodes_list)
+        draw_dag(dag)
+        # show_dag(dag)
+
+        re_qc = dag_to_circuit(dag, qubits=qc.num)
+        assert re_qc is not None
+        assert len(qc.gates) == len(re_qc.gates), "Number of gates should be the same"

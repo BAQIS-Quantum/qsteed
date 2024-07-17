@@ -30,7 +30,6 @@ requirements = [
     "networkx>=2.6.3",
     "scipy>=1.8.1",
     "Pillow>=10.4.0",
-    "pyquafu>=0.4.1",
     "rich>=13.7.1",
     "graphviz>=0.14.2",
     "tabulate>=0.9.0",
@@ -38,7 +37,7 @@ requirements = [
 
 setup(
     name="qsteed",
-    version="0.1.1",
+    version="0.1.2",
     author="Xuhongze",
     author_email="xhzby1995@163.com",
     url="https://github.com/BAQIS-Quantum/QSteed",
