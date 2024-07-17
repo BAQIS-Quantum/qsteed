@@ -27,7 +27,7 @@ class TestDAGConversion:
         qc.draw_circuit()
 
         dag = circuit_to_dag(qc)
-        draw_dag(dag)
+        # draw_dag(dag)  # You can uncomment the lines locally to display the DAG diagram.
         # show_dag(dag)
 
         re_qc = dag_to_circuit(dag, qubits=qc.num)
@@ -42,7 +42,7 @@ class TestDAGConversion:
 
         nodes_list = [gate_to_node(gate, specific_label=i) for i, gate in enumerate(qc.gates)]
         dag = nodelist_to_dag(nodes_list)
-        draw_dag(dag)
+        # draw_dag(dag)  # You can uncomment the lines locally to display the DAG diagram.
         # show_dag(dag)
 
         re_qc = dag_to_circuit(dag, qubits=qc.num)
