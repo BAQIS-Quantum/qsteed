@@ -19,7 +19,6 @@ from math import pi
 
 from quafu import QuantumCircuit
 from quafu.elements import Barrier, Delay, XYResonance, Measure
-from quafu.exceptions.quafu_error import CompileError
 
 from qsteed.passes.basepass import BasePass
 from qsteed.passes.unroll.rules_library import Rules_dict
@@ -59,7 +58,7 @@ class UnrollTo2Qubit(BasePass):
         if depth <= 0:
             # Exceeding the number of recursions indicates that no decomposition of this gate
             # based on 1-qubit and 2-qubit gates set has been found among all rules.
-            raise CompileError("The instruction %s cannot be unrolled to 2-qubit gates." % (
+            raise TypeError("The instruction %s cannot be unrolled to 2-qubit gates." % (
                 current_op.name.lower()))
 
         if (gate.name.lower() in self.quantum_element) or (get_length(gate.pos) <= 2):
