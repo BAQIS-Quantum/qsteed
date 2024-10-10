@@ -32,9 +32,9 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
-        pytest test_dag.py
-        pytest test_transpiler.py
-        pytest test_transpiler_parallelcircuits.py
-        pytest test_transpiler_parametercircuit.py
-        pytest test_transpiler_visualization.py
-        pytest test_unitary_decompose.py
+        pytest tests/test_dag.py
+        pytest tests/test_transpiler.py
+        pytest tests/test_transpiler_parallelcircuits.py
+        pytest tests/test_transpiler_parametercircuit.py
+        pytest tests/test_transpiler_visualization.py
+        pytest tests/test_unitary_decompose.py

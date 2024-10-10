@@ -65,6 +65,6 @@ jobs:
         DATABASE_URL: mysql://test_user:test_password@127.0.0.1/test_db
       run: |
         pip install pytest
-        pytest test_backend_sql_dbAPI.py
-        pytest test_database_query.py
-        pytest test_compiler.py
+        pytest tests/test_backend_sql_dbAPI.py
+        pytest tests/test_database_query.py
+        pytest tests/test_compiler.py
