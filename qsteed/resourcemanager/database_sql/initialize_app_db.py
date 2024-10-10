@@ -15,11 +15,34 @@
 # limitations under the License.
 
 
-from flask_sqlalchemy import SQLAlchemy
-from flask import Flask
 import configparser
-from qsteed.config.get_config import get_config
+
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
 from qsteed.config.config_to_dict import config_to_dict
+from qsteed.config.get_config import get_config
+
+# def initialize_app_db(mysql_config: dict = None):
+#     if mysql_config is None:
+#         config_file = get_config()
+#         config = configparser.ConfigParser()
+#         config.read(config_file)
+#         config_dict = config_to_dict(config)
+#         mysql_config = config_dict['MySQL']['mysql_config']
+#         # mysql_config = eval(mysql_config)
+#
+#     app = Flask(__name__)
+#     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + mysql_config["user"] + ':' \
+#                                             + mysql_config["password"] + '@' + mysql_config["host"] + \
+#                                             '/' + mysql_config["database"]
+#     db = SQLAlchemy(app)
+#     return app, db
+#
+#
+# app, db = initialize_app_db()
+
+db = SQLAlchemy()
 
 
 def initialize_app_db(mysql_config: dict = None):
@@ -29,14 +52,21 @@ def initialize_app_db(mysql_config: dict = None):
         config.read(config_file)
         config_dict = config_to_dict(config)
         mysql_config = config_dict['MySQL']['mysql_config']
-        # mysql_config = eval(mysql_config)
 
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + mysql_config["user"] + ':' \
                                             + mysql_config["password"] + '@' + mysql_config["host"] + \
                                             '/' + mysql_config["database"]
-    db = SQLAlchemy(app)
-    return app, db
+    db.init_app(app)
+    return app
 
 
-app, db = initialize_app_db()
+def create_app():
+    """Application factory function."""
+    app = initialize_app_db()
+    with app.app_context():
+        db.create_all()
+    return app
+
+
+app = create_app()
