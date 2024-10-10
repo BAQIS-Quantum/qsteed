@@ -14,5 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .backend import Backend
-from .chipinfo import ChipInfo
+
+from .sql_models import QPU, SubQPU, StdQPU, VQPU

@@ -1,0 +1,2825 @@
+{
+    "calibration_time": "2024-04-1 14:27:11",
+    "basis_gates": "['cz', 'rx', 'ry', 'rz', 'h']",
+    "coupler": {
+        "Q0101_Q0102": {
+            "site": 0
+        },
+        "Q0102_Q0103": {
+            "site": 1
+        },
+        "Q0103_Q0104": {
+            "site": 2
+        },
+        "Q0104_Q0105": {
+            "site": 3
+        },
+        "Q0105_Q0106": {
+            "site": 4
+        },
+        "Q0106_Q0107": {
+            "site": 5
+        },
+        "Q0107_Q0108": {
+            "site": 6
+        },
+        "Q0108_Q0109": {
+            "site": 7
+        },
+        "Q0109_Q0110": {
+            "site": 8
+        },
+        "Q0111_Q0110": {
+            "site": 9
+        },
+        "Q0111_Q0112": {
+            "site": 10
+        },
+        "Q0112_Q0113": {
+            "site": 11
+        },
+        "Q0203_Q0103": {
+            "site": 12
+        },
+        "Q0207_Q0107": {
+            "site": 13
+        },
+        "Q0111_Q0211": {
+            "site": 14
+        },
+        "Q0201_Q0202": {
+            "site": 15
+        },
+        "Q0202_Q0203": {
+            "site": 16
+        },
+        "Q0203_Q0204": {
+            "site": 17
+        },
+        "Q0204_Q0205": {
+            "site": 18
+        },
+        "Q0205_Q0206": {
+            "site": 19
+        },
+        "Q0206_Q0207": {
+            "site": 20
+        },
+        "Q0207_Q0208": {
+            "site": 21
+        },
+        "Q0208_Q0209": {
+            "site": 22
+        },
+        "Q0209_Q0210": {
+            "site": 23
+        },
+        "Q0210_Q0211": {
+            "site": 24
+        },
+        "Q0211_Q0212": {
+            "site": 25
+        },
+        "Q0212_Q0213": {
+            "site": 26
+        },
+        "Q0201_Q0301": {
+            "site": 27
+        },
+        "Q0205_Q0305": {
+            "site": 28
+        },
+        "Q0209_Q0309": {
+            "site": 29
+        },
+        "Q0213_Q0313": {
+            "site": 30
+        },
+        "Q0301_Q0302": {
+            "site": 31
+        },
+        "Q0302_Q0303": {
+            "site": 32
+        },
+        "Q0303_Q0304": {
+            "site": 33
+        },
+        "Q0304_Q0305": {
+            "site": 34
+        },
+        "Q0305_Q0306": {
+            "site": 35
+        },
+        "Q0306_Q0307": {
+            "site": 36
+        },
+        "Q0307_Q0308": {
+            "site": 37
+        },
+        "Q0308_Q0309": {
+            "site": 38
+        },
+        "Q0309_Q0310": {
+            "site": 39
+        },
+        "Q0310_Q0311": {
+            "site": 40
+        },
+        "Q0311_Q0312": {
+            "site": 41
+        },
+        "Q0312_Q0313": {
+            "site": 42
+        },
+        "Q0303_Q0403": {
+            "site": 43
+        },
+        "Q0307_Q0407": {
+            "site": 44
+        },
+        "Q0311_Q0411": {
+            "site": 45
+        },
+        "Q0401_Q0402": {
+            "site": 46
+        },
+        "Q0402_Q0403": {
+            "site": 47
+        },
+        "Q0403_Q0404": {
+            "site": 48
+        },
+        "Q0404_Q0405": {
+            "site": 49
+        },
+        "Q0405_Q0406": {
+            "site": 50
+        },
+        "Q0406_Q0407": {
+            "site": 51
+        },
+        "Q0407_Q0408": {
+            "site": 52
+        },
+        "Q0408_Q0409": {
+            "site": 53
+        },
+        "Q0409_Q0410": {
+            "site": 54
+        },
+        "Q0410_Q0411": {
+            "site": 55
+        },
+        "Q0411_Q0412": {
+            "site": 56
+        },
+        "Q0412_Q0413": {
+            "site": 57
+        },
+        "Q0401_Q0501": {
+            "site": 58
+        },
+        "Q0405_Q0505": {
+            "site": 59
+        },
+        "Q0409_Q0509": {
+            "site": 60
+        },
+        "Q0413_Q0513": {
+            "site": 61
+        },
+        "Q0501_Q0502": {
+            "site": 62
+        },
+        "Q0502_Q0503": {
+            "site": 63
+        },
+        "Q0503_Q0504": {
+            "site": 64
+        },
+        "Q0504_Q0505": {
+            "site": 65
+        },
+        "Q0505_Q0506": {
+            "site": 66
+        },
+        "Q0506_Q0507": {
+            "site": 67
+        },
+        "Q0507_Q0508": {
+            "site": 68
+        },
+        "Q0508_Q0509": {
+            "site": 69
+        },
+        "Q0509_Q0510": {
+            "site": 70
+        },
+        "Q0510_Q0511": {
+            "site": 71
+        },
+        "Q0511_Q0512": {
+            "site": 72
+        },
+        "Q0512_Q0513": {
+            "site": 73
+        },
+        "Q0503_Q0603": {
+            "site": 74
+        },
+        "Q0507_Q0607": {
+            "site": 75
+        },
+        "Q0511_Q0611": {
+            "site": 76
+        },
+        "Q0601_Q0602": {
+            "site": 77
+        },
+        "Q0602_Q0603": {
+            "site": 78
+        },
+        "Q0603_Q0604": {
+            "site": 79
+        },
+        "Q0604_Q0605": {
+            "site": 80
+        },
+        "Q0605_Q0606": {
+            "site": 81
+        },
+        "Q0606_Q0607": {
+            "site": 82
+        },
+        "Q0607_Q0608": {
+            "site": 83
+        },
+        "Q0608_Q0609": {
+            "site": 84
+        },
+        "Q0609_Q0610": {
+            "site": 85
+        },
+        "Q0610_Q0611": {
+            "site": 86
+        },
+        "Q0611_Q0612": {
+            "site": 87
+        },
+        "Q0612_Q0613": {
+            "site": 88
+        },
+        "Q0601_Q0701": {
+            "site": 89
+        },
+        "Q0605_Q0705": {
+            "site": 90
+        },
+        "Q0609_Q0709": {
+            "site": 91
+        },
+        "Q0613_Q0713": {
+            "site": 92
+        },
+        "Q0701_Q0702": {
+            "site": 93
+        },
+        "Q0702_Q0703": {
+            "site": 94
+        },
+        "Q0703_Q0704": {
+            "site": 95
+        },
+        "Q0704_Q0705": {
+            "site": 96
+        },
+        "Q0705_Q0706": {
+            "site": 97
+        },
+        "Q0706_Q0707": {
+            "site": 98
+        },
+        "Q0707_Q0708": {
+            "site": 99
+        },
+        "Q0708_Q0709": {
+            "site": 100
+        },
+        "Q0709_Q0710": {
+            "site": 101
+        },
+        "Q0710_Q0711": {
+            "site": 102
+        },
+        "Q0711_Q0712": {
+            "site": 103
+        },
+        "Q0712_Q0713": {
+            "site": 104
+        },
+        "Q0703_Q0803": {
+            "site": 105
+        },
+        "Q0707_Q0807": {
+            "site": 106
+        },
+        "Q0811_Q0711": {
+            "site": 107
+        },
+        "Q0801_Q0802": {
+            "site": 108
+        },
+        "Q0802_Q0803": {
+            "site": 109
+        },
+        "Q0803_Q0804": {
+            "site": 110
+        },
+        "Q0804_Q0805": {
+            "site": 111
+        },
+        "Q0805_Q0806": {
+            "site": 112
+        },
+        "Q0806_Q0807": {
+            "site": 113
+        },
+        "Q0807_Q0808": {
+            "site": 114
+        },
+        "Q0808_Q0809": {
+            "site": 115
+        },
+        "Q0810_Q0809": {
+            "site": 116
+        },
+        "Q0810_Q0811": {
+            "site": 117
+        },
+        "Q0811_Q0812": {
+            "site": 118
+        },
+        "Q0812_Q0813": {
+            "site": 119
+        },
+        "Q0901_Q0801": {
+            "site": 120
+        },
+        "Q0905_Q0805": {
+            "site": 121
+        },
+        "Q0909_Q0809": {
+            "site": 122
+        },
+        "Q0813_Q0913": {
+            "site": 123
+        },
+        "Q0901_Q0902": {
+            "site": 124
+        },
+        "Q0902_Q0903": {
+            "site": 125
+        },
+        "Q0903_Q0904": {
+            "site": 126
+        },
+        "Q0904_Q0905": {
+            "site": 127
+        },
+        "Q0905_Q0906": {
+            "site": 128
+        },
+        "Q0906_Q0907": {
+            "site": 129
+        },
+        "Q0907_Q0908": {
+            "site": 130
+        },
+        "Q0908_Q0909": {
+            "site": 131
+        },
+        "Q0909_Q0910": {
+            "site": 132
+        },
+        "Q0910_Q0911": {
+            "site": 133
+        },
+        "Q0911_Q0912": {
+            "site": 134
+        },
+        "Q0912_Q0913": {
+            "site": 135
+        },
+        "Q0903_Q1003": {
+            "site": 136
+        },
+        "Q0907_Q1007": {
+            "site": 137
+        },
+        "Q0911_Q1011": {
+            "site": 138
+        },
+        "Q1001_Q1002": {
+            "site": 139
+        },
+        "Q1002_Q1003": {
+            "site": 140
+        },
+        "Q1003_Q1004": {
+            "site": 141
+        },
+        "Q1004_Q1005": {
+            "site": 142
+        },
+        "Q1005_Q1006": {
+            "site": 143
+        },
+        "Q1006_Q1007": {
+            "site": 144
+        },
+        "Q1007_Q1008": {
+            "site": 145
+        },
+        "Q1008_Q1009": {
+            "site": 146
+        },
+        "Q1009_Q1010": {
+            "site": 147
+        },
+        "Q1010_Q1011": {
+            "site": 148
+        },
+        "Q1011_Q1012": {
+            "site": 149
+        }
+    },
+    "all_qubits_info": {
+        "Q0101": {},
+        "Q0102": {},
+        "Q0103": {},
+        "Q0104": {},
+        "Q0105": {},
+        "Q0106": {},
+        "Q0107": {},
+        "Q0108": {},
+        "Q0109": {},
+        "Q0110": {},
+        "Q0111": {},
+        "Q0112": {},
+        "Q0113": {},
+        "Q0201": {},
+        "Q0202": {},
+        "Q0203": {},
+        "Q0204": {},
+        "Q0205": {},
+        "Q0206": {},
+        "Q0207": {},
+        "Q0208": {},
+        "Q0209": {},
+        "Q0210": {},
+        "Q0211": {},
+        "Q0212": {},
+        "Q0213": {},
+        "Q0301": {},
+        "Q0302": {},
+        "Q0303": {},
+        "Q0304": {},
+        "Q0305": {},
+        "Q0306": {},
+        "Q0307": {},
+        "Q0308": {},
+        "Q0309": {},
+        "Q0310": {},
+        "Q0311": {},
+        "Q0312": {},
+        "Q0313": {},
+        "Q0401": {},
+        "Q0402": {},
+        "Q0403": {},
+        "Q0404": {},
+        "Q0405": {},
+        "Q0406": {},
+        "Q0407": {},
+        "Q0408": {},
+        "Q0409": {},
+        "Q0410": {},
+        "Q0411": {},
+        "Q0412": {},
+        "Q0413": {},
+        "Q0501": {},
+        "Q0502": {},
+        "Q0503": {},
+        "Q0504": {},
+        "Q0505": {},
+        "Q0506": {},
+        "Q0507": {},
+        "Q0508": {},
+        "Q0509": {},
+        "Q0510": {},
+        "Q0511": {},
+        "Q0512": {},
+        "Q0513": {},
+        "Q0601": {},
+        "Q0602": {},
+        "Q0603": {},
+        "Q0604": {},
+        "Q0605": {},
+        "Q0606": {},
+        "Q0607": {},
+        "Q0608": {},
+        "Q0609": {},
+        "Q0610": {},
+        "Q0611": {},
+        "Q0612": {},
+        "Q0613": {},
+        "Q0701": {},
+        "Q0702": {},
+        "Q0703": {},
+        "Q0704": {},
+        "Q0705": {},
+        "Q0706": {},
+        "Q0707": {},
+        "Q0708": {},
+        "Q0709": {},
+        "Q0710": {},
+        "Q0711": {},
+        "Q0712": {},
+        "Q0713": {},
+        "Q0801": {},
+        "Q0802": {},
+        "Q0803": {},
+        "Q0804": {},
+        "Q0805": {},
+        "Q0806": {},
+        "Q0807": {},
+        "Q0808": {},
+        "Q0809": {},
+        "Q0810": {},
+        "Q0811": {},
+        "Q0812": {},
+        "Q0813": {},
+        "Q0901": {},
+        "Q0902": {},
+        "Q0903": {},
+        "Q0904": {},
+        "Q0905": {},
+        "Q0906": {},
+        "Q0907": {},
+        "Q0908": {},
+        "Q0909": {},
+        "Q0910": {},
+        "Q0911": {},
+        "Q0912": {},
+        "Q0913": {},
+        "Q1001": {},
+        "Q1002": {},
+        "Q1003": {},
+        "Q1004": {},
+        "Q1005": {},
+        "Q1006": {},
+        "Q1007": {},
+        "Q1008": {},
+        "Q1009": {},
+        "Q1010": {},
+        "Q1011": {},
+        "Q1012": {},
+        "Q1013": {}
+    },
+    "all_topological_structure": {
+        "Q0101_Q0102": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0102_Q0103": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0103_Q0104": {
+            "CZ": {
+                "fidelity": 0.989
+            }
+        },
+        "Q0104_Q0105": {
+            "CZ": {
+                "fidelity": 0.99
+            }
+        },
+        "Q0105_Q0106": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0106_Q0107": {
+            "CZ": {
+                "fidelity": 0.971
+            }
+        },
+        "Q0107_Q0108": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0108_Q0109": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0109_Q0110": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0111_Q0110": {
+            "CZ": {
+                "fidelity": 0.961
+            }
+        },
+        "Q0111_Q0112": {
+            "CZ": {
+                "fidelity": 0.966
+            }
+        },
+        "Q0112_Q0113": {
+            "CZ": {
+                "fidelity": 0.92
+            }
+        },
+        "Q0203_Q0103": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0207_Q0107": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0111_Q0211": {
+            "CZ": {
+                "fidelity": 0.9
+            }
+        },
+        "Q0201_Q0202": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0202_Q0203": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0203_Q0204": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0204_Q0205": {
+            "CZ": {
+                "fidelity": 0.964
+            }
+        },
+        "Q0205_Q0206": {
+            "CZ": {
+                "fidelity": 0.93
+            }
+        },
+        "Q0206_Q0207": {
+            "CZ": {
+                "fidelity": 0.974
+            }
+        },
+        "Q0207_Q0208": {
+            "CZ": {
+                "fidelity": 0.962
+            }
+        },
+        "Q0208_Q0209": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0209_Q0210": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0210_Q0211": {
+            "CZ": {
+                "fidelity": 0.969
+            }
+        },
+        "Q0211_Q0212": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0212_Q0213": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0201_Q0301": {
+            "CZ": {
+                "fidelity": 0.916
+            }
+        },
+        "Q0205_Q0305": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0209_Q0309": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0213_Q0313": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0301_Q0302": {
+            "CZ": {
+                "fidelity": 0.975
+            }
+        },
+        "Q0302_Q0303": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0303_Q0304": {
+            "CZ": {
+                "fidelity": 0.985
+            }
+        },
+        "Q0304_Q0305": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0305_Q0306": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0306_Q0307": {
+            "CZ": {
+                "fidelity": 0.989
+            }
+        },
+        "Q0307_Q0308": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0308_Q0309": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0309_Q0310": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0310_Q0311": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0311_Q0312": {
+            "CZ": {
+                "fidelity": 0.99
+            }
+        },
+        "Q0312_Q0313": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0303_Q0403": {
+            "CZ": {
+                "fidelity": 0.96
+            }
+        },
+        "Q0307_Q0407": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0311_Q0411": {
+            "CZ": {
+                "fidelity": 0.952
+            }
+        },
+        "Q0401_Q0402": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0402_Q0403": {
+            "CZ": {
+                "fidelity": 0.976
+            }
+        },
+        "Q0403_Q0404": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0404_Q0405": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0405_Q0406": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0406_Q0407": {
+            "CZ": {
+                "fidelity": 0.979
+            }
+        },
+        "Q0407_Q0408": {
+            "CZ": {
+                "fidelity": 0.968
+            }
+        },
+        "Q0408_Q0409": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0409_Q0410": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0410_Q0411": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0411_Q0412": {
+            "CZ": {
+                "fidelity": 0.979
+            }
+        },
+        "Q0412_Q0413": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0401_Q0501": {
+            "CZ": {
+                "fidelity": 0.968
+            }
+        },
+        "Q0405_Q0505": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0409_Q0509": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0413_Q0513": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0501_Q0502": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0502_Q0503": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0503_Q0504": {
+            "CZ": {
+                "fidelity": 0.981
+            }
+        },
+        "Q0504_Q0505": {
+            "CZ": {
+                "fidelity": 0.92
+            }
+        },
+        "Q0505_Q0506": {
+            "CZ": {
+                "fidelity": 0.977
+            }
+        },
+        "Q0506_Q0507": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0507_Q0508": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0508_Q0509": {
+            "CZ": {
+                "fidelity": 0.976
+            }
+        },
+        "Q0509_Q0510": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0510_Q0511": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0511_Q0512": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q0512_Q0513": {
+            "CZ": {
+                "fidelity": 0.993
+            }
+        },
+        "Q0503_Q0603": {
+            "CZ": {
+                "fidelity": 0.964
+            }
+        },
+        "Q0507_Q0607": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q0511_Q0611": {
+            "CZ": {
+                "fidelity": 0.964
+            }
+        },
+        "Q0601_Q0602": {
+            "CZ": {
+                "fidelity": 0.979
+            }
+        },
+        "Q0602_Q0603": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0603_Q0604": {
+            "CZ": {
+                "fidelity": 0.962
+            }
+        },
+        "Q0604_Q0605": {
+            "CZ": {
+                "fidelity": 0.982
+            }
+        },
+        "Q0605_Q0606": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0606_Q0607": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0607_Q0608": {
+            "CZ": {
+                "fidelity": 0.991
+            }
+        },
+        "Q0608_Q0609": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0609_Q0610": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0610_Q0611": {
+            "CZ": {
+                "fidelity": 0.968
+            }
+        },
+        "Q0611_Q0612": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0612_Q0613": {
+            "CZ": {
+                "fidelity": 0.985
+            }
+        },
+        "Q0601_Q0701": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0605_Q0705": {
+            "CZ": {
+                "fidelity": 0.977
+            }
+        },
+        "Q0609_Q0709": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0613_Q0713": {
+            "CZ": {
+                "fidelity": 0.982
+            }
+        },
+        "Q0701_Q0702": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0702_Q0703": {
+            "CZ": {
+                "fidelity": 0.972
+            }
+        },
+        "Q0703_Q0704": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0704_Q0705": {
+            "CZ": {
+                "fidelity": 0.968
+            }
+        },
+        "Q0705_Q0706": {
+            "CZ": {
+                "fidelity": 0.953
+            }
+        },
+        "Q0706_Q0707": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0707_Q0708": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0708_Q0709": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0709_Q0710": {
+            "CZ": {
+                "fidelity": 0.989
+            }
+        },
+        "Q0710_Q0711": {
+            "CZ": {
+                "fidelity": 0.979
+            }
+        },
+        "Q0711_Q0712": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q0712_Q0713": {
+            "CZ": {
+                "fidelity": 0.99
+            }
+        },
+        "Q0703_Q0803": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0707_Q0807": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0811_Q0711": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0801_Q0802": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0802_Q0803": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0803_Q0804": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0804_Q0805": {
+            "CZ": {
+                "fidelity": 0.9
+            }
+        },
+        "Q0805_Q0806": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0806_Q0807": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0807_Q0808": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0808_Q0809": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0810_Q0809": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0810_Q0811": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0811_Q0812": {
+            "CZ": {
+                "fidelity": 0.95
+            }
+        },
+        "Q0812_Q0813": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0901_Q0801": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0905_Q0805": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0909_Q0809": {
+            "CZ": {
+                "fidelity": 0.96
+            }
+        },
+        "Q0813_Q0913": {
+            "CZ": {
+                "fidelity": 0.977
+            }
+        },
+        "Q0901_Q0902": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0902_Q0903": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0903_Q0904": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q0904_Q0905": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0905_Q0906": {
+            "CZ": {
+                "fidelity": 0.989
+            }
+        },
+        "Q0906_Q0907": {
+            "CZ": {
+                "fidelity": 0.95
+            }
+        },
+        "Q0907_Q0908": {
+            "CZ": {
+                "fidelity": 0.975
+            }
+        },
+        "Q0908_Q0909": {
+            "CZ": {
+                "fidelity": 0.971
+            }
+        },
+        "Q0909_Q0910": {
+            "CZ": {
+                "fidelity": 0.965
+            }
+        },
+        "Q0910_Q0911": {
+            "CZ": {
+                "fidelity": 0.991
+            }
+        },
+        "Q0911_Q0912": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0912_Q0913": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q0903_Q1003": {
+            "CZ": {
+                "fidelity": 0.966
+            }
+        },
+        "Q0907_Q1007": {
+            "CZ": {
+                "fidelity": 0.959
+            }
+        },
+        "Q0911_Q1011": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q1001_Q1002": {
+            "CZ": {
+                "fidelity": 0.958
+            }
+        },
+        "Q1002_Q1003": {
+            "CZ": {
+                "fidelity": 0.976
+            }
+        },
+        "Q1003_Q1004": {
+            "CZ": {
+                "fidelity": 0.969
+            }
+        },
+        "Q1004_Q1005": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q1005_Q1006": {
+            "CZ": {
+                "fidelity": 0.977
+            }
+        },
+        "Q1006_Q1007": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q1007_Q1008": {
+            "CZ": {
+                "fidelity": 0.959
+            }
+        },
+        "Q1008_Q1009": {
+            "CZ": {
+                "fidelity": 0.973
+            }
+        },
+        "Q1009_Q1010": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q1010_Q1011": {
+            "CZ": {
+                "fidelity": 0
+            }
+        },
+        "Q1011_Q1012": {
+            "CZ": {
+                "fidelity": 0
+            }
+        }
+    },
+    "qubits_info": {
+        "Q0103": {
+            "T1": 65.33,
+            "T2echo": 27.79,
+            "T2star": 28.52,
+            "anharmonicity": 0.195,
+            "qubit_frequency": 4.459,
+            "readout_frequency": 6.919,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0104": {
+            "T1": 28.68,
+            "T2echo": 36.97,
+            "T2star": 31.79,
+            "anharmonicity": 0.206,
+            "qubit_frequency": 4.175,
+            "readout_frequency": 6.653,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0105": {
+            "T1": 69.02,
+            "T2echo": 47.57,
+            "T2star": 42.53,
+            "anharmonicity": 0.2,
+            "qubit_frequency": 4.451,
+            "readout_frequency": 6.953,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0106": {
+            "T1": 53.21,
+            "T2echo": 39.6,
+            "T2star": 38.29,
+            "anharmonicity": 0.206,
+            "qubit_frequency": 4.165,
+            "readout_frequency": 6.692,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0107": {
+            "T1": 49.89,
+            "T2echo": 36.64,
+            "T2star": 8.86,
+            "anharmonicity": 0.175,
+            "qubit_frequency": 4.519,
+            "readout_frequency": 6.993,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0110": {
+            "T1": 80.73,
+            "T2echo": 47.57,
+            "T2star": 32.25,
+            "anharmonicity": 0.203,
+            "qubit_frequency": 4.25,
+            "readout_frequency": 6.784,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0111": {
+            "T1": 30,
+            "T2echo": 33.11,
+            "T2star": 33.23,
+            "anharmonicity": 0.192,
+            "qubit_frequency": 4.588,
+            "readout_frequency": 7.091,
+            "single_qubit_gate_duration": 42.0
+        },
+        "Q0112": {
+            "T1": 15.25,
+            "T2echo": 25.99,
+            "T2star": 12.55,
+            "anharmonicity": 0.199,
+            "qubit_frequency": 4.322,
+            "readout_frequency": 6.823,
+            "single_qubit_gate_duration": 35.0
+        },
+        "Q0113": {
+            "T1": 57.9,
+            "T2echo": 48.35,
+            "T2star": 28.73,
+            "anharmonicity": 0.193,
+            "qubit_frequency": 4.641,
+            "readout_frequency": 7.136,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0201": {
+            "T1": 52.65,
+            "T2echo": 30.39,
+            "T2star": 11.61,
+            "anharmonicity": 0.208,
+            "qubit_frequency": 3.982,
+            "readout_frequency": 6.528,
+            "single_qubit_gate_duration": 42.0
+        },
+        "Q0204": {
+            "T1": 44.76,
+            "T2echo": 36.13,
+            "T2star": 29.28,
+            "anharmonicity": 0.209,
+            "qubit_frequency": 4.225,
+            "readout_frequency": 6.865,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0205": {
+            "T1": 28.63,
+            "T2echo": 27.8,
+            "T2star": 13.09,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 3.876,
+            "readout_frequency": 6.6,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0206": {
+            "T1": 31.07,
+            "T2echo": 32.61,
+            "T2star": 29.01,
+            "anharmonicity": 0.209,
+            "qubit_frequency": 4.316,
+            "readout_frequency": 6.91,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0207": {
+            "T1": 38.89,
+            "T2echo": 31.72,
+            "T2star": 22.1,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 3.908,
+            "readout_frequency": 6.648,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0208": {
+            "T1": 28.39,
+            "T2echo": 28.99,
+            "T2star": 26.43,
+            "anharmonicity": 0.209,
+            "qubit_frequency": 4.261,
+            "readout_frequency": 6.953,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0209": {
+            "T1": 62.23,
+            "T2echo": 21.07,
+            "T2star": 23.49,
+            "anharmonicity": 0.21,
+            "qubit_frequency": 3.924,
+            "readout_frequency": 6.694,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0210": {
+            "T1": 53.8,
+            "T2echo": 38.17,
+            "T2star": 32.11,
+            "anharmonicity": 0.21,
+            "qubit_frequency": 4.353,
+            "readout_frequency": 7.001,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0211": {
+            "T1": 46.98,
+            "T2echo": 33.27,
+            "T2star": 24.36,
+            "anharmonicity": 0.208,
+            "qubit_frequency": 3.985,
+            "readout_frequency": 6.745,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0212": {
+            "T1": 14.08,
+            "T2echo": 20.45,
+            "T2star": 16.54,
+            "anharmonicity": 0.203,
+            "qubit_frequency": 4.339,
+            "readout_frequency": 7.046,
+            "single_qubit_gate_duration": 42.0
+        },
+        "Q0213": {
+            "T1": 54.42,
+            "T2echo": 34.06,
+            "T2star": 30.58,
+            "anharmonicity": 0.202,
+            "qubit_frequency": 4.16,
+            "readout_frequency": 6.793,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0301": {
+            "T1": 66.04,
+            "T2echo": 43.95,
+            "T2star": 31.54,
+            "anharmonicity": 0.204,
+            "qubit_frequency": 4.395,
+            "readout_frequency": 6.861,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0302": {
+            "T1": 45.2,
+            "T2echo": 22.99,
+            "T2star": 10.03,
+            "anharmonicity": 0.21,
+            "qubit_frequency": 4.225,
+            "readout_frequency": 6.598,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0303": {
+            "T1": 54.32,
+            "T2echo": 24.87,
+            "T2star": 15.88,
+            "anharmonicity": 0.201,
+            "qubit_frequency": 4.491,
+            "readout_frequency": 6.896,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0304": {
+            "T1": 27.01,
+            "T2echo": 10.44,
+            "T2star": 16.97,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 4.2,
+            "readout_frequency": 6.63,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0306": {
+            "T1": 41.67,
+            "T2echo": 46.69,
+            "T2star": 22.22,
+            "anharmonicity": 0.212,
+            "qubit_frequency": 4.299,
+            "readout_frequency": 6.667,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0307": {
+            "T1": 70.04,
+            "T2echo": 41.65,
+            "T2star": 33.65,
+            "anharmonicity": 0.202,
+            "qubit_frequency": 4.564,
+            "readout_frequency": 6.975,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0308": {
+            "T1": 43.92,
+            "T2echo": 32.83,
+            "T2star": 23.73,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 4.216,
+            "readout_frequency": 6.712,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0309": {
+            "T1": 58.22,
+            "T2echo": 31.37,
+            "T2star": 19.04,
+            "anharmonicity": 0.202,
+            "qubit_frequency": 4.559,
+            "readout_frequency": 7.018,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0310": {
+            "T1": 42.19,
+            "T2echo": 34.54,
+            "T2star": 28.84,
+            "anharmonicity": 0.208,
+            "qubit_frequency": 4.31,
+            "readout_frequency": 6.762,
+            "single_qubit_gate_duration": 44.0
+        },
+        "Q0311": {
+            "T1": 55.55,
+            "T2echo": 42.25,
+            "T2star": 18.99,
+            "anharmonicity": 0.198,
+            "qubit_frequency": 4.576,
+            "readout_frequency": 7.069,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0312": {
+            "T1": 31.88,
+            "T2echo": 20.19,
+            "T2star": 35.57,
+            "anharmonicity": 0.206,
+            "qubit_frequency": 4.319,
+            "readout_frequency": 6.808,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0401": {
+            "T1": 66.1,
+            "T2echo": 51.08,
+            "T2star": 35.92,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 3.963,
+            "readout_frequency": 6.51,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0402": {
+            "T1": 58.43,
+            "T2echo": 46.22,
+            "T2star": 7.25,
+            "anharmonicity": 0.211,
+            "qubit_frequency": 4.289,
+            "readout_frequency": 6.809,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0403": {
+            "T1": 55.49,
+            "T2echo": 38.98,
+            "T2star": 33.01,
+            "anharmonicity": 0.217,
+            "qubit_frequency": 3.925,
+            "readout_frequency": 6.545,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0404": {
+            "T1": 31.72,
+            "T2echo": 32.31,
+            "T2star": 13.61,
+            "anharmonicity": 0.216,
+            "qubit_frequency": 4.252,
+            "readout_frequency": 6.848,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0406": {
+            "T1": 53.28,
+            "T2echo": 39.41,
+            "T2star": 18.66,
+            "anharmonicity": 0.214,
+            "qubit_frequency": 4.345,
+            "readout_frequency": 6.889,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0407": {
+            "T1": 57.99,
+            "T2echo": 43.16,
+            "T2star": 33.32,
+            "anharmonicity": 0.219,
+            "qubit_frequency": 3.909,
+            "readout_frequency": 6.628,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0408": {
+            "T1": 54.88,
+            "T2echo": 43.13,
+            "T2star": 32.45,
+            "anharmonicity": 0.215,
+            "qubit_frequency": 4.318,
+            "readout_frequency": 6.935,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0410": {
+            "T1": 53.49,
+            "T2echo": 38.82,
+            "T2star": 36.42,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 4.312,
+            "readout_frequency": 6.982,
+            "single_qubit_gate_duration": 45.0
+        },
+        "Q0411": {
+            "T1": 71.17,
+            "T2echo": 46.24,
+            "T2star": 36.16,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 3.981,
+            "readout_frequency": 6.728,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0412": {
+            "T1": 62.39,
+            "T2echo": 45.93,
+            "T2star": 32.6,
+            "anharmonicity": 0.207,
+            "qubit_frequency": 4.382,
+            "readout_frequency": 7.032,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0413": {
+            "T1": 65.24,
+            "T2echo": 51.6,
+            "T2star": 35.43,
+            "anharmonicity": 0.205,
+            "qubit_frequency": 4.118,
+            "readout_frequency": 6.779,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0501": {
+            "T1": 72.38,
+            "T2echo": 54.33,
+            "T2star": 15.49,
+            "anharmonicity": 0.203,
+            "qubit_frequency": 4.601,
+            "readout_frequency": 6.849,
+            "single_qubit_gate_duration": 42.0
+        },
+        "Q0502": {
+            "T1": 96.05,
+            "T2echo": 124.93,
+            "T2star": 25.29,
+            "anharmonicity": 0.214,
+            "qubit_frequency": 4.192,
+            "readout_frequency": 6.582,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0503": {
+            "T1": 59.59,
+            "T2echo": 33.0,
+            "T2star": 28.68,
+            "anharmonicity": 0.205,
+            "qubit_frequency": 4.527,
+            "readout_frequency": 6.884,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0504": {
+            "T1": 24.83,
+            "T2echo": 33.19,
+            "T2star": 28.99,
+            "anharmonicity": 0.216,
+            "qubit_frequency": 4.28,
+            "readout_frequency": 6.612,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0505": {
+            "T1": 68.94,
+            "T2echo": 39.95,
+            "T2star": 40.8,
+            "anharmonicity": 0.223,
+            "qubit_frequency": 4.507,
+            "readout_frequency": 6.913,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0506": {
+            "T1": 74.85,
+            "T2echo": 45.16,
+            "T2star": 32.48,
+            "anharmonicity": 0.218,
+            "qubit_frequency": 4.263,
+            "readout_frequency": 6.656,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0507": {
+            "T1": 37.61,
+            "T2echo": 30.95,
+            "T2star": 9.05,
+            "anharmonicity": 0.206,
+            "qubit_frequency": 4.565,
+            "readout_frequency": 6.962,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0508": {
+            "T1": 71.69,
+            "T2echo": 50.58,
+            "T2star": 21.84,
+            "anharmonicity": 0.216,
+            "qubit_frequency": 4.244,
+            "readout_frequency": 6.698,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0509": {
+            "T1": 64.37,
+            "T2echo": 39.46,
+            "T2star": 25.77,
+            "anharmonicity": 0.202,
+            "qubit_frequency": 4.586,
+            "readout_frequency": 7.0,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0511": {
+            "T1": 59.42,
+            "T2echo": 34.46,
+            "T2star": 28.34,
+            "anharmonicity": 0.202,
+            "qubit_frequency": 4.572,
+            "readout_frequency": 7.051,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0512": {
+            "T1": 62.67,
+            "T2echo": 47.39,
+            "T2star": 37.31,
+            "anharmonicity": 0.209,
+            "qubit_frequency": 4.323,
+            "readout_frequency": 6.794,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0513": {
+            "T1": 72.88,
+            "T2echo": 55.69,
+            "T2star": 36.41,
+            "anharmonicity": 0.2,
+            "qubit_frequency": 4.61,
+            "readout_frequency": 7.102,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0601": {
+            "T1": 41.64,
+            "T2echo": 27.04,
+            "T2star": 28.7,
+            "anharmonicity": 0.217,
+            "qubit_frequency": 3.867,
+            "readout_frequency": 6.497,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0602": {
+            "T1": 57.23,
+            "T2echo": 32.57,
+            "T2star": 30.99,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 4.282,
+            "readout_frequency": 6.8,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0603": {
+            "T1": 56.81,
+            "T2echo": 32.66,
+            "T2star": 16.45,
+            "anharmonicity": 0.219,
+            "qubit_frequency": 3.944,
+            "readout_frequency": 6.536,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0604": {
+            "T1": 37.44,
+            "T2echo": 28.86,
+            "T2star": 14.97,
+            "anharmonicity": 0.216,
+            "qubit_frequency": 4.301,
+            "readout_frequency": 6.838,
+            "single_qubit_gate_duration": 44.0
+        },
+        "Q0605": {
+            "T1": 43.96,
+            "T2echo": 27.18,
+            "T2star": 25.25,
+            "anharmonicity": 0.219,
+            "qubit_frequency": 4.061,
+            "readout_frequency": 6.572,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0607": {
+            "T1": 71.55,
+            "T2echo": 31.83,
+            "T2star": 28.35,
+            "anharmonicity": 0.218,
+            "qubit_frequency": 4.208,
+            "readout_frequency": 6.615,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0608": {
+            "T1": 56.76,
+            "T2echo": 33.26,
+            "T2star": 26.72,
+            "anharmonicity": 0.215,
+            "qubit_frequency": 4.498,
+            "readout_frequency": 6.921,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0609": {
+            "T1": 91.5,
+            "T2echo": 34.7,
+            "T2star": 32.7,
+            "anharmonicity": 0.218,
+            "qubit_frequency": 4.062,
+            "readout_frequency": 6.663,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0610": {
+            "T1": 38.94,
+            "T2echo": 15.16,
+            "T2star": 35.71,
+            "anharmonicity": 0.214,
+            "qubit_frequency": 4.384,
+            "readout_frequency": 6.969,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0611": {
+            "T1": 86.28,
+            "T2echo": 36.24,
+            "T2star": 17.92,
+            "anharmonicity": 0.218,
+            "qubit_frequency": 3.96,
+            "readout_frequency": 6.712,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0612": {
+            "T1": 72.64,
+            "T2echo": 43.21,
+            "T2star": 31.06,
+            "anharmonicity": 0.21,
+            "qubit_frequency": 4.379,
+            "readout_frequency": 7.023,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0613": {
+            "T1": 63.45,
+            "T2echo": 42.31,
+            "T2star": 31.98,
+            "anharmonicity": 0.211,
+            "qubit_frequency": 4.08,
+            "readout_frequency": 6.762,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0702": {
+            "T1": 88.1,
+            "T2echo": 13.59,
+            "T2star": 12.76,
+            "anharmonicity": 0.214,
+            "qubit_frequency": 4.219,
+            "readout_frequency": 6.574,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0703": {
+            "T1": 57.94,
+            "T2echo": 33.69,
+            "T2star": 26.86,
+            "anharmonicity": 0.205,
+            "qubit_frequency": 4.498,
+            "readout_frequency": 6.871,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0704": {
+            "T1": 62.03,
+            "T2echo": 41.53,
+            "T2star": 37.24,
+            "anharmonicity": 0.218,
+            "qubit_frequency": 4.281,
+            "readout_frequency": 6.605,
+            "single_qubit_gate_duration": 44.0
+        },
+        "Q0705": {
+            "T1": 78.29,
+            "T2echo": 40.56,
+            "T2star": 33.37,
+            "anharmonicity": 0.208,
+            "qubit_frequency": 4.612,
+            "readout_frequency": 6.907,
+            "single_qubit_gate_duration": 42.0
+        },
+        "Q0706": {
+            "T1": 64.09,
+            "T2echo": 35.11,
+            "T2star": 24.01,
+            "anharmonicity": 0.215,
+            "qubit_frequency": 4.517,
+            "readout_frequency": 6.648,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0708": {
+            "T1": 66.86,
+            "T2echo": 46.93,
+            "T2star": 32.07,
+            "anharmonicity": 0.214,
+            "qubit_frequency": 4.691,
+            "readout_frequency": 6.691,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0709": {
+            "T1": 57.0,
+            "T2echo": 28.18,
+            "T2star": 32.28,
+            "anharmonicity": 0.206,
+            "qubit_frequency": 4.809,
+            "readout_frequency": 6.994,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0710": {
+            "T1": 71.3,
+            "T2echo": 40.85,
+            "T2star": 21.61,
+            "anharmonicity": 0.215,
+            "qubit_frequency": 4.352,
+            "readout_frequency": 6.733,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0711": {
+            "T1": 60.77,
+            "T2echo": 43.81,
+            "T2star": 34.25,
+            "anharmonicity": 0.203,
+            "qubit_frequency": 4.603,
+            "readout_frequency": 7.042,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0712": {
+            "T1": 79.52,
+            "T2echo": 49.33,
+            "T2star": 38.73,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 4.248,
+            "readout_frequency": 6.779,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0713": {
+            "T1": 68.97,
+            "T2echo": 41.23,
+            "T2star": 28.58,
+            "anharmonicity": 0.201,
+            "qubit_frequency": 4.691,
+            "readout_frequency": 7.087,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0804": {
+            "T1": 47.27,
+            "T2echo": 37.47,
+            "T2star": 7.86,
+            "anharmonicity": 0.217,
+            "qubit_frequency": 4.29,
+            "readout_frequency": 6.827,
+            "single_qubit_gate_duration": 40.0
+        },
+        "Q0805": {
+            "T1": 71.68,
+            "T2echo": 43.12,
+            "T2star": 7.29,
+            "anharmonicity": 0.219,
+            "qubit_frequency": 3.981,
+            "readout_frequency": 6.567,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0806": {
+            "T1": 74.83,
+            "T2echo": 35.81,
+            "T2star": 37.28,
+            "anharmonicity": 0.219,
+            "qubit_frequency": 4.413,
+            "readout_frequency": 6.87,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0807": {
+            "T1": 51.6,
+            "T2echo": 40.48,
+            "T2star": 33.48,
+            "anharmonicity": 0.219,
+            "qubit_frequency": 4.167,
+            "readout_frequency": 6.608,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0808": {
+            "T1": 56.02,
+            "T2echo": 40.32,
+            "T2star": 23.28,
+            "anharmonicity": 0.215,
+            "qubit_frequency": 4.558,
+            "readout_frequency": 6.911,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0809": {
+            "T1": 80.23,
+            "T2echo": 40.48,
+            "T2star": 30.2,
+            "anharmonicity": 0.217,
+            "qubit_frequency": 4.137,
+            "readout_frequency": 6.653,
+            "single_qubit_gate_duration": 42.0
+        },
+        "Q0811": {
+            "T1": 71.06,
+            "T2echo": 37.6,
+            "T2star": 15.7,
+            "anharmonicity": 0.215,
+            "qubit_frequency": 4.14,
+            "readout_frequency": 6.701,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0812": {
+            "T1": 60.12,
+            "T2echo": 39.96,
+            "T2star": 33.75,
+            "anharmonicity": 0.211,
+            "qubit_frequency": 4.39,
+            "readout_frequency": 7.007,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0813": {
+            "T1": 57.19,
+            "T2echo": 29.83,
+            "T2star": 34.83,
+            "anharmonicity": 0.212,
+            "qubit_frequency": 4.122,
+            "readout_frequency": 6.751,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0903": {
+            "T1": 60.46,
+            "T2echo": 32.96,
+            "T2star": 28.78,
+            "anharmonicity": 0.203,
+            "qubit_frequency": 4.498,
+            "readout_frequency": 6.867,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0904": {
+            "T1": 94.49,
+            "T2echo": 41.55,
+            "T2star": 23.1,
+            "anharmonicity": 0.218,
+            "qubit_frequency": 4.195,
+            "readout_frequency": 6.601,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0905": {
+            "T1": 89.08,
+            "T2echo": 36.48,
+            "T2star": 27.59,
+            "anharmonicity": 0.208,
+            "qubit_frequency": 4.559,
+            "readout_frequency": 6.901,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0906": {
+            "T1": 82.7,
+            "T2echo": 38.45,
+            "T2star": 7.77,
+            "anharmonicity": 0.218,
+            "qubit_frequency": 4.3,
+            "readout_frequency": 6.64,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0907": {
+            "T1": 89.53,
+            "T2echo": 33.46,
+            "T2star": 32.22,
+            "anharmonicity": 0.207,
+            "qubit_frequency": 4.643,
+            "readout_frequency": 6.943,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0908": {
+            "T1": 96.5,
+            "T2echo": 45.28,
+            "T2star": 31.03,
+            "anharmonicity": 0.218,
+            "qubit_frequency": 4.286,
+            "readout_frequency": 6.681,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0909": {
+            "T1": 63.11,
+            "T2echo": 38.58,
+            "T2star": 17.89,
+            "anharmonicity": 0.207,
+            "qubit_frequency": 4.573,
+            "readout_frequency": 6.989,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0910": {
+            "T1": 89.04,
+            "T2echo": 38.71,
+            "T2star": 15.26,
+            "anharmonicity": 0.216,
+            "qubit_frequency": 4.312,
+            "readout_frequency": 6.728,
+            "single_qubit_gate_duration": 42.0
+        },
+        "Q0911": {
+            "T1": 80.33,
+            "T2echo": 36.81,
+            "T2star": 19.81,
+            "anharmonicity": 0.203,
+            "qubit_frequency": 4.605,
+            "readout_frequency": 7.031,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0912": {
+            "T1": 79.11,
+            "T2echo": 41.19,
+            "T2star": 22.09,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 4.301,
+            "readout_frequency": 6.773,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0913": {
+            "T1": 34.96,
+            "T2echo": 26.35,
+            "T2star": 15.68,
+            "anharmonicity": 0.202,
+            "qubit_frequency": 4.718,
+            "readout_frequency": 7.077,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q1001": {
+            "T1": 63.71,
+            "T2echo": 47.41,
+            "T2star": 36.8,
+            "anharmonicity": 0.212,
+            "qubit_frequency": 4.026,
+            "readout_frequency": 6.484,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q1002": {
+            "T1": 61.03,
+            "T2echo": 45.13,
+            "T2star": 41.34,
+            "anharmonicity": 0.211,
+            "qubit_frequency": 4.297,
+            "readout_frequency": 6.787,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q1003": {
+            "T1": 53.55,
+            "T2echo": 40.8,
+            "T2star": 22.88,
+            "anharmonicity": 0.215,
+            "qubit_frequency": 4.032,
+            "readout_frequency": 6.523,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q1004": {
+            "T1": 36.71,
+            "T2echo": 43.79,
+            "T2star": 32.23,
+            "anharmonicity": 0.214,
+            "qubit_frequency": 4.316,
+            "readout_frequency": 6.825,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q1005": {
+            "T1": 73.18,
+            "T2echo": 44.89,
+            "T2star": 19.88,
+            "anharmonicity": 0.218,
+            "qubit_frequency": 3.952,
+            "readout_frequency": 6.557,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q1006": {
+            "T1": 72.52,
+            "T2echo": 23.83,
+            "T2star": 8.48,
+            "anharmonicity": 0.216,
+            "qubit_frequency": 4.305,
+            "readout_frequency": 6.865,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q1007": {
+            "T1": 68.36,
+            "T2echo": 34.8,
+            "T2star": 13.03,
+            "anharmonicity": 0.213,
+            "qubit_frequency": 4.062,
+            "readout_frequency": 6.604,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q1008": {
+            "T1": 58.81,
+            "T2echo": 40.47,
+            "T2star": 23.8,
+            "anharmonicity": 0.214,
+            "qubit_frequency": 4.418,
+            "readout_frequency": 6.907,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q1009": {
+            "T1": 70.91,
+            "T2echo": 43.79,
+            "T2star": 32.33,
+            "anharmonicity": 0.217,
+            "qubit_frequency": 4.009,
+            "readout_frequency": 6.648,
+            "single_qubit_gate_duration": 30.0
+        }
+    },
+    "topological_structure": {
+        "Q0103_Q0104": {
+            "CZ": {
+                "fidelity": 0.989
+            }
+        },
+        "Q0104_Q0105": {
+            "CZ": {
+                "fidelity": 0.99
+            }
+        },
+        "Q0105_Q0106": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0106_Q0107": {
+            "CZ": {
+                "fidelity": 0.971
+            }
+        },
+        "Q0111_Q0110": {
+            "CZ": {
+                "fidelity": 0.961
+            }
+        },
+        "Q0111_Q0112": {
+            "CZ": {
+                "fidelity": 0.966
+            }
+        },
+        "Q0112_Q0113": {
+            "CZ": {
+                "fidelity": 0.92
+            }
+        },
+        "Q0207_Q0107": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0111_Q0211": {
+            "CZ": {
+                "fidelity": 0.9
+            }
+        },
+        "Q0204_Q0205": {
+            "CZ": {
+                "fidelity": 0.964
+            }
+        },
+        "Q0205_Q0206": {
+            "CZ": {
+                "fidelity": 0.93
+            }
+        },
+        "Q0206_Q0207": {
+            "CZ": {
+                "fidelity": 0.974
+            }
+        },
+        "Q0207_Q0208": {
+            "CZ": {
+                "fidelity": 0.962
+            }
+        },
+        "Q0208_Q0209": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0209_Q0210": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0210_Q0211": {
+            "CZ": {
+                "fidelity": 0.969
+            }
+        },
+        "Q0211_Q0212": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0212_Q0213": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0201_Q0301": {
+            "CZ": {
+                "fidelity": 0.916
+            }
+        },
+        "Q0209_Q0309": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0301_Q0302": {
+            "CZ": {
+                "fidelity": 0.975
+            }
+        },
+        "Q0302_Q0303": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0303_Q0304": {
+            "CZ": {
+                "fidelity": 0.985
+            }
+        },
+        "Q0306_Q0307": {
+            "CZ": {
+                "fidelity": 0.989
+            }
+        },
+        "Q0307_Q0308": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0308_Q0309": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0309_Q0310": {
+            "CZ": {
+                "fidelity": 0.9
+            }
+        },
+        "Q0310_Q0311": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0311_Q0312": {
+            "CZ": {
+                "fidelity": 0.99
+            }
+        },
+        "Q0303_Q0403": {
+            "CZ": {
+                "fidelity": 0.96
+            }
+        },
+        "Q0307_Q0407": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0311_Q0411": {
+            "CZ": {
+                "fidelity": 0.952
+            }
+        },
+        "Q0401_Q0402": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0402_Q0403": {
+            "CZ": {
+                "fidelity": 0.976
+            }
+        },
+        "Q0403_Q0404": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0406_Q0407": {
+            "CZ": {
+                "fidelity": 0.979
+            }
+        },
+        "Q0407_Q0408": {
+            "CZ": {
+                "fidelity": 0.968
+            }
+        },
+        "Q0410_Q0411": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0411_Q0412": {
+            "CZ": {
+                "fidelity": 0.979
+            }
+        },
+        "Q0412_Q0413": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0401_Q0501": {
+            "CZ": {
+                "fidelity": 0.968
+            }
+        },
+        "Q0413_Q0513": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0501_Q0502": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0502_Q0503": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0503_Q0504": {
+            "CZ": {
+                "fidelity": 0.981
+            }
+        },
+        "Q0504_Q0505": {
+            "CZ": {
+                "fidelity": 0.92
+            }
+        },
+        "Q0505_Q0506": {
+            "CZ": {
+                "fidelity": 0.993
+            }
+        },
+        "Q0506_Q0507": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0507_Q0508": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0508_Q0509": {
+            "CZ": {
+                "fidelity": 0.976
+            }
+        },
+        "Q0511_Q0512": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q0512_Q0513": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0503_Q0603": {
+            "CZ": {
+                "fidelity": 0.964
+            }
+        },
+        "Q0507_Q0607": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q0511_Q0611": {
+            "CZ": {
+                "fidelity": 0.964
+            }
+        },
+        "Q0601_Q0602": {
+            "CZ": {
+                "fidelity": 0.979
+            }
+        },
+        "Q0602_Q0603": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0603_Q0604": {
+            "CZ": {
+                "fidelity": 0.962
+            }
+        },
+        "Q0604_Q0605": {
+            "CZ": {
+                "fidelity": 0.982
+            }
+        },
+        "Q0607_Q0608": {
+            "CZ": {
+                "fidelity": 0.991
+            }
+        },
+        "Q0608_Q0609": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0610_Q0611": {
+            "CZ": {
+                "fidelity": 0.968
+            }
+        },
+        "Q0611_Q0612": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0612_Q0613": {
+            "CZ": {
+                "fidelity": 0.985
+            }
+        },
+        "Q0605_Q0705": {
+            "CZ": {
+                "fidelity": 0.977
+            }
+        },
+        "Q0609_Q0709": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0613_Q0713": {
+            "CZ": {
+                "fidelity": 0.982
+            }
+        },
+        "Q0702_Q0703": {
+            "CZ": {
+                "fidelity": 0.972
+            }
+        },
+        "Q0703_Q0704": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0704_Q0705": {
+            "CZ": {
+                "fidelity": 0.968
+            }
+        },
+        "Q0705_Q0706": {
+            "CZ": {
+                "fidelity": 0.953
+            }
+        },
+        "Q0708_Q0709": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0709_Q0710": {
+            "CZ": {
+                "fidelity": 0.989
+            }
+        },
+        "Q0710_Q0711": {
+            "CZ": {
+                "fidelity": 0.979
+            }
+        },
+        "Q0711_Q0712": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q0712_Q0713": {
+            "CZ": {
+                "fidelity": 0.99
+            }
+        },
+        "Q0811_Q0711": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q0804_Q0805": {
+            "CZ": {
+                "fidelity": 0.9
+            }
+        },
+        "Q0805_Q0806": {
+            "CZ": {
+                "fidelity": 0.978
+            }
+        },
+        "Q0806_Q0807": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0808_Q0809": {
+            "CZ": {
+                "fidelity": 0.983
+            }
+        },
+        "Q0811_Q0812": {
+            "CZ": {
+                "fidelity": 0.95
+            }
+        },
+        "Q0812_Q0813": {
+            "CZ": {
+                "fidelity": 0.984
+            }
+        },
+        "Q0905_Q0805": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0909_Q0809": {
+            "CZ": {
+                "fidelity": 0.96
+            }
+        },
+        "Q0813_Q0913": {
+            "CZ": {
+                "fidelity": 0.977
+            }
+        },
+        "Q0904_Q0905": {
+            "CZ": {
+                "fidelity": 0.98
+            }
+        },
+        "Q0905_Q0906": {
+            "CZ": {
+                "fidelity": 0.989
+            }
+        },
+        "Q0906_Q0907": {
+            "CZ": {
+                "fidelity": 0.95
+            }
+        },
+        "Q0907_Q0908": {
+            "CZ": {
+                "fidelity": 0.975
+            }
+        },
+        "Q0908_Q0909": {
+            "CZ": {
+                "fidelity": 0.971
+            }
+        },
+        "Q0909_Q0910": {
+            "CZ": {
+                "fidelity": 0.965
+            }
+        },
+        "Q0910_Q0911": {
+            "CZ": {
+                "fidelity": 0.991
+            }
+        },
+        "Q0911_Q0912": {
+            "CZ": {
+                "fidelity": 0.987
+            }
+        },
+        "Q0912_Q0913": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q0903_Q1003": {
+            "CZ": {
+                "fidelity": 0.966
+            }
+        },
+        "Q0907_Q1007": {
+            "CZ": {
+                "fidelity": 0.959
+            }
+        },
+        "Q1001_Q1002": {
+            "CZ": {
+                "fidelity": 0.958
+            }
+        },
+        "Q1002_Q1003": {
+            "CZ": {
+                "fidelity": 0.976
+            }
+        },
+        "Q1003_Q1004": {
+            "CZ": {
+                "fidelity": 0.969
+            }
+        },
+        "Q1004_Q1005": {
+            "CZ": {
+                "fidelity": 0.986
+            }
+        },
+        "Q1005_Q1006": {
+            "CZ": {
+                "fidelity": 0.977
+            }
+        },
+        "Q1006_Q1007": {
+            "CZ": {
+                "fidelity": 0.97
+            }
+        },
+        "Q1007_Q1008": {
+            "CZ": {
+                "fidelity": 0.959
+            }
+        },
+        "Q1008_Q1009": {
+            "CZ": {
+                "fidelity": 0.973
+            }
+        }
+    },
+    "priority_qubits": "[(2, 3),(2,3,4),(113, 114, 115),(2, 3, 4, 5), (86, 87, 88, 89, 90),(73, 86, 87, 88, 89, 90),(72, 73, 86, 87, 88, 89, 90),(71, 72, 73, 86, 87, 88, 89, 90),(71, 72, 73, 86, 87, 88, 89, 90,77),(71, 72, 73, 86, 87, 88, 89, 90,77,76)]",
+    "system_id": 7
+}

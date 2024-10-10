@@ -20,49 +20,56 @@ import networkx as nx
 from quafu import QuantumCircuit
 
 from qsteed.graph.circuitgraph import circuit_to_graph, relabel_graph
-from qsteed.graph.graphkernel import wl_subtree_kernel
+from qsteed.graph.graphkernel import wl_subtree_kernel, fast_subtree_kernel, wl_oa_kernel
+from qsteed.compiler.qasm_parser import qreg_creg
 
 
-def similar_struct(circuit: QuantumCircuit, sub_data):
+def similar_structure(circuit: str, vqpus):
     """ Compare the similarity of weighted graph of circuit and substructure of quantum chip.
 
     Args:
-        circuit(QuantumCircuit)
-        sub_data: backend library data e.g. substructure_data['substructure_dict']
+        circuit(str): OpenQASM 2.0
+        vqpus:
     Returns:
         most_similar_struct(list): Chip substructures similar to quantum circuits,
                                     sorted according to the value of the kernel,
                                     the higher the kernel value, the more similar.
     """
-    g1 = circuit_to_graph(circuit)
-    similar_struct_list = []
+    qreg_name, creg_name, qubit_num, cbit_num = qreg_creg(circuit)
+    qc = QuantumCircuit(qubit_num, cbit_num)
+    qc.from_openqasm(circuit)
+    qc.draw_circuit()
+    g1 = circuit_to_graph(qc)
+    similar_structure_list = []
     kernel_value_list = []
-    cut = 100  # number of substructures to search
-    k = 0
-    for sub_list in sub_data:
-        if k < cut:
-            g2 = nx.Graph()
-            g1_copy = copy.deepcopy(g1)
-            for item in sub_list:
-                g2.add_edges_from([(item[0], item[1], {'weight': item[2]})])
-            g2 = relabel_graph(g2)
+    for vqpu in vqpus:
+        g2 = nx.Graph()
+        g1_copy = copy.deepcopy(g1)
+        for item in vqpu.coupling_list:
+            g2.add_edges_from([(item[0], item[1], {'weight': item[2]})])
+        g2 = relabel_graph(g2)
 
-            # # W-L subtree kernel iteration
-            kernel_value = wl_subtree_kernel(g1_copy, g2, iteration=5)
-            if round(kernel_value, 0) not in kernel_value_list:
-                kernel_value_list.append(round(kernel_value, 0))
-                similar_struct_list.append((sub_list, kernel_value))
+        # W-L subtree kernel iteration
+        kernel_value = wl_subtree_kernel(g1_copy, g2, iteration=10)
+        if round(kernel_value, 1) not in kernel_value_list:
+            kernel_value_list.append(round(kernel_value, 1))
+            similar_structure_list.append((vqpu, kernel_value))
 
-            # # fast subtree kernel iteration
-            # g2 = nx.convert_node_labels_to_integers(g2)
-            # kernel_value = fast_subtree_kernel(g1_copy, g2, iteration=2)
-            # if round(kernel_value, 0) not in kernel_value_list:
-            #     kernel_value_list.append(round(kernel_value, 0))
-            #     similar_struct_list.append((sub_list, kernel_value))
+        # # Weisfeiler-Lehman Optimal Assignment (WL-OA) Kernel iteration
+        # kernel_value = wl_oa_kernel(g1_copy, g2, iteration=10)
+        # if round(kernel_value, 1) not in kernel_value_list:
+        #     kernel_value_list.append(round(kernel_value, 1))
+        #     similar_structure_list.append((vqpu, kernel_value))
 
-            g1_copy.clear()
-            g2.clear()
-            k += 1
+        # # fast subtree kernel iteration
+        # g2 = nx.convert_node_labels_to_integers(g2)
+        # kernel_value = fast_subtree_kernel(g1_copy, g2, iteration=10)
+        # if round(kernel_value, 1) not in kernel_value_list:
+        #     kernel_value_list.append(round(kernel_value, 1))
+        #     similar_structure_list.append((vqpu, kernel_value))
 
-    similar_struct_list = sorted(similar_struct_list, key=lambda x: x[1], reverse=True)
-    return similar_struct_list
+        g1_copy.clear()
+        g2.clear()
+
+    similar_structure_list = sorted(similar_structure_list, key=lambda x: x[1], reverse=True)
+    return similar_structure_list

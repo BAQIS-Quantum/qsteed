@@ -1,0 +1,200 @@
+{
+    "calibration_time": "2024-10-01 14:27:11",
+    "basis_gates": "['cx', 'rx', 'ry', 'rz', 'h', 'id']",
+    "coupler": { },
+    "all_qubits_info": {
+        "Q0101": {},
+        "Q0102": {},
+        "Q0103": {},
+        "Q0104": {},
+        "Q0105": {},
+        "Q0106": {},
+        "Q0107": {},
+        "Q0108": {},
+        "Q0109": {},
+        "Q0110": {}
+    },
+    "all_topological_structure": {
+        "Q0101_Q0102": {
+            "CX": {
+                "fidelity": 0
+            }
+        },
+        "Q0102_Q0103": {
+            "CX": {
+                "fidelity": 0.996
+            }
+        },
+        "Q0103_Q0104": {
+            "CX": {
+                "fidelity": 0.994
+            }
+        },
+        "Q0104_Q0105": {
+            "CX": {
+                "fidelity": 0.995
+            }
+        },
+        "Q0105_Q0106": {
+            "CX": {
+                "fidelity": 0.99
+            }
+        },
+        "Q0106_Q0107": {
+            "CX": {
+                "fidelity": 0.992
+            }
+        },
+        "Q0107_Q0108": {
+            "CX": {
+                "fidelity": 0.991
+            }
+        },
+        "Q0108_Q0109": {
+            "CX": {
+                "fidelity": 0.996
+            }
+        },
+        "Q0109_Q0110": {
+            "CX": {
+                "fidelity": 0.99
+            }
+        }
+    },
+    "qubits_info": {
+        "Q0101": {
+            "T1": 30,
+            "T2echo": 33.11,
+            "T2star": 33.23,
+            "anharmonicity": 0.192,
+            "qubit_frequency": 4.588,
+            "readout_frequency": 7.091,
+            "single_qubit_gate_duration": 42.0
+        },
+        "Q0102": {
+            "T1": 15.25,
+            "T2echo": 25.99,
+            "T2star": 12.55,
+            "anharmonicity": 0.199,
+            "qubit_frequency": 4.322,
+            "readout_frequency": 6.823,
+            "single_qubit_gate_duration": 35.0
+        },
+        "Q0103": {
+            "T1": 65.33,
+            "T2echo": 27.79,
+            "T2star": 28.52,
+            "anharmonicity": 0.195,
+            "qubit_frequency": 4.459,
+            "readout_frequency": 6.919,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0104": {
+            "T1": 28.68,
+            "T2echo": 36.97,
+            "T2star": 31.79,
+            "anharmonicity": 0.206,
+            "qubit_frequency": 4.175,
+            "readout_frequency": 6.653,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0105": {
+            "T1": 69.02,
+            "T2echo": 47.57,
+            "T2star": 42.53,
+            "anharmonicity": 0.2,
+            "qubit_frequency": 4.451,
+            "readout_frequency": 6.953,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0106": {
+            "T1": 53.21,
+            "T2echo": 39.6,
+            "T2star": 38.29,
+            "anharmonicity": 0.206,
+            "qubit_frequency": 4.165,
+            "readout_frequency": 6.692,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0107": {
+            "T1": 49.89,
+            "T2echo": 36.64,
+            "T2star": 8.86,
+            "anharmonicity": 0.175,
+            "qubit_frequency": 4.519,
+            "readout_frequency": 6.993,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0108": {
+            "T1": 52.65,
+            "T2echo": 30.39,
+            "T2star": 11.61,
+            "anharmonicity": 0.208,
+            "qubit_frequency": 3.982,
+            "readout_frequency": 6.528,
+            "single_qubit_gate_duration": 42.0
+        },
+        "Q0109": {
+            "T1": 44.76,
+            "T2echo": 36.13,
+            "T2star": 29.28,
+            "anharmonicity": 0.209,
+            "qubit_frequency": 4.225,
+            "readout_frequency": 6.865,
+            "single_qubit_gate_duration": 30.0
+        },
+        "Q0110": {
+            "T1": 80.73,
+            "T2echo": 47.57,
+            "T2star": 32.25,
+            "anharmonicity": 0.203,
+            "qubit_frequency": 4.25,
+            "readout_frequency": 6.784,
+            "single_qubit_gate_duration": 30.0
+        }
+    },
+    "topological_structure": {
+        "Q0102_Q0103": {
+            "CX": {
+                "fidelity": 0.996
+            }
+        },
+        "Q0103_Q0104": {
+            "CX": {
+                "fidelity": 0.994
+            }
+        },
+        "Q0104_Q0105": {
+            "CX": {
+                "fidelity": 0.995
+            }
+        },
+        "Q0105_Q0106": {
+            "CX": {
+                "fidelity": 0.99
+            }
+        },
+        "Q0106_Q0107": {
+            "CX": {
+                "fidelity": 0.992
+            }
+        },
+        "Q0107_Q0108": {
+            "CX": {
+                "fidelity": 0.991
+            }
+        },
+        "Q0108_Q0109": {
+            "CX": {
+                "fidelity": 0.996
+            }
+        },
+        "Q0109_Q0110": {
+            "CX": {
+                "fidelity": 0.99
+            }
+        }
+    },
+    "priority_qubits": "[]",
+    "system_id": 0
+}

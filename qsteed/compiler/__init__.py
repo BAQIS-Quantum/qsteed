@@ -14,5 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .backend import Backend
-from .chipinfo import ChipInfo
+
+from .compiler import Compiler
+from .standardized_circuit import StandardizedCircuit

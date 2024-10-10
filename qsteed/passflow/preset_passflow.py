@@ -19,12 +19,14 @@ from qsteed.passes.unroll.unroll_to_2qubit import UnrollTo2Qubit
 from qsteed.passes.unroll.unroll_to_basis import UnrollToBasis
 from qsteed.passes.optimization.optimization_combine import GateCombineOptimization
 from qsteed.passes.optimization.one_qubit_optimization import OneQubitGateOptimization
+from qsteed.passes.ParameterTuning.parametersubstitution import ParaSubstitution
 from .passflow import PassFlow
 
 
 def level_0_passflow(basis_gates):
     level_0 = [UnrollTo2Qubit(),
-               UnrollToBasis(basis_gates=basis_gates)
+               UnrollToBasis(basis_gates=basis_gates),
+               ParaSubstitution()
                ]
     return PassFlow(level_0)
 
@@ -35,6 +37,7 @@ def level_1_passflow(basis_gates):
                UnrollToBasis(basis_gates=basis_gates),
                GateCombineOptimization(),
                OneQubitGateOptimization(),
+               ParaSubstitution()
                ]
     return PassFlow(level_1)
 
@@ -45,6 +48,7 @@ def level_2_passflow(basis_gates):
                UnrollToBasis(basis_gates=basis_gates),
                GateCombineOptimization(),
                OneQubitGateOptimization(),
+               ParaSubstitution()
                ]
     return PassFlow(level_2)
 
@@ -55,6 +59,7 @@ def level_3_passflow(basis_gates):
                UnrollToBasis(basis_gates=basis_gates),
                GateCombineOptimization(),
                OneQubitGateOptimization(),
+               ParaSubstitution()
                ]
     return PassFlow(level_3)
 
