@@ -61,7 +61,7 @@ jobs:
 
     - name: Initialize database
       run: |
-        python -c "from from qsteed.resourcemanager.database_sql.initialize_app_db import db; db.create_all()"
+        python -c "from qsteed.resourcemanager.database_sql.initialize_app_db import db; db.create_all()"
 
     - name: Test with pytest
       env:
