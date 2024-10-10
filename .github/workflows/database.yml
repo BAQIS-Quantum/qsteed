@@ -59,15 +59,12 @@ jobs:
         mysql -h 127.0.0.1 -u root -proot_password -e "GRANT ALL PRIVILEGES ON test_db.* TO 'test_user'@'%';"
         mysql -h 127.0.0.1 -u root -proot_password -e "FLUSH PRIVILEGES;"
 
-    - name: Initialize database
-      run: |
-        python -c "from qsteed.resourcemanager.database_sql.initialize_app_db import db; db.create_all()"
-
     - name: Test with pytest
       env:
         DATABASE_URL: mysql://test_user:test_password@127.0.0.1/test_db
       run: |
         pip install pytest
+        pytest tests/test_database.py
         pytest tests/test_backend_sql_dbAPI.py
         pytest tests/test_database_query.py
         pytest tests/test_compiler.py
