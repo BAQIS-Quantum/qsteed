@@ -249,13 +249,14 @@ class BuildLibrary:
         save_substructure = {'structure': structure, 'substructure_dict': substructure_dict,
                              'int_to_qubit': int_to_qubit}
 
-        current_dir = os.path.abspath(os.path.dirname(__file__))
+        # current_dir = os.path.abspath(os.path.dirname(__file__))
+        user_home = os.path.expanduser('~')
         # target_dir = os.path.join(current_dir, '..', '..', '..')
         # normalized_path = os.path.normpath(target_dir)
-        folder_path = os.path.join(current_dir, "resourceDB")
+        folder_path = os.path.join(user_home, "QSteed")
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
-        file_name = self.backend + '_database.txt'
+        file_name = self.backend + '_structure.txt'
         file_path = os.path.join(folder_path, file_name)
 
         with open(file_path, "w") as file:

@@ -25,9 +25,9 @@ def get_config(user_config_file=None):
     # Determine the location of the user configuration file.
     if user_config_file is None:
         if current_os.startswith('win'):
-            user_config_file = os.path.expanduser('~\.QSteed\config.ini')
+            user_config_file = os.path.expanduser(r'~\QSteed\config.ini')
         else:
-            user_config_file = os.path.expanduser('~/.QSteed/config.ini')
+            user_config_file = os.path.expanduser(r'~/QSteed/config.ini')
 
     # Check if the user configuration file exists, if not, use the default configuration file.
     if os.path.isfile(user_config_file):

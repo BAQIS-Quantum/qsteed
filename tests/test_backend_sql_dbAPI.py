@@ -34,6 +34,10 @@ class TestDatabaseSetup:
             data_dict = json.load(file)
         call_backend_db_api(backend='dongling', chip_info_dict=data_dict)
 
+        with open('chipexample.json', 'r') as file:
+            data_dict = json.load(file)
+        call_backend_db_api(backend='example', chip_info_dict=data_dict)
+
 
 if __name__ == "__main__":
     t = TestDatabaseSetup()
