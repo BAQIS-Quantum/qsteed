@@ -1,0 +1,70 @@
+name: Database
+on:
+    push:
+    pull_request:
+        branches: [master]
+
+jobs:
+  tests:
+    name: ubuntu-tests-Python-${{matrix.python-version}}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11"]
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: arm64
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install 'pyquafu>=0.4.1'
+        if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+
+    - name: Install qsteed
+      run: python setup.py develop
+
+    - name: Wait for MySQL to be ready
+      run: |
+        while ! mysqladmin ping -h "127.0.0.1" --silent; do
+          echo "Waiting for database connection..."
+          sleep 5
+        done
+
+    - name: Set up MySQL database
+      run: |
+        mysql -h 127.0.0.1 -u root -proot_password -e "CREATE DATABASE test_db;"
+        mysql -h 127.0.0.1 -u root -proot_password -e "CREATE USER 'test_user'@'%' IDENTIFIED BY 'test_password';"
+        mysql -h 127.0.0.1 -u root -proot_password -e "GRANT ALL PRIVILEGES ON test_db.* TO 'test_user'@'%';"
+        mysql -h 127.0.0.1 -u root -proot_password -e "FLUSH PRIVILEGES;"
+
+    - name: Test with pytest
+      env:
+        DATABASE_URL: mysql://test_user:test_password@127.0.0.1/test_db
+      run: |
+        pip install pytest
+        pytest test_backend_sql_dbAPI.py
+        pytest test_database_query.py
+        pytest test_compiler.py
