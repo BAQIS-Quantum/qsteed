@@ -14,12 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os import path
+import os
 
 from setuptools import setup, find_packages
 
-here = path.abspath(path.dirname(__file__))
-with open(path.join(here, "README.md"), encoding="utf-8") as f:
+home_dir = os.path.expanduser("~")
+config_dir = os.path.join(home_dir, "QSteed")
+
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 requirements = [
@@ -33,6 +36,10 @@ requirements = [
     "rich>=13.7.1",
     "graphviz>=0.14.2",
     "tabulate>=0.9.0",
+    "sqlalchemy>=2.0.28",
+    "flask>=3.0.2",
+    "pymysql>=1.1.0",
+    "flask_sqlalchemy>=3.1.1"
 ]
 
 setup(
@@ -48,6 +55,7 @@ setup(
     install_requires=requirements,
     packages=find_packages(),
     include_package_data=True,
+    data_files=[(config_dir, ['qsteed/config/config.ini'])],
     extras_require={"tests": ["pytest"]},
     python_requires=">=3.10",
     license="Apache-2.0 License",
