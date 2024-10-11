@@ -18,6 +18,7 @@
 from qsteed.resourcemanager.database_sql.initialize_database import initialize_database
 from qsteed.resourcemanager.database_sql.backend_dbAPI import call_backend_db_api
 import json
+import os
 
 
 class TestDatabaseSetup:
@@ -30,11 +31,13 @@ class TestDatabaseSetup:
 
     def test_call_backend_db_api(self):
         """Test calling the backend DB API with example chip info."""
-        with open('dongling.json', 'r') as file:
+        chip_file = os.path.join(os.path.dirname(__file__), 'dongling.json')
+        with open(chip_file, 'r') as file:
             data_dict = json.load(file)
         call_backend_db_api(backend='dongling', chip_info_dict=data_dict)
 
-        with open('chipexample.json', 'r') as file:
+        chip_file = os.path.join(os.path.dirname(__file__), 'chipexample.json')
+        with open(chip_file, 'r') as file:
             data_dict = json.load(file)
         call_backend_db_api(backend='example', chip_info_dict=data_dict)
 
