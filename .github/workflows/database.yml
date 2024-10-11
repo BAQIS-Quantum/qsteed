@@ -72,4 +72,3 @@ jobs:
         pytest tests/test_backend_sql_dbAPI.py
         pytest tests/test_database_query.py
         pytest tests/test_compiler.py
-      working-directory: ./tests
