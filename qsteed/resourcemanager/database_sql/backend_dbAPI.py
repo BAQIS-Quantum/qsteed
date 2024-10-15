@@ -29,8 +29,9 @@ def call_backend_db_api(database: str = "update",
                         chip_info_dict=None):
     """
     Args:
-        database (str): "update" or "initialize"
-        backend (str): the name of backend
+        database (str): "update" or "initialize".
+                        Selecting "initialize" will initialize all databases, so proceed with caution.
+        backend (str): Consistent with the chip's name in the configuration file config.ini.
         chip_info_dict (dict):
     """
     if database == "initialize":

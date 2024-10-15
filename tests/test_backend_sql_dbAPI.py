@@ -42,7 +42,7 @@ class TestDatabaseSetup:
         call_backend_db_api(backend='example', chip_info_dict=data_dict)
 
 
-# if __name__ == "__main__":
-#     t = TestDatabaseSetup()
-#     t.test_initialize_database()
-#     t.test_call_backend_db_api()
+if __name__ == "__main__":
+    t = TestDatabaseSetup()
+    t.test_initialize_database()
+    t.test_call_backend_db_api()

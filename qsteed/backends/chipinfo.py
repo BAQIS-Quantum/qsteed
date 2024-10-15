@@ -24,7 +24,7 @@ CONFIG = configparser.ConfigParser()
 CONFIG.read(CONFIG_FILE)
 
 chips = CONFIG['Chips']
-system_name_dict = eval(CONFIG['Systems']['system_name_dict'])
+system_id_name = eval(CONFIG['Systems']['system_id_name'])
 system_status = CONFIG['system_status']
 
 
@@ -67,7 +67,7 @@ class ChipInfo:
         if self.chip_info_dict is not None:
             if self.system_id != self.chip_info_dict['system_id']:
                 raise ValueError(
-                    'System id and name do not match, please check given chip_info_dict or system_name_dict')
+                    'System id and name do not match, please check given chip_info_dict or system_id_name')
             self.calibration_time = self.chip_info_dict.get('calibration_time', None)
             self.all_topological_structure = self.chip_info_dict.get('all_topological_structure', None)
             self.topological_structure = self.chip_info_dict.get('topological_structure', None)

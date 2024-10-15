@@ -57,7 +57,7 @@ class Compiler:
                  qpu_name: str = None,
                  qpu_id: int = None,
                  qubits_list: list = None,
-                 optimization_level: int = None,
+                 optimization_level: int = 1,
                  passflow: PassFlow = None,
                  task_type: str = "qc",  # "vqa"
                  repeat: int = 1,
