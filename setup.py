@@ -40,8 +40,12 @@ class InstallCommand(install):
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(here, "VERSION"), encoding="utf-8") as f:
-    __version__ = f.read()
+variables = {}
+with open(os.path.join(here, 'qsteed', "version.py"), "r", encoding="utf-8") as f:
+    code = f.read()
+    exec(code, variables)
+
+__version__ = variables.get("__version__")
 
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
@@ -76,7 +80,6 @@ setup(
     install_requires=requirements,
     packages=find_packages(),
     include_package_data=True,
-    # data_files=[(config_dir, ["qsteed\config\config.ini"])],
     extras_require={"tests": ["pytest"]},
     python_requires=">=3.10",
     license="Apache-2.0 License",

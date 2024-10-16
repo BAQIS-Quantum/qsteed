@@ -15,16 +15,4 @@
 # limitations under the License.
 
 
-import os
-
-
-def get_version():
-    here = os.path.abspath(os.path.dirname(__file__))
-    parent_dir = os.path.dirname(here)
-    version_file = os.path.join(parent_dir, "VERSION")
-    if os.path.exists(version_file):
-        with open(version_file, encoding="utf-8") as f:
-            version = f.read().strip()
-        return version
-    else:
-        print("VERSION not found!")
+__version__ = "0.2.0"
