@@ -64,7 +64,8 @@ jobs:
         python -c "from qsteed.resourcemanager.database_sql.initialize_database import initialize_database; initialize_database()"
 
     - name: Wait for 10 seconds
-        run: sleep 10
+      run: |
+        bash -c "sleep 10"
 
     - name: Test with pytest
       env:
