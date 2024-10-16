@@ -32,6 +32,7 @@ from qsteed.taskmanager import *
 from qsteed.taskscheduler import *
 from qsteed.transpiler import *
 from qsteed.utils import *
+from qsteed.version import get_version
 
 current_module = sys.modules[__name__]
 
@@ -46,3 +47,4 @@ def get_qsteed_members():
 
 __all__ = get_qsteed_members()
 __all__.sort()
+__version__ = get_version()

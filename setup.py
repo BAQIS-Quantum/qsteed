@@ -15,13 +15,34 @@
 # limitations under the License.
 
 import os
+import shutil
 
 from setuptools import setup, find_packages
+from setuptools.command.install import install
 
-home_dir = os.path.expanduser("~")
-config_dir = os.path.join(home_dir, "QSteed")
+
+class InstallCommand(install):
+    def run(self):
+        super().run()
+
+        home_dir = os.path.expanduser("~")
+        config_dir = os.path.join(home_dir, "QSteed")
+        config_file_user = os.path.join(config_dir, "config.ini")
+        config_file_src = os.path.join("qsteed", "config", "config.ini")
+
+        if not os.path.exists(config_file_user):
+            print(f"{config_file_user} not found, copying...")
+            os.makedirs(config_dir, exist_ok=True)
+            shutil.copy(config_file_src, config_file_user)
+        else:
+            print(f"{config_file_user} already exists, skipping copy.")
+
 
 here = os.path.abspath(os.path.dirname(__file__))
+
+with open(os.path.join(here, "VERSION"), encoding="utf-8") as f:
+    __version__ = f.read()
+
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
@@ -44,7 +65,7 @@ requirements = [
 
 setup(
     name="qsteed",
-    version="0.2.0",
+    version=__version__,
     author="Xuhongze",
     author_email="xhzby1995@163.com",
     url="https://github.com/BAQIS-Quantum/QSteed",
@@ -55,8 +76,9 @@ setup(
     install_requires=requirements,
     packages=find_packages(),
     include_package_data=True,
-    data_files=[(config_dir, ['qsteed/config/config.ini'])],
+    # data_files=[(config_dir, ["qsteed\config\config.ini"])],
     extras_require={"tests": ["pytest"]},
     python_requires=">=3.10",
     license="Apache-2.0 License",
+    cmdclass={"install": InstallCommand},
 )
