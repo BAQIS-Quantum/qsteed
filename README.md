@@ -91,13 +91,15 @@ system_name_id = {"example": 0,}
 For more examples of chip configuration, see the file [config.ini](qsteed/config/config.ini).
 
 ### Initialize the quantum computing resource virtualization database
+> [!**WARNING**]
+> If this is your first time installing QSteed, please make sure to perform the following database initialization steps after the installation is complete.
+
 After the MySQL service starts and the config.ini file is configured, 
 initialize the quantum computing resource virtualization database by running the following command:
 ```python
 from qsteed.resourcemanager.database_sql.initialize_database import initialize_database
 initialize_database()
 ```
-
 
 
 ## Build database
