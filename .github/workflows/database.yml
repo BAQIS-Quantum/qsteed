@@ -24,9 +24,9 @@ jobs:
           --health-retries=3
         env:
           MYSQL_ROOT_PASSWORD: root_password
-          MYSQL_DATABASE: test_db
-          MYSQL_USER: test_user
-          MYSQL_PASSWORD: test_password
+          MYSQL_DATABASE: database_name
+          MYSQL_USER: user_name
+          MYSQL_PASSWORD: user_password
 
     steps:
     - uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
 
     - name: Test with pytest
       env:
-        DATABASE_URL: mysql://test_user:test_password@127.0.0.1/test_db
+        DATABASE_URL: mysql://user_name:user_password@127.0.0.1/database_name
       run: |
         pip install pytest
         pytest tests/test_database.py
