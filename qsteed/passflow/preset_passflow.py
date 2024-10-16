@@ -20,7 +20,7 @@ from qsteed.passes.unroll.unroll_to_basis import UnrollToBasis
 from qsteed.passes.optimization.optimization_combine import GateCombineOptimization
 from qsteed.passes.optimization.one_qubit_optimization import OneQubitGateOptimization
 from qsteed.passes.ParameterTuning.parametersubstitution import ParaSubstitution
-from .passflow import PassFlow
+from qsteed.passflow import PassFlow
 
 
 def level_0_passflow(basis_gates):

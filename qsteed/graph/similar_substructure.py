@@ -24,12 +24,12 @@ from qsteed.graph.graphkernel import wl_subtree_kernel, fast_subtree_kernel, wl_
 from qsteed.compiler.qasm_parser import qreg_creg
 
 
-def similar_structure(circuit: str, vqpus):
+def similar_structure(circuit: str, vqpus: list):
     """ Compare the similarity of weighted graph of circuit and substructure of quantum chip.
 
     Args:
         circuit(str): OpenQASM 2.0
-        vqpus:
+        vqpus(list): [VQPU,]
     Returns:
         most_similar_struct(list): Chip substructures similar to quantum circuits,
                                     sorted according to the value of the kernel,
