@@ -13,3 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+
+from .one_qubit_decompose import OneQubitDecompose
+from .unitary_decompose import UnitaryDecompose
+

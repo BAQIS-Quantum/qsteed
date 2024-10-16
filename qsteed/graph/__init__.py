@@ -14,5 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .circuitgraph import circuit_to_graph
+from .circuitgraph import circuit_to_graph, draw_graph
 from .couplinggraph import CouplingGraph

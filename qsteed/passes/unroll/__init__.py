@@ -13,3 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+
+from .unroll_to_basis import UnrollToBasis
+from .unroll_to_2qubit import UnrollTo2Qubit
