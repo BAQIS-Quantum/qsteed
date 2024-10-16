@@ -123,16 +123,7 @@ To use only the quantum circuit transpiler, you can refer to the following examp
 The following code demonstrates how to customize hardware backend properties and customize the compilation process.
 ```python
 import matplotlib.pyplot as plt
-from qsteed import Transpiler
-from qsteed.backends.backend import Backend
-from qsteed.passes.mapping.layout.sabre_layout import SabreLayout
-from qsteed.passes.model import Model
-from qsteed.passes.optimization.optimization_combine import GateCombineOptimization
-from qsteed.passes.optimization.one_qubit_optimization import OneQubitGateOptimization
-from qsteed.passes.unroll.unroll_to_2qubit import UnrollTo2Qubit
-from qsteed.passes.unroll.unroll_to_basis import UnrollToBasis
-from qsteed.utils.random_circuit import RandomCircuit
-from qsteed.passflow.passflow import PassFlow
+from qsteed import *
 
 # Generating random quantum circuits (needs to be a pyquafu QuantumCircuit class)
 rqc = RandomCircuit(num_qubit=5, gates_number=100, gates_list=['cx', 'rx', 'rz', 'ry', 'h'])
