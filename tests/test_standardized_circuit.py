@@ -17,50 +17,6 @@
 from qsteed.compiler.qasm_parser import actually_bits, reset_qasm_bits
 from qsteed.compiler.standardized_circuit import StandardizedCircuit
 
-# circuit = """
-# OPENQASM 2.0;
-# include "qelib1.inc";
-# qreg qq[10];
-# creg meas[5];
-# h qq[3];
-# barrier qq[5];
-# cx qq[3],qq[5];
-# cx qq[5],qq[8];
-# cx qq[8],qq[2];
-# barrier qq[3];
-# measure qq[3] -> meas[0];
-# barrier qq[5];
-# measure qq[5] -> meas[1];
-# barrier qq[8];
-# measure qq[8] -> meas[2];
-# barrier qq[2];
-# measure qq[2] -> meas[3];
-# """
-#
-# # circuit="""OPENQASM 2.0;
-# # include "qelib1.inc";
-# # qreg q[4];
-# # creg meas[3];
-# # h q[0];
-# # cx q[0],q[1];
-# # barrier q[0],q[1],q[2],q[2],q[12],q[14];
-# # barrier q[0],q[1],q[2],q[2],q[12],q[14];
-# # measure q[3] -> meas[0];
-# # measure q[1] -> meas[1];
-# # measure q[2] -> meas[2];"""
-#
-# qubits, cbits = actually_bits(circuit)
-#
-# # Reset qubit/cbit
-# if len(cbits) == 0:
-#     cbits = qubits
-# circuit = reset_qasm_bits(circuit, qubits, cbits)
-# print(circuit)
-#
-# new_circuit = StandardizedCircuit(circuit)
-# new_circuit.standardized_circuit()
-# print(new_circuit.circuit)
-
 
 class TestStandardizedCircuit:
     """Test cases for testing StandardizedCircuit."""
@@ -100,9 +56,6 @@ class TestStandardizedCircuit:
         print(new_circuit.circuit)
 
 
-
 if __name__ == "__main__":
     t = TestStandardizedCircuit()
     t.test_standardized_circuit()
-
-
