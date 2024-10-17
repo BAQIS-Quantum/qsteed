@@ -16,9 +16,9 @@
 
 import os
 import shutil
-
-from setuptools import setup, find_packages
+from skbuild import setup
 from setuptools.command.install import install
+from setuptools import find_packages
 
 
 class InstallCommand(install):
@@ -78,7 +78,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords=["qsteed", "quantum compiling", "quantum computing", "quantum operating system"],
     install_requires=requirements,
-    packages=find_packages(),
+    packages=find_packages(exclude=["test*"]),
     include_package_data=True,
     extras_require={"tests": ["pytest"]},
     python_requires=">=3.10",
