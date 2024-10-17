@@ -18,28 +18,24 @@
 import configparser
 import operator
 import re
+import time
 from functools import reduce
 
-import numpy as np
 from quafu import QuantumCircuit as quafuQC
 
 from qsteed.backends.backend import Backend
-from qsteed.resourcemanager.database_sql.sql_models import VQPU
-from qsteed.resourcemanager.database_sql.database_query import query_vqpu, query_qpu, query_specified_vqpu, \
-    generate_specified_vqpu
-from qsteed.resourcemanager.database_sql.instantiating import get_qpu, get_vqpu, get_subqpu
-from qsteed.resourcemanager.utils import virtual_qubits
-from qsteed.compiler.qasm_parser import actually_bits, reset_qasm_bits, reset_real_qubits, get_measures
+from qsteed.compiler.program_verification import check_openqasm
+from qsteed.compiler.qasm_parser import actually_bits, reset_qasm_bits, reset_real_qubits, get_measures, circuit_depth
+from qsteed.compiler.qasm_parser import qreg_creg
 from qsteed.compiler.standardized_circuit import StandardizedCircuit
 from qsteed.config.get_config import get_config
 from qsteed.graph.similar_substructure import similar_structure
 from qsteed.passes.model import Model
 from qsteed.passflow.passflow import PassFlow
+from qsteed.resourcemanager.database_sql.database_query import query_vqpu, query_qpu, query_specified_vqpu, \
+    generate_specified_vqpu
+from qsteed.resourcemanager.database_sql.instantiating import get_qpu, get_vqpu, get_subqpu
 from qsteed.transpiler.transpiler import Transpiler
-import time
-from qsteed.compiler.qasm_parser import qreg_creg
-from qsteed.compiler.program_verification import check_openqasm
-
 
 QPUs = get_qpu()
 VQPUs = get_vqpu()
@@ -135,6 +131,7 @@ class Compiler:
         # TODO: Sort by QPU estimated free time, then by fidelity
         def calculate_product(vqpu):
             return reduce(operator.mul, (item[2] for item in getattr(vqpu, sort_attribute)), 1)
+
         return sorted(self.vqpus, key=calculate_product, reverse=True)
 
     def find_available_vqpus(self, qubits_num):
@@ -199,8 +196,9 @@ class Compiler:
         initial_model = self._set_backend_model(used_vqpu)
         transpiler = Transpiler(initial_model=initial_model)
         transpiled_circuit = transpiler.transpile(logical_circuit, optimization_level=self.optimization_level)
-        transpiled_circuit_depth = len(transpiled_circuit.layered_circuit().T) - 1
         transpiled_openqasm = transpiled_circuit.to_openqasm(with_para=True)
+
+        transpiled_circuit_depth = circuit_depth(transpiled_openqasm)
 
         swap_count = transpiler.model.datadict['add_swap_count']
         return transpiled_openqasm, used_vqpu, transpiled_circuit_depth, swap_count
@@ -235,9 +233,7 @@ class Compiler:
         new_circuit = StandardizedCircuit(circuit)
         compiled_openqasm = new_circuit.standardized_circuit()
 
-        input_qc = quafuQC(new_circuit.qubit_num)
-        input_qc.from_openqasm(compiled_openqasm)
-        compiled_circuit_depth = len(input_qc.layered_circuit().T) - 1
+        compiled_circuit_depth = circuit_depth(compiled_openqasm)
         swap_count = 0
 
         return compiled_openqasm, used_vqpu, compiled_circuit_depth, swap_count
