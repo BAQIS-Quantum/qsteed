@@ -63,9 +63,9 @@ jobs:
       run: |
         python -c "from qsteed.first_build_db import first_build_db; first_build_db()"
 
-    - name: Wait for 10 seconds
+    - name: Wait for 5 seconds
       run: |
-        bash -c "sleep 10"
+        bash -c "sleep 5"
 
     - name: Test with pytest
       env:
@@ -73,9 +73,10 @@ jobs:
       run: |
         pip install pytest
         pytest tests/test_database.py
-        pytest tests/test_backend_sql_dbAPI.py
+        pytest tests/test_resourceDB_api.py
         pytest tests/test_database_query.py
         pytest tests/test_compiler.py
+        pytest tests/test_compiler_api.py
         
         pytest tests/test_dag.py
         pytest tests/test_transpiler.py

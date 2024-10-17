@@ -24,15 +24,15 @@ def backend_db_api(backend: str = None, chip_info_dict: dict = None):
     update_sql(backend, chip_info_dict)
 
 
-def call_backend_db_api(database: str = "update",
-                        backend=None,
-                        chip_info_dict=None):
+def call_backend_db_api(backend=None,
+                        chip_info_dict=None,
+                        database: str = "update",):
     """
     Args:
+        backend (str): Consistent with the chip's name in the configuration file config.ini.
+        chip_info_dict (dict): e.g. see /tests/chipexample.json
         database (str): "update" or "initialize".
                         Selecting "initialize" will initialize all databases, so proceed with caution.
-        backend (str): Consistent with the chip's name in the configuration file config.ini.
-        chip_info_dict (dict):
     """
     if database == "initialize":
         initialize_database()

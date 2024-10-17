@@ -45,20 +45,24 @@ CONFIG_FILE = get_config()
 CONFIG = configparser.ConfigParser()
 CONFIG.read(CONFIG_FILE)
 
+chips = CONFIG['Chips']
+system_id_name = eval(CONFIG['Systems']['system_id_name'])
+system_status = CONFIG['system_status']
+
 
 class Compiler:
     def __init__(self,
                  circuit,
-                 vqpus: list = None,
+                 transpile: bool = True,
                  qpu_name: str = None,
                  qpu_id: int = None,
                  qubits_list: list = None,
                  optimization_level: int = 1,
                  passflow: PassFlow = None,
-                 task_type: str = "qc",  # "vqa"
+                 task_type: str = "qc",
                  repeat: int = 1,
                  vqpu_preferred: str = "fidelity",  # "structure"
-                 transpile: bool = True,
+                 vqpus: list = None,
                  ):
         self.circuit = circuit
         self.qpu_name = qpu_name
@@ -71,6 +75,15 @@ class Compiler:
         self.task_type = task_type
         self.vqpu_preferred = vqpu_preferred
         self.transpile = transpile
+
+        if self.qpu_name is None and self.qpu_id is not None:
+            self.qpu_name = system_id_name[self.qpu_id]
+
+        if self.qpu_name is None and self.qpu_id is None and self.transpile is False:
+            raise ValueError("'transpile' is False, you need to specify the 'qpu_name' or 'qpu_id'.")
+
+        if self.qubits_list is not None and self.qpu_name is None and self.qpu_id is None:
+            raise ValueError("When specifying 'qubits_list', you must specify either 'qpu_name' or 'qpu_id'.")
 
     def compile(self):
 

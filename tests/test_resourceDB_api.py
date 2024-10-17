@@ -16,7 +16,7 @@
 
 
 from qsteed.resourcemanager.database_sql.initialize_database import initialize_database
-from qsteed.resourcemanager.database_sql.backend_dbAPI import call_backend_db_api
+from qsteed.apis.resourceDB_api import update_chip_api
 import json
 import os
 
@@ -29,20 +29,20 @@ class TestDatabaseSetup:
         # When deploying on a new computer, you need to run initialize_database() first to set up the initial database.
         initialize_database()
 
-    def test_call_backend_db_api(self):
+    def test_update_chip_api(self):
         """Test calling the backend DB API with example chip info."""
         chip_file = os.path.join(os.path.dirname(__file__), 'dongling.json')
         with open(chip_file, 'r') as file:
             data_dict = json.load(file)
-        call_backend_db_api(backend='dongling', chip_info_dict=data_dict)
+        update_chip_api('dongling', data_dict)
 
         chip_file = os.path.join(os.path.dirname(__file__), 'chipexample.json')
         with open(chip_file, 'r') as file:
             data_dict = json.load(file)
-        call_backend_db_api(backend='example', chip_info_dict=data_dict)
+        update_chip_api('example', data_dict)
 
 
 if __name__ == "__main__":
     t = TestDatabaseSetup()
     t.test_initialize_database()
-    t.test_call_backend_db_api()
+    t.test_update_chip_api()
