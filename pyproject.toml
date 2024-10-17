@@ -1,0 +1,46 @@
+[build-system]
+requires = ["scikit-build", "setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qsteed"
+dynamic = ["version"]
+description = "Quantum Software of Compilation for supporting Real Quantum device"
+readme = "README.md"
+authors = [
+    {name = "Xuhongze", email = "xhzby1995@163.com"}
+]
+license = {text = "Apache-2.0 License"}
+keywords = ["qsteed", "quantum compiling", "quantum computing", "quantum operating system"]
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+tests = ["pytest"]
+
+[project.urls]
+Homepage = "https://github.com/BAQIS-Quantum/QSteed"
+Documentation = "https://github.com/BAQIS-Quantum/QSteed/wiki"
+Source = "https://github.com/BAQIS-Quantum/QSteed"
+Issues = "https://github.com/BAQIS-Quantum/QSteed/issues"
+
+#[tool.setuptools.packages.find]
+#include = ["qsteed", "qsteed.*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.cibuildwheel]
+manylinux-x86_64-image = "manylinux2014"
+manylinux-i686-image = "manylinux2014"
+
+[tool.cibuildwheel.linux]
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.macos]
+repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
+
+[tool.cibuildwheel.windows]
+repair-wheel-command = "cp {wheel} {dest_dir}/."
+
+#[project.scripts]
+#qsteed-config = "qsteed.config_script:main"
