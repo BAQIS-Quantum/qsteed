@@ -15,14 +15,17 @@
 # limitations under the License.
 
 
-from qsteed.resourcemanager.database_sql.sql_models import QPU, SubQPU, StdQPU, VQPU
-from qsteed.resourcemanager.database_sql.database_operations import database_operations
-from qsteed.resourcemanager.database_sql.initialize_app_db import db, app
+def build_db():
+    from qsteed.resourcemanager.database_sql.database_operations import database_operations
+    database_operations(create=True)
 
 
-def initialize_database():
+def create_tables():
+    from qsteed.resourcemanager.database_sql.initialize_app_db import db, app
+    from qsteed.resourcemanager.database_sql.initialize_database import initialize_qpu, initialize_stdqpu, \
+        initialize_subqpu, initialize_vqpu
     with app.app_context():
-        database_operations(reset=True)
+        print("Creating all tables...")
         db.create_all()
         db.session.commit()
         initialize_qpu()
@@ -32,29 +35,6 @@ def initialize_database():
         db.session.commit()
 
 
-def initialize_qpu():
-    obj = QPU()
-    db.session.add(obj)
-    db.session.flush()
-    db.session.commit()
-
-
-def initialize_stdqpu():
-    obj = StdQPU()
-    db.session.add(obj)
-    db.session.flush()
-    db.session.commit()
-
-
-def initialize_subqpu():
-    obj = SubQPU()
-    db.session.add(obj)
-    db.session.flush()
-    db.session.commit()
-
-
-def initialize_vqpu():
-    obj = VQPU()
-    db.session.add(obj)
-    db.session.flush()
-    db.session.commit()
+def first_build_db():
+    build_db()
+    create_tables()

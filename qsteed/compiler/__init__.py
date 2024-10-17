@@ -15,5 +15,5 @@
 # limitations under the License.
 
 
-from .compiler import Compiler
+# from .compiler import Compiler
 from .standardized_circuit import StandardizedCircuit

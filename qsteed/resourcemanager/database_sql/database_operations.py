@@ -16,18 +16,46 @@
 
 
 import configparser
+
 import pymysql
-from qsteed.config.get_config import get_config
+
 from qsteed.config.config_to_dict import config_to_dict
+from qsteed.config.get_config import get_config
+
+
+def get_mysql_config():
+    config_file = get_config()
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    config_dict = config_to_dict(config)
+    mysql_config = config_dict['MySQL']['mysql_config']
+    return mysql_config
+
+
+def check_database(db_name: str = None):
+    """Check if the database exists"""
+
+    mysql_config = get_mysql_config()
+    # Create database connection
+    connection = pymysql.connect(
+        host=mysql_config['host'],
+        user=mysql_config['user'],
+        password=mysql_config['password']
+    )
+
+    # Create cursor object
+    cursor = connection.cursor()
+    check_database_query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s"
+    cursor.execute(check_database_query, (db_name,))
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return result
 
 
 def database_operations(mysql_config: dict = None, create=True, reset=False, delete=False):
     if mysql_config is None:
-        config_file = get_config()
-        config = configparser.ConfigParser()
-        config.read(config_file)
-        config_dict = config_to_dict(config)
-        mysql_config = config_dict['MySQL']['mysql_config']
+        mysql_config = get_mysql_config()
         # mysql_config = eval(mysql_config)
 
     # Create database connection
@@ -52,19 +80,40 @@ def database_operations(mysql_config: dict = None, create=True, reset=False, del
         print("Database {} does not exist, created successfully.".format(mysql_config['database']))
 
     # Delete the database
-    if delete is True and result:
+    elif delete is True and result:
         drop_database_query = "DROP DATABASE {}".format(mysql_config['database'])
         cursor.execute(drop_database_query)
         print("Database {} deleted successfully.".format(mysql_config['database']))
 
     # If you reset the database, delete it and recreate it
-    if reset is True and result:
+    elif reset is True and result:
         drop_database_query = "DROP DATABASE {}".format(mysql_config['database'])
         cursor.execute(drop_database_query)
 
         create_database_query = "CREATE DATABASE {}".format(mysql_config['database'])
         cursor.execute(create_database_query)
         print("Database {} reset successfully.".format(mysql_config['database']))
+
+    # Close cursor and database connection
+    cursor.close()
+    connection.close()
+
+
+def delete_db(db_name: str = None):
+    mysql_config = get_mysql_config()
+
+    # Create database connection
+    connection = pymysql.connect(
+        host=mysql_config['host'],
+        user=mysql_config['user'],
+        password=mysql_config['password']
+    )
+
+    # Create cursor object
+    cursor = connection.cursor()
+
+    drop_database_query = "DROP DATABASE {}".format(db_name)
+    cursor.execute(drop_database_query)
 
     # Close cursor and database connection
     cursor.close()
