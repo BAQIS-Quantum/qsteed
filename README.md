@@ -107,12 +107,12 @@ first_build_db()
 We can build the quantum computing resource virtualization database
 from the chip's json data file or the chip's information dictionary.
 ```python
-from qsteed.resourcemanager.database_sql.backend_dbAPI import call_backend_db_api
+from qsteed.apis.resourceDB_api import update_chip_api
 import json
 chip_file = 'chipexample.json'
 with open(chip_file, 'r') as file:
     data_dict = json.load(file)
-call_backend_db_api(backend='example', chip_info_dict=data_dict)
+update_chip_api('example', data_dict)
 ```
 For the data format of the chip, see file [chipexample.json](tests/chipexample.json) or 
 [dongling.json](tests/dongling.json).
@@ -172,7 +172,7 @@ transpiled_circuit = transpiler.transpile(qc, optimization_level=3)
 ```
 
 ### Quantum Compiler
-Using the `Compiler`, user tasks can be compiled onto a real quantum chip.
+Using the `Compiler`, you can compile quantum circuits onto a real quantum chip.
 ```python
 from qsteed.compiler.compiler import Compiler
 
@@ -201,6 +201,26 @@ compiler = Compiler(qasm, qpu_name='example')
 compiled_openqasm, final_q2c, compiled_circuit_information = compiler.compile()
 ```
 
+More convenient to use `compiler_api`, user tasks can be compiled onto available quantum computing resources.
+If deployed on a real machine, users can submit a task information dictionary, 
+and by invoking the compilation interface, the compiled results will be sent to 
+the quantum computer’s measurement and control device for computation.
+```python
+from qsteed.apis.compiler_api import call_compiler_api
+
+# Assume you can obtain the user's task information and store it as task_info. 
+task_info = {
+    "circuit": qasm,
+    "transpile": True,
+    "qpu_name": 'example',
+    "optimization_level": 2,
+    "task_type": 'qc',
+}
+compiled_info = call_compiler_api(**task_info)
+print('Compiled openqasm:\n', compiled_info[0])
+print('Measurement qubits to cbits:\n', compiled_info[1])
+print('Compiled circuit information:\n', compiled_info[2])
+```
 
 ## More Tests
 See [tests](tests) for more examples.

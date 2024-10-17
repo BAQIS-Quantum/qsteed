@@ -38,7 +38,14 @@ class TestCallCompiler:
         measure q[8] -> meas[2];
         measure q[2] -> meas[3];
         """
-        compiled_info = call_compiler_api(qasm, qpu_name='example', optimization_level=2, transpile=True)
+        task_info = {
+            "circuit": qasm,
+            "transpile": True,
+            "qpu_name": 'example',
+            "optimization_level": 2,
+            "task_type": 'qc',
+        }
+        compiled_info = call_compiler_api(**task_info)
 
         assert compiled_info is not None
 

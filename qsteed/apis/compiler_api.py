@@ -19,7 +19,7 @@ from qsteed.compiler.compiler import Compiler
 from qsteed.passflow.passflow import PassFlow
 
 
-def call_compiler_api(circuit,
+def call_compiler_api(circuit: str = None,
                       transpile: bool = True,
                       qpu_name: str = None,
                       qpu_id: int = None,
@@ -29,6 +29,7 @@ def call_compiler_api(circuit,
                       task_type: str = "qc",
                       repeat: int = 1,
                       vqpu_preferred: str = "fidelity",  # "structure"
+                      **task_info,
                       ):
     """
 
@@ -55,6 +56,7 @@ def call_compiler_api(circuit,
                       from which the best transpilation result is selected (subsequent versions will provide).
         vqpu_preferred (str): "fidelity": Choose the VQPU with the highest fidelity.
                               "structure": Choose the VQPU whose qubits coupling structure best matches the task.
+        task_info (dict): The above parameters can be packaged
 
     Returns:
         compiled_info (list): [compiled_openqasm, measure_q2c, compiled_circuit_information]
@@ -62,6 +64,19 @@ def call_compiler_api(circuit,
                                 measure_q2c (dict): Mapping of physical qubits to classical bits,
                                 compiled_circuit_information (dict): Compilation result information
     """
+
+    # Get task parameters
+    circuit = task_info.get("circuit", circuit)
+    transpile = task_info.get("transpile", transpile)
+    qpu_name = task_info.get("qpu_name", qpu_name)
+    qpu_id = task_info.get("qpu_id", qpu_id)
+    qubits_list = task_info.get("qubits_list", qubits_list)
+    optimization_level = task_info.get("optimization_level", optimization_level)
+    passflow = task_info.get("passflow", passflow)
+    task_type = task_info.get("task_type", task_type)
+    repeat = task_info.get("repeat", repeat)
+    vqpu_preferred = task_info.get("vqpu_preferred", vqpu_preferred)
+
     compiler = Compiler(circuit, transpile, qpu_name, qpu_id, qubits_list, optimization_level,
                         passflow, task_type, repeat, vqpu_preferred)
     compiled_openqasm, measure_q2c, compiled_circuit_information = compiler.compile()
