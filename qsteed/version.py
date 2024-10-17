@@ -15,4 +15,4 @@
 # limitations under the License.
 
 
-from .parametersubstitution import ParaSubstitution, ParaSubstitutionCached
+__version__ = "0.2.0"

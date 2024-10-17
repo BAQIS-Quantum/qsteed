@@ -21,7 +21,6 @@ from typing import List
 from quafu import QuantumCircuit
 from quafu.elements import Barrier, Delay, XYResonance, Measure
 from quafu.elements.element_gates import CXGate, RXGate, RYGate, RZGate, IdGate, CPGate, CZGate, ISwapGate
-from quafu.exceptions.quafu_error import CompileError
 
 from qsteed.passes.basepass import BasePass
 from qsteed.passes.unroll.rules_library import Rules_dict, CX_rules
@@ -75,7 +74,7 @@ class UnrollToBasis(BasePass):
         if depth <= 0:
             # Exceeding the number of recursions indicates that no decomposition of this gate
             # based on the given basis gates set has been found among all rules.
-            raise CompileError("The instruction %s cannot be unrolled to the given basis gates set %s." % (
+            raise ValueError("The instruction %s cannot be unrolled to the given basis gates set %s." % (
                 current_op.name.lower(), self.basis_gates))
 
         if gate.name.lower() in self.basis_gates:

@@ -14,12 +14,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os import path
+import os
+import shutil
 
 from setuptools import setup, find_packages
+from setuptools.command.install import install
 
-here = path.abspath(path.dirname(__file__))
-with open(path.join(here, "README.md"), encoding="utf-8") as f:
+
+class InstallCommand(install):
+    def run(self):
+        super().run()
+
+        home_dir = os.path.expanduser("~")
+        config_dir = os.path.join(home_dir, "QSteed")
+        config_file_user = os.path.join(config_dir, "config.ini")
+        config_file_src = os.path.join("qsteed", "config", "config.ini")
+
+        if not os.path.exists(config_file_user):
+            print(f"{config_file_user} not found, copying...")
+            os.makedirs(config_dir, exist_ok=True)
+            shutil.copy(config_file_src, config_file_user)
+        else:
+            print(f"{config_file_user} already exists, skipping copy.")
+
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+variables = {}
+with open(os.path.join(here, 'qsteed', "version.py"), "r", encoding="utf-8") as f:
+    code = f.read()
+    exec(code, variables)
+
+__version__ = variables.get("__version__")
+
+with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 requirements = [
@@ -33,11 +61,15 @@ requirements = [
     "rich>=13.7.1",
     "graphviz>=0.14.2",
     "tabulate>=0.9.0",
+    "sqlalchemy>=2.0.28",
+    "flask>=3.0.2",
+    "pymysql>=1.1.0",
+    "flask_sqlalchemy>=3.1.1"
 ]
 
 setup(
     name="qsteed",
-    version="0.1.2",
+    version=__version__,
     author="Xuhongze",
     author_email="xhzby1995@163.com",
     url="https://github.com/BAQIS-Quantum/QSteed",
@@ -51,4 +83,5 @@ setup(
     extras_require={"tests": ["pytest"]},
     python_requires=">=3.10",
     license="Apache-2.0 License",
+    cmdclass={"install": InstallCommand},
 )

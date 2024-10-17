@@ -37,19 +37,96 @@ pip install -r requirements.txt
 python setup.py install
 ```
 
+## Deployment
+### Configure MySQL Service
+#### 1. Install MySQL. 
+You can download the appropriate [MySQL Community Server](https://dev.mysql.com/downloads/mysql/) from the MySQL official website.
+For detailed installation instructions, see the official [documentation](https://dev.mysql.com/doc/refman/8.4/en/installing.html).
+
+#### 2. Set MySQL user information
+After installing QSteed, a folder named `QSteed` will be created in the root directory. 
+Inside this folder, there is a configuration file called `config.ini`. 
+Open this configuration file and enter your MySQL user information into the `mysql_config` property under section `[MySQL]`.
+Please keep the following format:
+```bash
+mysql_config = {"host": "localhost",
+                "user": "user_name",
+                "password": "user_password",
+                "database": "database_name"
+               }
+```
+
+#### 3. Start MySQL service
+Different platforms have different startup methods. For details, see [Getting Started with MySQL](https://dev.mysql.com/doc/mysql-getting-started/en/).
+
+### Configure quantum chip information
+#### 1. Add a chip
+Open the configuration file `config.ini` in the QSteed folder. 
+In section `[Chips]`, add your chip's basic information. 
+For example, to add a chip named `"example"`, use the following format:
+```bash
+example = {"name": "example",
+           "qubit_num": 10,
+           "system_id": 0,
+           "basis_gates": ["cx", "ry", "rz", "rx", "h", "id"]
+           }
+```
+
+#### 2. Add the chip's size information
+Add the chip's size information (embed the qubits into a two-dimensional grid) 
+in the `chips_shape` property of section `[ChipsShape]`. Please keep the following format:
+```bash
+chips_shape = {
+              "example": {"dimension": 1, "row": 1, "column": 10},
+              }
+```
+
+#### 3. Add the mapping of the chip's name and ID.
+Add the mapping in the `system_id_name` and `system_name_id` property of section `[Systems]`. Please keep the following format:
+```bash
+system_id_name = {0: "example",}
+system_name_id = {"example": 0,}
+```
+
+For more examples of chip configuration, see the file [config.ini](qsteed/config/config.ini).
+
+### Initialize the quantum computing resource virtualization database
+
+> ⚠️<span style="color:#8B0000"> **Warning**</span>   
+> If this is your first time installing QSteed, please make sure to perform the following database initialization steps after the installation is complete.
+
+After the MySQL service starts and the config.ini file is configured, 
+initialize the quantum computing resource virtualization database by running the following command:
+```python
+from qsteed.first_build_db import first_build_db
+first_build_db()
+```
+
+
+## Build database
+We can build the quantum computing resource virtualization database
+from the chip's json data file or the chip's information dictionary.
+```python
+from qsteed.apis.resourceDB_api import update_chip_api
+import json
+chip_file = 'chipexample.json'
+with open(chip_file, 'r') as file:
+    data_dict = json.load(file)
+update_chip_api('example', data_dict)
+```
+For the data format of the chip, see file [chipexample.json](tests/chipexample.json) or 
+[dongling.json](tests/dongling.json).
+
+
+
+
 ## Example
+### Quantum circuit transpiler
+To use only the quantum circuit transpiler, you can refer to the following examples.
+The following code demonstrates how to customize hardware backend properties and customize the compilation process.
 ```python
 import matplotlib.pyplot as plt
-from qsteed import Transpiler
-from qsteed.backends.backend import Backend
-from qsteed.passes.mapping.layout.sabre_layout import SabreLayout
-from qsteed.passes.model import Model
-from qsteed.passes.optimization.optimization_combine import GateCombineOptimization
-from qsteed.passes.optimization.one_qubit_optimization import OneQubitGateOptimization
-from qsteed.passes.unroll.unroll_to_2qubit import UnrollTo2Qubit
-from qsteed.passes.unroll.unroll_to_basis import UnrollToBasis
-from qsteed.utils.random_circuit import RandomCircuit
-from qsteed.passflow.passflow import PassFlow
+from qsteed import *
 
 # Generating random quantum circuits (needs to be a pyquafu QuantumCircuit class)
 rqc = RandomCircuit(num_qubit=5, gates_number=100, gates_list=['cx', 'rx', 'rz', 'ry', 'h'])
@@ -81,17 +158,68 @@ passflow = PassFlow(passes=passes)
 backend_instance = Backend(**backend_properties)
 initial_model = Model(backend=backend_instance)
 
-compiler = Transpiler(passflow, initial_model)
-compiled_circuit = compiler.transpile(qc)
-compiled_circuit.plot_circuit()
+transpiler = Transpiler(passflow, initial_model)
+transpiled_circuit = transpiler.transpile(qc)
+transpiled_circuit.plot_circuit()
 plt.show()
 ```
 
 You can also use preset compilation passflow with optimization_level 0-3:
 Using preset compilation passflow, see [preset_passflow.py](qsteed/passflow/preset_passflow.py)
 ```python
-compiler = Transpiler(initial_model=initial_model)
-compiled_circuit = compiler.transpile(qc, optimization_level=3)
+transpiler = Transpiler(initial_model=initial_model)
+transpiled_circuit = transpiler.transpile(qc, optimization_level=3)
+```
+
+### Quantum Compiler
+Using the `Compiler`, you can compile quantum circuits onto a real quantum chip.
+```python
+from qsteed.compiler.compiler import Compiler
+
+qasm = """
+OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[5];
+creg meas[5];
+rxx(2.7757800154614016) q[3],q[2];
+z q[2];
+h q[3];
+rxx(5.893149917736792) q[2],q[0];
+cx q[4],q[1];
+x q[1];
+y q[4];
+x q[4];
+measure q[0] -> meas[0];
+measure q[1] -> meas[1];
+measure q[2] -> meas[2];
+measure q[3] -> meas[3];
+measure q[4] -> meas[4];
+"""
+
+# If 'qpu_name' is not given, the most suitable computing resource for the task is searched on all available chips. 
+compiler = Compiler(qasm, qpu_name='example')
+compiled_openqasm, final_q2c, compiled_circuit_information = compiler.compile()
+```
+
+More convenient to use `compiler_api`, user tasks can be compiled onto available quantum computing resources.
+If deployed on a real machine, users can submit a task information dictionary, 
+and by invoking the compilation interface, the compiled results will be sent to 
+the quantum computer’s measurement and control device for computation.
+```python
+from qsteed.apis.compiler_api import call_compiler_api
+
+# Assume you can obtain the user's task information and store it as task_info. 
+task_info = {
+    "circuit": qasm,
+    "transpile": True,
+    "qpu_name": 'example',
+    "optimization_level": 2,
+    "task_type": 'qc',
+}
+compiled_info = call_compiler_api(**task_info)
+print('Compiled openqasm:\n', compiled_info[0])
+print('Measurement qubits to cbits:\n', compiled_info[1])
+print('Compiled circuit information:\n', compiled_info[2])
 ```
 
 ## More Tests

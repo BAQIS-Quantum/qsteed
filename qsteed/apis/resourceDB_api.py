@@ -15,4 +15,15 @@
 # limitations under the License.
 
 
-from .parametersubstitution import ParaSubstitution, ParaSubstitutionCached
+from qsteed.resourcemanager.database_sql.backend_dbAPI import call_backend_db_api
+
+
+def update_chip_api(chip_name: str = None, chip_info_dict=None):
+    """Update chip data in the quantum computing resource virtualization database
+       and create it if the chip does not exist.
+
+    Args:
+        chip_name (str): Consistent with the chip's name in the configuration file config.ini.
+        chip_info_dict (dict): e.g. see /tests/chipexample.json
+    """
+    call_backend_db_api(chip_name, chip_info_dict)

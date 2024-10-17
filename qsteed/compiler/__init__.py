@@ -14,4 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .build_library import BuildLibrary
+
+# from .compiler import Compiler
+from .standardized_circuit import StandardizedCircuit

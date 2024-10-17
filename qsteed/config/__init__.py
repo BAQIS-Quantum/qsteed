@@ -15,4 +15,4 @@
 # limitations under the License.
 
 
-from .parametersubstitution import ParaSubstitution, ParaSubstitutionCached
+from .get_config import get_config

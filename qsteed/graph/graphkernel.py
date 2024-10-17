@@ -140,8 +140,6 @@ def fast_subtree_kernel(g1, g2, iteration: int = 3):
     node_pairs2 = _get_node_pairs(g2)
     subtrees1 = _get_subtrees(g1, node_pairs1)
     subtrees2 = _get_subtrees(g2, node_pairs2)
-    print(labels1, labels2)
-    print(node_pairs1, node_pairs2)
     K = np.zeros((len(node_pairs1), len(node_pairs2)))
     for i in range(iteration):
         for j in range(len(node_pairs1)):
@@ -188,3 +186,47 @@ def _get_subtrees(graph, node_pairs):
         subtree.add_edges_from(nx.all_shortest_paths(graph, node_pair[0], node_pair[1]))
         subtrees[node_pair] = subtree
     return subtrees
+
+
+def wl_oa_kernel(g1, g2, iteration=3):
+    """
+    Compute the Weisfeiler-Lehman Optimal Assignment (WL-OA) Kernel between two graphs.
+
+    Args:
+        g1 (nx.Graph): The first graph.
+        g2 (nx.Graph): The second graph.
+        iteration (int): Number of WL iterations.
+
+    Returns:
+        float: The WL-OA kernel value.
+    """
+    # Step 1: Initialization - assign initial labels
+    labels_g1 = {node: str(data) for node, data in g1.nodes(data=True)}
+    labels_g2 = {node: str(data) for node, data in g2.nodes(data=True)}
+
+    for _ in range(iteration):
+        # Step 2: Generate multisets of neighborhood labels
+        for graph, labels in zip([g1, g2], [labels_g1, labels_g2]):
+            new_labels = {}
+            for node in graph:
+                neighbor_labels = sorted([labels[neighbor] for neighbor in graph.neighbors(node)])
+                new_labels[node] = labels[node] + "_" + "_".join(neighbor_labels)
+            labels.update(new_labels)
+
+        # Step 3: Relabel nodes to unique new labels
+        unique_labels = set(labels_g1.values()).union(set(labels_g2.values()))
+        label_mapping = {label: idx for idx, label in enumerate(unique_labels)}
+        labels_g1 = {node: label_mapping[label] for node, label in labels_g1.items()}
+        labels_g2 = {node: label_mapping[label] for node, label in labels_g2.items()}
+
+        # Step 4: Compute Optimal Assignment (OA) Kernel
+        cost_matrix = np.zeros((len(g1.nodes), len(g2.nodes)))
+        for i, label1 in enumerate(labels_g1.values()):
+            for j, label2 in enumerate(labels_g2.values()):
+                cost_matrix[i, j] = 1 if label1 == label2 else 0
+
+        from scipy.optimize import linear_sum_assignment
+        row_ind, col_ind = linear_sum_assignment(-cost_matrix)
+        kernel_value = cost_matrix[row_ind, col_ind].sum()
+
+        return kernel_value

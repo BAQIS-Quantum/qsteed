@@ -96,7 +96,8 @@ class Backend:
             self._properties[property_name] = value
 
     def __repr__(self):
-        return f"<Backend(name={self.get_property('name')}, type={self.get_property('backend_type')}, qubits_num={self.get_property('qubits_num')})> "
+        return f"<Backend(name={self.get_property('name')}, type={self.get_property('backend_type')}, " \
+               f"qubits_num={self.get_property('qubits_num')})> "
 
     def supports_pulse(self):
         """Check if the backend supports pulse level operations."""

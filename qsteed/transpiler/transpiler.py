@@ -38,9 +38,12 @@ class Transpiler:
     def set_model(self, new_model):
         self.model = new_model
 
-    def transpile(self, circuit: Union[QuantumCircuit, DAGCircuit], optimization_level: int = 0):
+    def transpile(self, circuit: Union[QuantumCircuit, DAGCircuit], optimization_level=None):
         # give the parameters of the original circuit only once,be careful!
         self.model.datadict['variables'] = circuit.variables
+
+        if optimization_level is None:
+            optimization_level = 0
 
         if self.passflow is None:
             if optimization_level in [0, 1, 2, 3]:

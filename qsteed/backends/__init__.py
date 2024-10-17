@@ -15,3 +15,4 @@
 # limitations under the License.
 
 from .backend import Backend
+from .chipinfo import ChipInfo

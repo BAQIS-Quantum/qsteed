@@ -1,0 +1,86 @@
+name: Database
+on:
+    push:
+    pull_request:
+        branches: [master]
+
+jobs:
+  tests:
+    name: ubuntu-tests-Python-${{matrix.python-version}}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11"]
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install 'pyquafu>=0.4.1'
+        if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+
+    - name: Install qsteed
+      run: python setup.py develop
+
+    - name: Wait for MySQL to be ready
+      run: |
+        while ! mysqladmin ping -h "127.0.0.1" --silent; do
+          echo "Waiting for database connection..."
+          sleep 10
+        done
+
+    - name: Set up MySQL database
+      run: |
+        mysql -h 127.0.0.1 -u root -proot_password -e "CREATE DATABASE IF NOT EXISTS test_db;"
+        mysql -h 127.0.0.1 -u root -proot_password -e "GRANT ALL PRIVILEGES ON test_db.* TO 'test_user'@'%' IDENTIFIED BY 'test_password';"
+        mysql -h 127.0.0.1 -u root -proot_password -e "GRANT ALL PRIVILEGES ON test_db.* TO 'test_user'@'%';"
+        mysql -h 127.0.0.1 -u root -proot_password -e "FLUSH PRIVILEGES;"
+
+    - name: First build database
+      run: |
+        python -c "from qsteed.first_build_db import first_build_db; first_build_db()"
+
+    - name: Wait for 5 seconds
+      run: |
+        bash -c "sleep 5"
+
+    - name: Test with pytest
+      env:
+        DATABASE_URL: mysql://test_user:test_password@127.0.0.1/test_db
+      run: |
+        pip install pytest
+        pytest tests/test_database.py
+        pytest tests/test_resourceDB_api.py
+        pytest tests/test_database_query.py
+        pytest tests/test_compiler.py
+        pytest tests/test_compiler_api.py
+        
+        pytest tests/test_dag.py
+        pytest tests/test_transpiler.py
+        pytest tests/test_transpiler_parallelcircuits.py
+        pytest tests/test_transpiler_parametercircuit.py
+        pytest tests/test_transpiler_visualization.py
+        pytest tests/test_unitary_decompose.py

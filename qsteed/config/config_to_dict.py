@@ -15,6 +15,22 @@
 # limitations under the License.
 
 
-from .one_qubit_decompose import OneQubitDecompose
-from .unitary_decompose import UnitaryDecompose
+import json
 
+
+def config_to_dict(config):
+    """
+    Convert a ConfigParser object to a nested dictionary.
+    """
+    config_dict = {}
+    for section in config.sections():
+        section_dict = {}
+        for key, value in config.items(section):
+            try:
+                # Attempt to parse a string value as JSON to support complex types like dictionaries, lists, etc.
+                section_dict[key] = json.loads(value)
+            except json.JSONDecodeError:
+                # If parsing fails, retain the original string.
+                section_dict[key] = value
+        config_dict[section] = section_dict
+    return config_dict
