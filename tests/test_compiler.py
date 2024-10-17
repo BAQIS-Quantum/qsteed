@@ -38,7 +38,7 @@ class TestCompiler:
         measure q[8] -> meas[2];
         measure q[2] -> meas[3];
         """
-        compiler = Compiler(qasm, qpu_name='dongling', optimization_level=1, transpile=True)
+        compiler = Compiler(qasm, qpu_name='example', optimization_level=1, transpile=True)
         compiled_openqasm, measure_q2c, compiled_circuit_information = compiler.compile()
 
         assert compiled_openqasm is not None

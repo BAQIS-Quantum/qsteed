@@ -25,14 +25,13 @@ def create_tables():
     from qsteed.resourcemanager.database_sql.initialize_database import initialize_qpu, initialize_stdqpu, \
         initialize_subqpu, initialize_vqpu
     with app.app_context():
-        print("Creating all tables...")
+        print("Creating all empty tables...")
         db.create_all()
         db.session.commit()
         initialize_qpu()
         initialize_stdqpu()
         initialize_subqpu()
         initialize_vqpu()
-        db.session.commit()
 
 
 def first_build_db():

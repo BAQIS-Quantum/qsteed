@@ -29,32 +29,27 @@ def initialize_database():
         initialize_stdqpu()
         initialize_subqpu()
         initialize_vqpu()
-        db.session.commit()
 
 
 def initialize_qpu():
     obj = QPU()
     db.session.add(obj)
     db.session.flush()
-    db.session.commit()
 
 
 def initialize_stdqpu():
     obj = StdQPU()
     db.session.add(obj)
     db.session.flush()
-    db.session.commit()
 
 
 def initialize_subqpu():
     obj = SubQPU()
     db.session.add(obj)
     db.session.flush()
-    db.session.commit()
 
 
 def initialize_vqpu():
     obj = VQPU()
     db.session.add(obj)
     db.session.flush()
-    db.session.commit()
