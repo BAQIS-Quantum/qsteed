@@ -23,7 +23,7 @@ from setuptools import find_packages
 
 class InstallCommand(install):
     def run(self):
-        super().run()
+        install.run(self)
 
         home_dir = os.path.expanduser("~")
         config_dir = os.path.join(home_dir, "QSteed")
