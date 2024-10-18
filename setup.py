@@ -84,4 +84,10 @@ setup(
     python_requires=">=3.10",
     license="Apache-2.0 License",
     cmdclass={"install": InstallCommand},
+    entry_points={
+        'console_scripts': [
+            'qsteed-config = qsteed.qsteed_config:copy_config',
+            'qsteed-build_db = qsteed.first_build_db:first_build_db',
+        ],
+    },
 )

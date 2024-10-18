@@ -42,5 +42,6 @@ repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest
 [tool.cibuildwheel.windows]
 repair-wheel-command = "cp {wheel} {dest_dir}/."
 
-#[project.scripts]
-#qsteed-config = "qsteed.config_script:main"
+[project.scripts]
+qsteed-config = "qsteed.qsteed_config:copy_config"
+qsteed-build-db = "qsteed.first_build_db:first_build_db"
