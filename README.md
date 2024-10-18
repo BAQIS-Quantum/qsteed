@@ -90,7 +90,7 @@ transpiled_circuit = transpiler.transpile(qc, optimization_level=3)
 
 ### Quantum Compiler
 > ⚠️<span style="color:#8B0000"> **Warning**</span>   
-> The quantum compiler requires MySQL database support, see section [Deployment](#-Deployment).
+> The quantum compiler requires MySQL database support, see section [Deployment](#deployment).
 
 Using the `Compiler`, you can compile quantum circuits onto a real quantum chip.
 ```python
