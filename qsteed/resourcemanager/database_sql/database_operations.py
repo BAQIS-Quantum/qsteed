@@ -75,24 +75,27 @@ def database_operations(mysql_config: dict = None, create=True, reset=False, del
 
     # If the database does not exist, create the database
     if result is None and create is True:
-        create_database_query = "CREATE DATABASE {}".format(mysql_config['database'])
+        create_database_query = fr"CREATE DATABASE {mysql_config['database']}"
         cursor.execute(create_database_query)
-        print("Database {} does not exist, created successfully.".format(mysql_config['database']))
+        print(fr"Database {mysql_config['database']} does not exist, created successfully.")
+
+    elif result is not None and create is True:
+        print(fr"Database {mysql_config['database']} already exists.")
 
     # Delete the database
     elif delete is True and result:
-        drop_database_query = "DROP DATABASE {}".format(mysql_config['database'])
+        drop_database_query = fr"DROP DATABASE {mysql_config['database']}"
         cursor.execute(drop_database_query)
-        print("Database {} deleted successfully.".format(mysql_config['database']))
+        print(fr"Database {mysql_config['database']} deleted successfully.")
 
     # If you reset the database, delete it and recreate it
     elif reset is True and result:
-        drop_database_query = "DROP DATABASE {}".format(mysql_config['database'])
+        drop_database_query = fr"DROP DATABASE {mysql_config['database']}"
         cursor.execute(drop_database_query)
 
-        create_database_query = "CREATE DATABASE {}".format(mysql_config['database'])
+        create_database_query = fr"CREATE DATABASE {mysql_config['database']}"
         cursor.execute(create_database_query)
-        print("Database {} reset successfully.".format(mysql_config['database']))
+        print(fr"Database {mysql_config['database']} reset successfully.")
 
     # Close cursor and database connection
     cursor.close()
@@ -112,7 +115,7 @@ def delete_db(db_name: str = None):
     # Create cursor object
     cursor = connection.cursor()
 
-    drop_database_query = "DROP DATABASE {}".format(db_name)
+    drop_database_query = fr"DROP DATABASE {db_name}"
     cursor.execute(drop_database_query)
 
     # Close cursor and database connection
