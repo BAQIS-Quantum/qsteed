@@ -31,10 +31,10 @@ or clone the repository using the following command.
 ```bash
 git clone https://github.com/BAQIS-Quantum/QSteed.git
 ```
-Change to the qsteed directory install using the following command.
+Change to the qsteed directory install using the following command:
 ```bash
 pip install -r requirements.txt
-python setup.py install
+python setup.py install   # or: pip install .
 ```
 
 ## Example
@@ -149,8 +149,11 @@ For convenience, you can run the following command to place the configuration fi
 `config.ini` in the `QSteed` folder at the root directory, or you can create it manually.
 ```python
 from qsteed.qsteed_config import copy_config
-
 copy_config()
+```
+or run the following command in the terminal:
+```bash
+qsteed-config
 ```
 
 ### Configure MySQL Service
@@ -216,7 +219,10 @@ initialize the quantum computing resource virtualization database by running the
 from qsteed.first_build_db import first_build_db
 first_build_db()
 ```
-
+or run the following command in the terminal:
+```bash
+qsteed-build-db
+```
 
 ### Build or update database
 We can build the quantum computing resource virtualization database
