@@ -1,0 +1,7 @@
+include LICENSE
+include requirements.txt
+include qsteed/config/config.ini
+
+# Include the tests files.
+include tests/*.py
+include tests/*.json
