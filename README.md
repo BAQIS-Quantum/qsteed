@@ -144,9 +144,9 @@ print('Compiled circuit information:\n', compiled_info[2])
 
 
 ## Deployment
-### Copy the configuration file
+### <span style="font-size:larger;">I.</span> Copy the configuration file
 For convenience, you can run the following command to place the configuration file
-`config.ini` in the `QSteed` folder at the root directory, or you can create it manually.
+`config.ini` in the `QSteed` folder at the root directory, 
 ```python
 from qsteed.qsteed_config import copy_config
 copy_config()
@@ -155,8 +155,9 @@ or run the following command in the terminal:
 ```bash
 qsteed-config
 ```
+You can also manually copy the `config.ini` to the `~\QSteed` directory.
 
-### Configure MySQL Service
+### <span style="font-size:larger;">II.</span> Configure MySQL Service
 #### 1. Install MySQL. 
 You can download the appropriate [MySQL Community Server](https://dev.mysql.com/downloads/mysql/) from the MySQL official website.
 For detailed installation instructions, see the official [documentation](https://dev.mysql.com/doc/refman/8.4/en/installing.html).
@@ -177,7 +178,24 @@ mysql_config = {"host": "localhost",
 #### 3. Start MySQL service
 Different platforms have different startup methods. For details, see [Getting Started with MySQL](https://dev.mysql.com/doc/mysql-getting-started/en/).
 
-### Configure quantum chip information
+
+### <span style="font-size:larger;">III.</span> Initialize the quantum computing resource virtualization database
+
+> ⚠️<span style="color:#8B0000"> **Warning**</span>   
+> If this is your first time installing QSteed, please make sure to perform the following database initialization steps after the installation is complete.
+
+After the MySQL service starts and the `config.ini` file is configured, 
+initialize the quantum computing resource virtualization database by running the following command:
+```python
+from qsteed.first_build_db import first_build_db
+first_build_db()
+```
+or run the following command in the terminal:
+```bash
+qsteed-build-db
+```
+
+### <span style="font-size:larger;">IV.</span> Configure quantum chip information
 #### 1. Add a chip
 Open the configuration file `config.ini` in the QSteed folder. 
 In section `[Chips]`, add your chip's basic information. 
@@ -208,23 +226,9 @@ system_name_id = {"example": 0,}
 
 For more examples of chip configuration, see the file [config.ini](qsteed/config/config.ini).
 
-### Initialize the quantum computing resource virtualization database
 
-> ⚠️<span style="color:#8B0000"> **Warning**</span>   
-> If this is your first time installing QSteed, please make sure to perform the following database initialization steps after the installation is complete.
 
-After the MySQL service starts and the `config.ini` file is configured, 
-initialize the quantum computing resource virtualization database by running the following command:
-```python
-from qsteed.first_build_db import first_build_db
-first_build_db()
-```
-or run the following command in the terminal:
-```bash
-qsteed-build-db
-```
-
-### Build or update database
+### <span style="font-size:larger;">V.</span> Build or update database
 We can build the quantum computing resource virtualization database
 from the chip's json data file or the chip's information dictionary.
 ```python
@@ -235,11 +239,11 @@ with open(chip_file, 'r') as file:
     data_dict = json.load(file)
 update_chip_api('example', data_dict)
 ```
-For the data format of the chip, see file [chipexample.json](tests/chipexample.json) or 
+For the data structure of the chip, see file [chipexample.json](tests/chipexample.json) or 
 [dongling.json](tests/dongling.json).
 
 
-### Real machine deployment
+## Real quantum device deployment cases
 QSteed has been successfully deployed to the [Quafu Quantum Cloud Computing Cluster](https://quafu.baqis.ac.cn/), 
 supporting the compilation and optimization of user tasks into quantum circuits 
 executable by quantum processors. 
@@ -247,8 +251,7 @@ You can submit tasks through the [Quafu Composer](https://quafu.baqis.ac.cn/#/co
 [Pyquafu](https://scq-cloud.github.io/) client, 
 or [QuarkStudio](https://www.yuque.com/wuming-6g8w2/ghzgfk/azika5xqlpxig3q3?singleDoc#) client.
 
-If you would like to learn more about real machine deployment, please contact us.
-
+If you want to learn more about real quantum device deployment or customize a deployment plan, please contact us.
 
 ## More Tests
 See [tests](tests) for more examples.
