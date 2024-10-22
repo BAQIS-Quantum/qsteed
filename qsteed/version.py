@@ -15,4 +15,14 @@
 # limitations under the License.
 
 
-__version__ = "0.2.1"
+import os
+
+root_dir = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(root_dir, "VERSION.txt")) as version_file:
+    VERSION = version_file.read().strip()
+
+if VERSION is not None:
+    __version__ = VERSION
+else:
+    __version__ = 'No version found'

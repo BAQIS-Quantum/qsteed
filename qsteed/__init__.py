@@ -46,4 +46,5 @@ def get_qsteed_members():
 
 
 __all__ = get_qsteed_members()
+__all__.append('__version__')
 __all__.sort()

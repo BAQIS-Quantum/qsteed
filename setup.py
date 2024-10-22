@@ -16,9 +16,19 @@
 
 import os
 import shutil
-from skbuild import setup
-from setuptools.command.install import install
+
 from setuptools import find_packages
+from setuptools.command.install import install
+from skbuild import setup
+
+
+def get_requirements(filename: str):
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"{filename} not found.")
+
+    with open(filename, 'r') as file:
+        lines = (line.strip() for line in file)
+        return [line for line in lines if line and not line.startswith("#")]
 
 
 class InstallCommand(install):
@@ -40,32 +50,13 @@ class InstallCommand(install):
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-variables = {}
-with open(os.path.join(here, 'qsteed', "version.py"), "r", encoding="utf-8") as f:
-    code = f.read()
-    exec(code, variables)
-
-__version__ = variables.get("__version__")
+with open(os.path.join(here, 'qsteed', "VERSION.txt")) as version_file:
+    __version__ = version_file.read().strip()
 
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-requirements = [
-    "dill>=0.3.8",
-    "ipython>=8.14.0",
-    "matplotlib>=3.5.2",
-    "numpy>=1.20.3,<2.0.0",
-    "networkx>=2.6.3",
-    "scipy>=1.8.1",
-    "Pillow>=10.4.0",
-    "rich>=13.7.1",
-    "graphviz>=0.14.2",
-    "tabulate>=0.9.0",
-    "sqlalchemy>=2.0.28",
-    "flask>=3.0.2",
-    "pymysql>=1.1.0",
-    "flask_sqlalchemy>=3.1.1"
-]
+requirements = get_requirements("requirements.txt")
 
 setup(
     name="qsteed",

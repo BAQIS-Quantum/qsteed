@@ -1,12 +1,11 @@
 [build-system]
-requires = ["scikit-build", "setuptools", "wheel"]
+requires = ["scikit-build", "setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "qsteed"
-dynamic = ["version"]
+dynamic = ["version", "readme", "dependencies"]
 description = "Quantum Software of Compilation for supporting Real Quantum device"
-readme = "README.md"
 authors = [
     {name = "Xuhongze", email = "xhzby1995@163.com"}
 ]
@@ -23,11 +22,16 @@ Documentation = "https://github.com/BAQIS-Quantum/QSteed/wiki"
 Source = "https://github.com/BAQIS-Quantum/QSteed"
 Issues = "https://github.com/BAQIS-Quantum/QSteed/issues"
 
-#[tool.setuptools.packages.find]
-#include = ["qsteed", "qsteed.*"]
+[tool.setuptools.packages.find]
+include = ["qsteed", "qsteed.*"]
 
 [tool.setuptools]
 include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {file = "qsteed/VERSION.txt"}
+readme = {file = "README.md", content-type = "text/markdown"}
+dependencies = {file = "requirements.txt"}
 
 [tool.cibuildwheel]
 manylinux-x86_64-image = "manylinux2014"
