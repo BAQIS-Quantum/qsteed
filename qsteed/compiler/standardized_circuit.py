@@ -135,7 +135,8 @@ class StandardizedCircuit:
             self.circuit = self.circuit.replace(f"creg {self.creg_name}[0];", f"creg {self.creg_name}[{self.cbit_num}];")
 
         if 'measure' not in self.circuit:
-            barrier = ','.join([f"{self.qreg_name}[{q}]" for q in range(self.qubit_num)])
+            barrier_qubits = ','.join([f"{self.qreg_name}[{q}]" for q in range(self.qubit_num)])
+            barrier = 'barrier ' + barrier_qubits + ";\n"
             self.circuit = self.circuit + barrier
             measures = ''.join(
                 [f"measure {self.qreg_name}[{i}] -> {self.creg_name}[{i}];\n" for i in range(self.qubit_num)])
