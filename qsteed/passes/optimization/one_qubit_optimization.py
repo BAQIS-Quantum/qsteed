@@ -59,6 +59,10 @@ class OneQubitGateOptimization(BasePass):
             dict: A sorted dictionary of nodes from the DAGCircuit.
         """
         node_list = circuit.nodes_dict()
+
+        value = node_list.pop('m')
+        node_list['m'] = value
+
         if 'm' in node_list:
             sorted_node = {k: node_list[k] for k in list(node_list.keys())[:-1]}
             sorted_node = {k: sorted_node[k] for k in sorted(sorted_node)}
