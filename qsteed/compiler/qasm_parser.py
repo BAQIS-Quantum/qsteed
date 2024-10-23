@@ -18,7 +18,40 @@
 import re
 from collections import defaultdict
 
+
 # from numpy import pi
+
+
+def creg_name_size(circuit: str):
+    """
+    Find all classical register (creg) names and their sizes in the OpenQASM string.
+
+    Args:
+        circuit: OpenQASM 2.0 string
+
+    Returns:
+        creg_info: A list of tuples containing creg names and their sizes. [('name1', 2), ('name2', 4)]
+    """
+
+    creg_matches = re.findall(r'creg\s+(\w+)\s*\[(\d+)]', circuit)
+    creg_info = [(name, int(size)) for name, size in creg_matches]
+    return creg_info
+
+
+def qreg_name_size(circuit: str):
+    """
+    Find all quantum register (qreg) names and their sizes in the OpenQASM string.
+
+    Args:
+        circuit: OpenQASM 2.0 string
+
+    Returns:
+        qreg_info: A list of tuples containing qreg names and their sizes. [('name1', 2), ('name2', 4)]
+    """
+
+    qreg_matches = re.findall(r'qreg\s+(\w+)\s*\[(\d+)]', circuit)
+    qreg_info = [(name, int(size)) for name, size in qreg_matches]
+    return qreg_info
 
 
 def qreg_creg(circuit: str):
@@ -107,7 +140,7 @@ def insert_creg(qasm: str, cbits: int, creg_name: str = None) -> str:
         creg_name = "c"
 
     def replacement(match):
-        return fr'{match.group(0)}\ncreg\s+{creg_name}\[{cbits}];'
+        return f'{match.group(0)}\ncreg {creg_name}[{cbits}];'
 
     # Perform the substitution
     return re.sub(qreg_pattern, replacement, qasm)
@@ -337,7 +370,6 @@ def circuit_depth(qasm: str):
     depth = max(qubit_usage.values(), default=0)
 
     return depth
-
 
 # def to_openqasm(qc):
 #     """
