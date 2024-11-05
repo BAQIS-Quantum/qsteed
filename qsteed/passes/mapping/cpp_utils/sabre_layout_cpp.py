@@ -64,12 +64,12 @@ class SabreLayout():
         """
         if isinstance(dag, DAGCircuit):
             dag = dag_to_cppDag(dag)
-            self.sabre_layout.run(dag)
+            dag = self.sabre_layout.run(dag)
             return cppDag_to_dag(dag)
 
         elif isinstance(dag, QuantumCircuit):
             dag = QuantumCircuit_to_cppDag(dag)
-            self.sabre_layout.run(dag)
+            dag = self.sabre_layout.run(dag)
             return cppDag_to_QuantumCircuit(dag)
 
 
