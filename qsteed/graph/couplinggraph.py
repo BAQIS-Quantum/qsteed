@@ -156,9 +156,9 @@ class CouplingGraph:
             self._path_fidelity = {}
             nodes = list(self.graph.nodes)
             nodes_num = len(nodes)
-            for i in range(nodes_num - 1):
-                for j in range(i + 1, nodes_num):
-                    n1, n2 = nodes[i], nodes[j]
+            for k in range(nodes_num - 1):
+                for j in range(k + 1, nodes_num):
+                    n1, n2 = nodes[k], nodes[j]
                     swap_path = nx.shortest_path(self.graph, n1, n2)
                     if len(swap_path) == 2:  # not need swap
                         self._path_fidelity[(n1, n2)] = np.log(self.edge_dict[(swap_path[0], swap_path[1])])
