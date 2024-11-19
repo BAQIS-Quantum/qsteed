@@ -90,8 +90,10 @@ class CouplingGraph:
         Returns:
             sub_coupling (CouplingGraph)
         """
-        sub_coupling = CouplingGraph()
-        sub_coupling.graph = self.graph.subgraph(node_list)
+        weight = list(list(self.graph.edges(data=True))[0][2].keys())[0]
+        sub_coupling_list = [(u, v, data[weight]) for u, v, data in self.graph.edges(data=True) if
+                             u in node_list and v in node_list]
+        sub_coupling = CouplingGraph(sub_coupling_list)
         return sub_coupling
 
     def is_connected(self):

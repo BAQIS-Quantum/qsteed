@@ -133,9 +133,15 @@ class SabreLayout(BasePass):
 
         if self.sabre_initial_layout is not None:
             self.model.set_layout({'initial_layout': self.sabre_initial_layout})
+            qubits_list = list(self.sabre_initial_layout.p2v.keys())
+            used_subgraph = self.coupling_graph.subgraph(qubits_list)
+            self.model.set_used_subgraph(used_subgraph)
         elif self.model.get_layout()["final_layout"] is not None:
             # final_layout may come from the previous pass
             self.model.set_layout({'initial_layout': self.model.get_layout()["final_layout"]})
+            qubits_list = list(self.model.get_layout()["final_layout"].p2v.keys())
+            used_subgraph = self.coupling_graph.subgraph(qubits_list)
+            self.model.set_used_subgraph(used_subgraph)
 
         if self.model.get_layout()["initial_layout"] is None:
             if len(dag.qubits_used) == self.coupling_graph.num_qubits:
@@ -160,7 +166,7 @@ class SabreLayout(BasePass):
                 weight = list(list(subgraph.edges(data=True))[0][2].keys())[0]
                 sub_coupling_list = [(u, v, data[weight]) for u, v, data in subgraph.edges(data=True)]
                 used_subgraph = CouplingGraph(sub_coupling_list)
-                self.model.get_layout()["initial_layout"] = layout
+                self.model.set_layout({'initial_layout': layout})
                 self.model.set_used_subgraph(used_subgraph)
             else:
                 raise ValueError("The required qubits are more than the number of physical qubits.")
