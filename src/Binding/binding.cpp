@@ -46,6 +46,8 @@ PYBIND11_MODULE(sabre, m) {
         .def(py::init<CouplingList>())
         .def("update_num_qubits", &CouplingCircuit::update_num_qubits)
         .def("get_distance_matrix", &CouplingCircuit::get_distance_matrix)
+        .def("get_fidelity_dict", &CouplingCircuit::get_fidelity_dict)
+        .def("print", &CouplingCircuit::print)
         .def_readwrite("num_qubits", &CouplingCircuit::num_qubits);
 
     py::class_<Layout>(m, "Layout")

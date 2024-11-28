@@ -76,6 +76,10 @@ namespace sabre {
         double _compute_distance_cost(  const DAGCircuit& dag, 
                                         const std::vector<int>& layer,
                                         const Layout& layout) const;
+
+        double _compute_fidelity_cost(  const DAGCircuit& dag, 
+                                        const std::vector<int>& layer,
+                                        const Layout& layout) const;
     };
 
 

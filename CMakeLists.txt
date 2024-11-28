@@ -12,17 +12,6 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 
-if(SKBUILD)
-execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c
-            "import pybind11; print(pybind11.get_cmake_dir())"
-    OUTPUT_VARIABLE _tmp_dir
-    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
-  list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
-endif()
-
-
-
 # Find Boost
 find_package(Boost REQUIRED)
 if(Boost_FOUND)
@@ -39,20 +28,51 @@ if(Boost_FOUND)
 endif()
 
 
-# Find Python and Pybind11 #
-# Build Debug
-# set(PYBIND11_FINDPYTHON ON)
-# add_subdirectory(extern/pybind11)
-# message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
-# message(STATUS "Python Version: ${Python_VERSION}")
-set(PYBIND11_FINDPYTHON ON)
-find_package(pybind11 REQUIRED CONFIG)
-
 # File filter
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB DAG_SOURCES "src/DAG/*.cpp")
 file(GLOB Vis_SOURCES "src/Vis/*.cpp")
 file(GLOB Model_SOURCES "src/Model/*.cpp")
+
+
+if(SKBUILD)
+  execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" -c
+            "import pybind11; print(pybind11.get_cmake_dir())"
+    OUTPUT_VARIABLE _tmp_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT
+  )
+  list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+
+  set(PYBIND11_FINDPYTHON ON)
+  find_package(pybind11 REQUIRED CONFIG)
+else()
+  # Build Debug
+  set(PYBIND11_FINDPYTHON ON)
+  add_subdirectory(extern/pybind11)
+
+  add_executable(
+      sabre_test 
+          ${SOURCES} 
+          ${DAG_SOURCES}
+          ${Model_SOURCES}
+  )
+  target_include_directories(
+    sabre_test 
+    PRIVATE 
+        "src/include" 
+        "src/include/DAG" 
+        "src/include/Vis"
+        "src/include/Model"
+        "src/include/vendor"
+  )    
+  target_link_libraries(sabre_test PRIVATE Boost::headers)
+  target_compile_definitions(sabre_test PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
+endif()
+
+# message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
+# message(STATUS "Python Version: ${Python_VERSION}")
+
 
 set(target sabre)
 pybind11_add_module(
@@ -69,6 +89,7 @@ target_include_directories(
         "src/include/DAG" 
         "src/include/Vis"
         "src/include/Model"
+        "src/include/vendor"
 )    
 
 target_link_libraries(sabre PRIVATE pybind11::headers)

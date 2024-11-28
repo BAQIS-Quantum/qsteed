@@ -286,11 +286,14 @@ double SabreRouting::_score_heuristic(  const DAGCircuit& dag,
             const std::vector<int> extended_vector(extended_set.begin(), extended_set.end());
             extended_cost = _compute_distance_cost(dag, extended_vector , trial_layout) / static_cast<double>(extended_set.size());
         }
-
         double total_cost = front_cost + extended_cost*extended_set_weight;
-        
         return total_cost * std::max(qubits_decay.at(swap_pos.first), qubits_decay.at(swap_pos.second));
     } 
+
+    else if ( heuristic == Heuristic::FIDELITY ) {
+        
+        return 0;
+    }
 
 
 
@@ -304,5 +307,19 @@ double SabreRouting::_compute_distance_cost(    const DAGCircuit& dag,
     double cost = 0;
     for (auto node_index : layer) 
         cost += distance_matrix.at(layout[dag.graph[node_index].qubit_pos[0]]).at(layout[dag.graph[node_index].qubit_pos[1]]);
+    return cost;
+}
+
+
+double SabreRouting::_compute_fidelity_cost(    const DAGCircuit& dag, 
+                                                const std::vector<int>& layer,
+                                                const Layout& layout) const {
+    double cost = 0;                                                    
+    int p1 = 0;
+    int p2 = 0;
+    for (auto node_index : layer) {
+        p1 = layout[dag.graph[node_index].qubit_pos[0]];
+        p2 = layout[dag.graph[node_index].qubit_pos[1]];
+    }
     return cost;
 }

@@ -33,6 +33,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 _skbuild/
+extern/pybind11/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

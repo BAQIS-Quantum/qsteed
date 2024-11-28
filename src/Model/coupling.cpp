@@ -2,7 +2,7 @@
 #include <boost/graph/graph_utility.hpp>
 
 CouplingCircuit::CouplingCircuit(CouplingList c_list) : c_list(c_list) {
-    //* Convert c_list to graph
+    /* Convert a c_list to graph */
     // Add node
     std::set<int> qubits_set = {};
     std::vector<int> qubits_vec = {};        

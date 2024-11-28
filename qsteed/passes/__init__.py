@@ -30,3 +30,6 @@ from .unroll.unroll_to_2qubit import UnrollTo2Qubit
 from .unroll.unroll_to_basis import UnrollToBasis
 
 from .mapping.cpp_utils.sabre_layout_cpp import SabreLayout as SabreLayout_cpp
+
+# Test
+from qsteed.passes.mapping.cpp_utils import sabre
