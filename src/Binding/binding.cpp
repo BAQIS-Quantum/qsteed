@@ -18,6 +18,7 @@ PYBIND11_MODULE(sabre, m) {
 
     py::class_<SabreLayout>(m, "SabreLayout")
         .def(py::init<const CouplingCircuit&>()) 
+        .def(py::init<const CouplingCircuit&, Heuristic>()) 
         .def("run", &SabreLayout::run)
         .def("get_model", &SabreLayout::get_model)
         .def_readwrite("c_circuit", &SabreLayout::c_circuit)
@@ -26,6 +27,7 @@ PYBIND11_MODULE(sabre, m) {
 
      py::class_<SabreRouting>(m, "SabreRouting")
         .def(py::init<const CouplingCircuit&>()) 
+        .def(py::init<const CouplingCircuit&, Heuristic>()) 
         .def("set_model", &SabreRouting::set_model)
         .def("get_model", &SabreRouting::get_model)
         .def("run", &SabreRouting::run)
@@ -47,6 +49,8 @@ PYBIND11_MODULE(sabre, m) {
         .def("update_num_qubits", &CouplingCircuit::update_num_qubits)
         .def("get_distance_matrix", &CouplingCircuit::get_distance_matrix)
         .def("get_fidelity_dict", &CouplingCircuit::get_fidelity_dict)
+        .def("get_fidelity", &CouplingCircuit::get_fidelity)
+        .def("get_mini_path", &CouplingCircuit::get_mini_path)
         .def("print", &CouplingCircuit::print)
         .def_readwrite("num_qubits", &CouplingCircuit::num_qubits);
 

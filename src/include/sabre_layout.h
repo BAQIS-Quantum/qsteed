@@ -19,6 +19,7 @@ namespace sabre {
 
     public:
         SabreLayout(const CouplingCircuit& c_circuit);
+        SabreLayout(const CouplingCircuit& c_circuit, Heuristic heuristic);
 
         void set_model(const Model& model) { 
             this->model = std::make_shared<Model>(model); 

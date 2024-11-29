@@ -7,10 +7,14 @@
 #include "layout.h"
 #include "sabre_routing.h"
 
+#include "prettyprint.hpp"
+
 /*
     Return a @c DAGCircuit : The original dag or the mapped_dag with added swap gate depending on modify_flag.
 */
 DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
+
+
     // Precheck
     std::set<int> qubits_used = dag.get_qubits_used();
     if (qubits_used.size() == 1) { 
@@ -24,6 +28,8 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
 
     for(const auto& qubit : qubits_used)
         this->qubits_decay[qubit] = 1;
+
+    // Size of lookahead window. Set to number of qubits
     this->extended_set_size = this->c_circuit.num_qubits;
 
 
@@ -46,9 +52,6 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
         if ( boost::source(*ei, dag.graph) == dag.start_node_pos) {
             const auto target = boost::target(*ei, dag.graph);
             pre_executed_counts[target]++;
-            // if ((pre_executed_counts[target] == 2) || (dag.graph[target].qubit_pos.size() == 1)) {
-            //     front_layer.push_back(target);
-            // }
             if (dag.graph[target].name != "barrier" && dag.graph[target].name != "measure") {
                 if ((pre_executed_counts[target] == 2) || (dag.graph[target].qubit_pos.size() == 1)) {
                     front_layer.push_back(target);
@@ -236,20 +239,30 @@ SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
     for ( const auto& swap : swap_candidates )
         swap_scores[swap] = -1000000; 
 
-    // TODO
     if ( this->heuristic == Heuristic::FIDELITY ) {
         for ( const auto& swap : swap_candidates )  {
-            SwapPos physical_swap = std::minmax(physical_swap.first, physical_swap.second);
+            SwapPos physical_swap = {current_layout[swap.first], current_layout[swap.second]};
             if (unavailable_2qubits.find(physical_swap) == unavailable_2qubits.end()) {
                 double swap_cost = _swap_score(physical_swap);
-
+                double score_h= _score_heuristic(
+                    dag, this->heuristic, front_layer, extended_set, current_layout, swap
+                );
+                double score = swap_cost + score_h;
+                swap_scores.at(swap) = score;
             } 
         }
-    }
+        auto best_swap = std::max_element(swap_scores.begin(), swap_scores.end(), 
+            [](const std::pair<SwapPos, double>& a, const std::pair<SwapPos, double>& b) {
+                return a.second < b.second;
+            }
+        );
+        // TODO : Random chooose best swap.
+        return best_swap->first;
 
+    }
     else if ( this->heuristic == Heuristic::DISTANCE ) {
         for ( const auto& swap : swap_candidates) {
-            double score = _score_heuristic(dag, front_layer, extended_set, current_layout, swap);
+            double score = _score_heuristic(dag, this->heuristic, front_layer, extended_set, current_layout, swap);
             swap_scores[swap] = score;
         }
         // get key of swap_scores mini_value
@@ -272,6 +285,7 @@ SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
 
 
 double SabreRouting::_score_heuristic(  const DAGCircuit& dag, 
+                                        const Heuristic heuristic,
                                         const std::vector<int>& front_layer, 
                                         const std::set<int>& extended_set, 
                                         const Layout& current_layout,
@@ -289,13 +303,19 @@ double SabreRouting::_score_heuristic(  const DAGCircuit& dag,
         double total_cost = front_cost + extended_cost*extended_set_weight;
         return total_cost * std::max(qubits_decay.at(swap_pos.first), qubits_decay.at(swap_pos.second));
     } 
-
     else if ( heuristic == Heuristic::FIDELITY ) {
-        
-        return 0;
+        double noise_front_cost = _compute_fidelity_cost(dag, front_layer, trial_layout);
+        double noise_extended_cost = 0;
+        if ( !extended_set.empty() ) {
+             noise_extended_cost = _compute_fidelity_cost(dag, front_layer, trial_layout);
+        }
+        double noise_total_cost = noise_front_cost + this->extended_set_weight * noise_extended_cost;
+
+        return 0.5 * (this->qubits_decay.at(swap_pos.first) + this->qubits_decay.at(swap_pos.second)) * noise_total_cost;
     }
-
-
+    else {
+        throw std::runtime_error("Unrecognized Heuristic type");
+    }
 
     return 0;
 }
@@ -320,6 +340,7 @@ double SabreRouting::_compute_fidelity_cost(    const DAGCircuit& dag,
     for (auto node_index : layer) {
         p1 = layout[dag.graph[node_index].qubit_pos[0]];
         p2 = layout[dag.graph[node_index].qubit_pos[1]];
+        cost += 0.5 * (fidelity_dict.at({p1, p2}) + fidelity_dict.at({p2, p1}));
     }
     return cost;
 }

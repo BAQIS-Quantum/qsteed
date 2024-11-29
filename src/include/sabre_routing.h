@@ -18,15 +18,19 @@ namespace sabre {
         float extended_set_weight = 0.5;
         std::shared_ptr<Model> model;
         CouplingCircuit c_circuit;
+        Heuristic heuristic = Heuristic::DISTANCE;
 
     private:
         const Matrix distance_matrix = c_circuit.get_distance_matrix();
-        Heuristic heuristic = Heuristic::DISTANCE;
+        const std::map<std::pair<int, int>, double> fidelity_dict = c_circuit.get_fidelity_dict();
         std::unordered_map<int, int> qubits_decay = {};
         int add_swap_counter = 0;
 
     public:
-        SabreRouting(const CouplingCircuit& c_circuit) : c_circuit(c_circuit) {}
+        SabreRouting(const CouplingCircuit& c_circuit) 
+            : c_circuit(c_circuit) {}
+        SabreRouting(const CouplingCircuit& c_circuit, const Heuristic& heuristic) 
+            : c_circuit(c_circuit), heuristic(heuristic) {}
         // SabreRouting() = default;
 
         void set_model(Model& model) { 
@@ -68,6 +72,7 @@ namespace sabre {
                                 const std::set<std::pair<int, int>>& unavailable_2qubits) const;
 
         double _score_heuristic(const DAGCircuit& dag, 
+                                const Heuristic heuristic,
                                 const std::vector<int>& front_layer, 
                                 const std::set<int>& extended_set, 
                                 const Layout& current_layout,

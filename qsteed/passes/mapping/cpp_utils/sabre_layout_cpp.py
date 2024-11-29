@@ -40,8 +40,8 @@ class SabreLayout():
         c_list = model.get_backend().get_property("coupling_list") 
         c_circuit = Cpp_CouplingCircuit(c_list)
 
-        self.sabre_layout = Cpp_SabreLayout(c_circuit)
-        self.sabre_layout.heuristic = self.heuristic
+        self.sabre_layout = Cpp_SabreLayout(c_circuit, self.heuristic)
+        # self.sabre_layout.heuristic = self.heuristic
         self.sabre_layout.max_iterations = self.max_iterations
 
 
@@ -86,3 +86,5 @@ class SabreLayout():
             return Heuristic.FIDELITY
         elif heuristic == "mixture":
             return Heuristic.MIXTURE
+        else:
+            raise NameError("Heuristic %s not recongnized" %heuristic)

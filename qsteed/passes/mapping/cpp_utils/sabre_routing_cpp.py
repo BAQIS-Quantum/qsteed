@@ -44,8 +44,8 @@ class SabreRouting():
         c_list = model.get_backend().get_property("coupling_list") 
         c_circuit = Cpp_CouplingCircuit(c_list)
 
-        self.sabre_routing = Cpp_SabreRouting(c_circuit)
-        self.sabre_layout.heuristic = self.heuristic
+        self.sabre_routing = Cpp_SabreRouting(c_circuit, self.heuristic)
+        # self.sabre_routinf.heuristic = self.heuristic
 
 
     def run(self, dag):

@@ -25,19 +25,19 @@ DAGCircuit test_dag() {
 }
 
 CouplingCircuit test_c_ciruit() {
-    CouplingList c_list = {
-        {0, 1, 0.99}, {2, 3, 0.67}, {2, 4, 0.89}, {1, 4, 0.89}, {3, 4, 0.89},
+    // CouplingList c_list = {
+    //     {0, 1, 0.99}, {2, 3, 0.67}, {2, 4, 0.89}, {1, 4, 0.89}, {3, 4, 0.89},
+    // };
+    CouplingList c_list  = {
+        {0, 1, 0.98}, {1, 0, 0.98}, {1, 2, 0.97}, {2, 1, 0.97},{2, 3, 0.982}, {3, 2, 0.982},
     };
+
     CouplingCircuit c_circuit{c_list};  
 
-    std::cout << c_list << std::endl;
+    std::map<std::pair<int, int>, double> fd = c_circuit.get_fidelity_dict();
 
 
-    // std::cout << "c_circuit num of qubits: " <<  c_circuit.num_qubits << std::endl;
-    // c_circuit.print();
-
-    // c_circuit.get_fidelity(0,3);
-
+    // std::vector<int> path = c_circuit.get_mini_path(1,4);
 
     //c_circuit.draw_self();
     return c_circuit;
@@ -55,7 +55,7 @@ void test_sabre_routing() {
 
 void test_sabre_layout() {
     CouplingCircuit c_circuit = test_c_ciruit();
-    SabreLayout sabre_layout{c_circuit};
+    SabreLayout sabre_layout{c_circuit, Heuristic::FIDELITY};
     DAGCircuit dag = test_dag();
     // Vis::draw_graph(dag.graph);
     sabre_layout.run(dag);
@@ -65,8 +65,8 @@ void test_sabre_layout() {
 
 int main() {
     std::cout << "---- main function ----" << std::endl;
-    test_c_ciruit();
+    // test_c_ciruit();
     // test_sabre_routing();
     // test_dag();
-    // test_sabre_layout();
+    test_sabre_layout();
 }
