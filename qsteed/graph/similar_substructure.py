@@ -38,7 +38,6 @@ def similar_structure(circuit: str, vqpus: list):
     qreg_name, creg_name, qubit_num, cbit_num = qreg_creg(circuit)
     qc = QuantumCircuit(qubit_num, cbit_num)
     qc.from_openqasm(circuit)
-    qc.draw_circuit()
     g1 = circuit_to_graph(qc)
     similar_structure_list = []
     kernel_value_list = []

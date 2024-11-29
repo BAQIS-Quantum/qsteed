@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import copy
+import math
 
 from qsteed.dag.circuit_dag_convert import circuit_to_dag, dag_to_circuit
 from qsteed.dag.circuit_dag_convert import node_to_gate, gate_to_node
@@ -158,29 +159,39 @@ class OneQubitGateOptimization(BasePass):
         #                                      predecessors, gate_record[pos][0])
         #     return
 
+        # TODO: Select the decomposition method according to the basic gate
+        # gamma, beta, alpha, global_phase = zxz_decomposition(gate_record[pos][2])
+        # if beta == 0:
+        #     circuit.add_instruction_node(gate_to_node(RZGate(pos, gamma + alpha), label[0]),
+        #                                  predecessors, gate_record[pos][0])
+        #     return
+        #
+        # gamma, beta, alpha, global_phase = zyz_decomposition(gate_record[pos][2])
+        # if beta == 0:
+        #     circuit.add_instruction_node(gate_to_node(RZGate(pos, gamma + alpha), label[0]),
+        #                                  predecessors, gate_record[pos][0])
+        #     return
+
         gamma, beta, alpha, global_phase = xyx_decomposition(gate_record[pos][2])
-        if beta == 0:
+        # if beta == 0:
+        if math.isclose(beta, 0, abs_tol=1e-15):
             circuit.add_instruction_node(gate_to_node(RXGate(pos, gamma + alpha), label[0]),
                                          predecessors, gate_record[pos][0])
-            return
-
-        gamma, beta, alpha, global_phase = zxz_decomposition(gate_record[pos][2])
-        if beta == 0:
-            circuit.add_instruction_node(gate_to_node(RZGate(pos, gamma + alpha), label[0]),
-                                         predecessors, gate_record[pos][0])
-            return
-
-        gamma, beta, alpha, global_phase = zyz_decomposition(gate_record[pos][2])
-        if beta == 0:
-            circuit.add_instruction_node(gate_to_node(RZGate(pos, gamma + alpha), label[0]),
-                                         predecessors, gate_record[pos][0])
-            return
-
         else:
-            node1 = gate_to_node(RZGate(pos, gamma), label[0])
-            circuit.add_instruction_node(node1, predecessors, gate_record[pos][0])
-            node2 = gate_to_node(RYGate(pos, beta), label[1])
-            circuit.add_instruction_node(node2, {pos: node1}, gate_record[pos][0])
-            node3 = gate_to_node(RZGate(pos, alpha), label[2])
-            circuit.add_instruction_node(node3, {pos: node2}, gate_record[pos][0])
-        return
+            if math.isclose(gamma, 0, abs_tol=1e-15):
+                node1 = gate_to_node(RYGate(pos, beta), label[0])
+                circuit.add_instruction_node(node1, predecessors, gate_record[pos][0])
+                node2 = gate_to_node(RXGate(pos, alpha), label[1])
+                circuit.add_instruction_node(node2, {pos: node1}, gate_record[pos][0])
+            elif math.isclose(alpha, 0, abs_tol=1e-15):
+                node1 = gate_to_node(RXGate(pos, gamma), label[0])
+                circuit.add_instruction_node(node1, predecessors, gate_record[pos][0])
+                node2 = gate_to_node(RYGate(pos, beta), label[1])
+                circuit.add_instruction_node(node2, {pos: node1}, gate_record[pos][0])
+            else:
+                node1 = gate_to_node(RXGate(pos, gamma), label[0])
+                circuit.add_instruction_node(node1, predecessors, gate_record[pos][0])
+                node2 = gate_to_node(RYGate(pos, beta), label[1])
+                circuit.add_instruction_node(node2, {pos: node1}, gate_record[pos][0])
+                node3 = gate_to_node(RXGate(pos, alpha), label[2])
+                circuit.add_instruction_node(node3, {pos: node2}, gate_record[pos][0])

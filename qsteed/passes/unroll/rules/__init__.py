@@ -39,6 +39,8 @@ from qsteed.passes.unroll.rules.mcz2cnot import MCZToCNOT
 from qsteed.passes.unroll.rules.phase2rz import PhaseToRZ
 from qsteed.passes.unroll.rules.rxx2cnot import RXXToCNOT
 from qsteed.passes.unroll.rules.ryy2cnot import RYYToCNOT
+from qsteed.passes.unroll.rules.rz2sxry import RZToSXRY
+from qsteed.passes.unroll.rules.rz2rxry import RZToRXRY
 from qsteed.passes.unroll.rules.rzz2cnot import RZZToCNOT
 from qsteed.passes.unroll.rules.s2rz import SToRZ
 from qsteed.passes.unroll.rules.sdg2rz import SdgToRZ
@@ -75,6 +77,8 @@ __all__ = [
     'PhaseToRZ',
     'RXXToCNOT',
     'RYYToCNOT',
+    'RZToSXRY',
+    'RZToRXRY',
     'RZZToCNOT',
     'SToRZ',
     'SdgToRZ',
