@@ -7,10 +7,11 @@
 #include <boost/graph/labeled_graph.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/copy.hpp>
-// #include <graphviz/gvc.h>
 #include "sabre_core.h"
 #include "instructionNode.h"
 #include "edge.h"
+
+#include "vendor/prettyprint.hpp"
 
 using namespace sabre;
 
@@ -105,6 +106,8 @@ public:
                 add_edge(2, end_node_pos, EdgeProperties{qubit});
             }
         }
+
+        // std::cout << this->get_qubits_used() << std::endl;
     }
 
     DAGCircuit reverse() const {
@@ -129,6 +132,8 @@ public:
     DagGraph::vertex_iterator vertex_end() const {
         return boost::vertices(graph).second;
     }
+
+    void draw() const;
 
 
 private:

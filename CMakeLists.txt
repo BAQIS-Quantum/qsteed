@@ -11,6 +11,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# Set CMake module path to include custom modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
 
 # Find Boost
 find_package(Boost REQUIRED)
@@ -26,6 +29,18 @@ if(Boost_FOUND)
     endif()
   endif()
 endif()
+
+# Find Graphviz
+find_package(Graphviz REQUIRED)
+if(GRAPHVIZ_FOUND)
+  include_directories(${GRAPHVIZ_INCLUDE_DIRS})
+  link_directories(${GRAPHVIZ_LIBRARY_DIRS})
+  message(STATUS "Graphviz library directories: ${GRAPHVIZ_LIBRARY_DIRS}")
+  message(STATUS "Graphviz include directories: ${GRAPHVIZ_INCLUDE_DIRS}")
+else()
+  message(FATAL_ERROR "Graphviz not found")
+endif()
+
 
 
 # File filter
@@ -56,6 +71,7 @@ else()
           ${SOURCES} 
           ${DAG_SOURCES}
           ${Model_SOURCES}
+          "src/Vis/visualization.cpp"
   )
   target_include_directories(
     sabre_test 
@@ -64,10 +80,14 @@ else()
         "src/include/DAG" 
         "src/include/Vis"
         "src/include/Model"
-        "src/include/vendor"
   )    
-  target_link_libraries(sabre_test PRIVATE Boost::headers)
-  target_compile_definitions(sabre_test PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
+  target_link_libraries(
+      sabre_test 
+      PRIVATE 
+          Boost::headers
+          gvc cgraph
+  )
+  # target_compile_definitions(sabre_test PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
 endif()
 
 # message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
@@ -81,6 +101,7 @@ pybind11_add_module(
         ${SOURCES} 
         ${DAG_SOURCES}
         ${Model_SOURCES}
+        "src/Vis/visualization.cpp"
 )
 target_include_directories(
     ${target} 
@@ -89,16 +110,15 @@ target_include_directories(
         "src/include/DAG" 
         "src/include/Vis"
         "src/include/Model"
-        "src/include/vendor"
 )    
 
-target_link_libraries(sabre PRIVATE pybind11::headers)
-
-if(Boost_FOUND)
-    target_link_libraries(${target} PRIVATE Boost::headers)
-    target_compile_definitions(${target} PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
-endif()
-
+target_link_libraries(
+    sabre 
+    PRIVATE 
+        pybind11::headers
+        Boost::headers
+        gvc cgraph
+)
 
 # Install
 install(TARGETS sabre LIBRARY DESTINATION .)

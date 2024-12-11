@@ -8,20 +8,32 @@
 #include <boost/graph/graph_utility.hpp>
 #include <iomanip>
 
-#include "prettyprint.hpp"
+#include "vendor/prettyprint.hpp"
 
 
 DAGCircuit test_dag() {
     DagGraph test_graph;
-    DAGCircuit dag_circuit{test_graph};
+    DAGCircuit dag{test_graph};
+    dag.add_instruction_node_end(InstructionNode{"a", 0});
+    dag.add_instruction_node_end(InstructionNode{"barrier", 1});
 
-    dag_circuit.add_instruction_node_end(InstructionNode{"a", 0});
-    dag_circuit.add_instruction_node_end(InstructionNode{"b", 1});
-    dag_circuit.add_instruction_node_end(InstructionNode{"c", 1});
+    
+    dag.add_edge(0, 3, 2);
+    dag.add_edge(0, 3, 3);
+    dag.add_edge(3, 1, 2);
+    dag.add_edge(3, 1, 3);
 
-    // dag_circuit.draw_self();
 
-    return dag_circuit;
+    DagGraph::edge_iterator ei, ei_end;
+    for (boost::tie(ei, ei_end) = boost::edges(dag.graph); ei != ei_end; ++ei) {
+        if ( boost::source(*ei, dag.graph) == dag.start_node_pos) {
+            std::cout << "Edge: " << *ei << std::endl;
+        }
+    }
+    dag.draw();
+
+
+    return dag;
 }
 
 CouplingCircuit test_c_ciruit() {
@@ -67,6 +79,6 @@ int main() {
     std::cout << "---- main function ----" << std::endl;
     // test_c_ciruit();
     // test_sabre_routing();
-    // test_dag();
-    test_sabre_layout();
+    test_dag();
+    // test_sabre_layout();
 }

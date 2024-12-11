@@ -113,6 +113,7 @@ PYBIND11_MODULE(sabre, m) {
         .def("get_qubits_used", &DAGCircuit::get_qubits_used)
         .def("vertices", [](DAGCircuit &s) {return py::make_iterator(s.vertex_begin(), s.vertex_end());})
         .def("reverse", &DAGCircuit::reverse)
+        .def("draw", &DAGCircuit::draw)
         .def_readwrite("graph", &DAGCircuit::graph)
         .def_readwrite("measure", &DAGCircuit::measure);
 

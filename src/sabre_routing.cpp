@@ -7,7 +7,7 @@
 #include "layout.h"
 #include "sabre_routing.h"
 
-#include "prettyprint.hpp"
+#include "vendor/prettyprint.hpp"
 
 /*
     Return a @c DAGCircuit : The original dag or the mapped_dag with added swap gate depending on modify_flag.
@@ -57,10 +57,11 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
                     front_layer.push_back(target);
                 }
             }
-        else 
-            break;
         }
     }
+
+    // std::cout << "cpp - front_layer - "  << front_layer << std::endl;
+    // std::cout << "cpp - pre_ - "  << pre_executed_counts << std::endl;
 
     std::vector<std::pair<int, int>> executed_2gate_list;  // The hardware execution order list of executable 2-qubit gates under current_layout.
     std::set<std::pair<int, int>> unavailable_2qubits;
@@ -181,7 +182,7 @@ std::set<int> SabreRouting::_calc_extended_set(const DAGCircuit& dag, const std:
         for (auto it = out_edges.first; it != out_edges.second; ++it) {
             successor_index = boost::target(*it, dag.graph);
             successor_node = dag.graph[successor_index];
-            if (successor_node.name != "barrier" && successor_node.name != "measure" && successor_node.name != "XY") {
+            if (successor_node.name != "barrier" && successor_node.name != "measure") {
                 successors_nodes.push_back(boost::target(*it, dag.graph));
             }
             if(successor_node.qubit_pos.size() == 2) {

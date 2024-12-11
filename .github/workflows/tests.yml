@@ -22,9 +22,10 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: arm64
-    - name: Install boost
+    - name: C++ dependencies
       run: |
         brew install boost
+        brew install graphviz
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

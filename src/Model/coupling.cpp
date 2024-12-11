@@ -2,7 +2,6 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "prettyprint.hpp"
 
 CouplingCircuit::CouplingCircuit(CouplingList c_list) : c_list(c_list) {
     /* Convert a c_list to graph */
