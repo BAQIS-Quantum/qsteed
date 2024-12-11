@@ -29,6 +29,14 @@ def query_qpu(qpus, qpu_name: str = None):
         return qpu_list
 
 
+def query_stdqpu(stdqpus, stdqpu_name: str = None):
+    stdqpu_list = [item for item in stdqpus if item.stdqpu_name.lower() == stdqpu_name.lower()]
+    if len(stdqpu_list) == 0:
+        raise NameError("The " + stdqpu_name + " is not found.")
+    else:
+        return stdqpu_list
+
+
 def query_vqpu(vqpus, qpu_name: str = None, qubits_num: int = None):
     if qpu_name is None and qubits_num is not None:
         return [item for item in vqpus if item.qubits_num == qubits_num]

@@ -45,8 +45,8 @@ class SubQPU(db.Model):
     VQPU_DBid = db.Column(db.BIGINT, ForeignKey('VQPU.id'))
     StdQPU_DBid = db.Column(db.BIGINT, ForeignKey('StdQPU.id'))
 
-    sub2v = relationship("VQPU", back_populates="v2sub", foreign_keys=[VQPU_DBid])
-    sub2std = relationship("StdQPU", back_populates="std2sub", foreign_keys=[StdQPU_DBid])
+    sub2v = relationship("VQPU", back_populates="v2sub", foreign_keys=[VQPU_DBid], lazy='joined')
+    sub2std = relationship("StdQPU", back_populates="std2sub", foreign_keys=[StdQPU_DBid], lazy='joined')
 
 
 class StdQPU(db.Model):
@@ -78,9 +78,9 @@ class StdQPU(db.Model):
 
     QPU_DBid = db.Column(db.BIGINT, ForeignKey('QPU.id'))
 
-    std2qpu = relationship("QPU", back_populates='qpu2std', foreign_keys=[QPU_DBid])
+    std2qpu = relationship("QPU", back_populates='qpu2std', foreign_keys=[QPU_DBid], lazy='joined')
     std2sub = relationship('SubQPU', back_populates='sub2std',
-                              foreign_keys=[SubQPU.StdQPU_DBid])
+                              foreign_keys=[SubQPU.StdQPU_DBid], lazy='joined')
 
 
 class QPU(db.Model):
@@ -113,7 +113,7 @@ class QPU(db.Model):
     estimated_free_time = db.Column(db.FLOAT)
 
     qpu2std = relationship('StdQPU', back_populates='std2qpu',
-                              foreign_keys=[StdQPU.QPU_DBid])
+                              foreign_keys=[StdQPU.QPU_DBid], lazy='joined')
 
 
 class VQPU(db.Model):
@@ -134,4 +134,4 @@ class VQPU(db.Model):
     vq_to_q = db.Column(db.PickleType)
 
     v2sub = relationship('SubQPU', back_populates='sub2v',
-                            foreign_keys=[SubQPU.VQPU_DBid])
+                            foreign_keys=[SubQPU.VQPU_DBid], lazy='joined')
