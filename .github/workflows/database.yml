@@ -39,7 +39,7 @@ jobs:
     - name: C++ dependencies
       run: | 
         sudo apt-get install -y libboost-all-dev
-        sudo apt-get install -y graphviz
+        sudo apt-get install -y graphviz graphviz-dev
 
     - name: Install dependencies
       run: |

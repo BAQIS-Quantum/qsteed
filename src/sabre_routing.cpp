@@ -4,6 +4,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <vector>
 #include <algorithm>
+#include <random>
 #include "layout.h"
 #include "sabre_routing.h"
 
@@ -60,8 +61,6 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
         }
     }
 
-    // std::cout << "cpp - front_layer - "  << front_layer << std::endl;
-    // std::cout << "cpp - pre_ - "  << pre_executed_counts << std::endl;
 
     std::vector<std::pair<int, int>> executed_2gate_list;  // The hardware execution order list of executable 2-qubit gates under current_layout.
     std::set<std::pair<int, int>> unavailable_2qubits;
@@ -103,7 +102,7 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
         if ( !execute_gate_list.empty() ) {
             for (const int& node_index : execute_gate_list) {
                 _apply_gate(mapped_dag, dag.graph[node_index], current_layout);
-                front_layer.erase(std::remove(front_layer.begin(), front_layer.end(), node_index), front_layer.end());
+                front_layer.erase(std::find(front_layer.begin(), front_layer.end(), node_index));
 
                 for ( int successor : _dag_successors(dag, node_index) ) {
                     pre_executed_counts[successor]++;
@@ -198,15 +197,12 @@ std::set<SwapPos> SabreRouting::_obtain_swaps(  const std::vector<int>& front_la
                                                 const Layout& current_layout, 
                                                 const DAGCircuit& dag ) {   
     std::set<SwapPos> candiate_swaps{};
-    for ( const auto& node_index : front_layer )
-    {
-        for ( const auto& virtual_pos : dag.graph[node_index].qubit_pos )
-        {
+    for ( const auto& node_index : front_layer ) {
+        for ( const auto& virtual_pos : dag.graph[node_index].qubit_pos ) {
             int physical_pos = current_layout[virtual_pos];
             auto neighbors = boost::adjacent_vertices(physical_pos, c_circuit.graph);
 
-            for ( auto it =  neighbors.first; it != neighbors.second; ++it )
-            {
+            for ( auto it =  neighbors.first; it != neighbors.second; ++it ) {
                 int virtual_neighbor = current_layout.get_p2v().at(*it);
                 SwapPos swap = std::minmax(virtual_pos, virtual_neighbor);
                 candiate_swaps.insert(swap);
@@ -237,29 +233,42 @@ SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
                                         const std::set<std::pair<int, int>>& unavailable_2qubits) const {
 
     std::map<SwapPos, double> swap_scores;
-    for ( const auto& swap : swap_candidates )
-        swap_scores[swap] = -1000000; 
+    for ( const auto& swap : swap_candidates ) {
+        swap_scores[swap] = -1000000;
+    }
 
     if ( this->heuristic == Heuristic::FIDELITY ) {
         for ( const auto& swap : swap_candidates )  {
-            SwapPos physical_swap = {current_layout[swap.first], current_layout[swap.second]};
+            SwapPos physical_swap = std::minmax(current_layout[swap.first], current_layout[swap.second]);
             if (unavailable_2qubits.find(physical_swap) == unavailable_2qubits.end()) {
                 double swap_cost = _swap_score(physical_swap);
                 double score_h= _score_heuristic(
                     dag, this->heuristic, front_layer, extended_set, current_layout, swap
                 );
                 double score = swap_cost + score_h;
-                swap_scores.at(swap) = score;
-            } 
+                swap_scores[swap] = score;
+            }
         }
         auto best_swap = std::max_element(swap_scores.begin(), swap_scores.end(), 
             [](const std::pair<SwapPos, double>& a, const std::pair<SwapPos, double>& b) {
                 return a.second < b.second;
             }
         );
-        // TODO : Random chooose best swap.
-        return best_swap->first;
 
+        // return best_swap->first;
+
+        std::vector<SwapPos> best_swaps;
+        for (const auto& pair : swap_scores) {
+            if (pair.second == best_swap->second) {
+                best_swaps.push_back(pair.first);
+            }
+        }
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, best_swaps.size() - 1);
+
+        return best_swaps[dis(gen)];
     }
     else if ( this->heuristic == Heuristic::DISTANCE ) {
         for ( const auto& swap : swap_candidates) {
