@@ -17,8 +17,9 @@ PYBIND11_MODULE(sabre, m) {
     m.doc() = "Sabre Algorithm"; // optional module docstring
 
     py::class_<SabreLayout>(m, "SabreLayout")
-        .def(py::init<const CouplingCircuit&>()) 
-        .def(py::init<const CouplingCircuit&, Heuristic>()) 
+        .def(py::init<const CouplingCircuit&>())
+        .def(py::init<const CouplingCircuit&, Heuristic>())
+        .def(py::init<const CouplingCircuit&, Heuristic, int>())
         .def("run", &SabreLayout::run)
         .def("get_model", &SabreLayout::get_model)
         .def_readwrite("c_circuit", &SabreLayout::c_circuit)

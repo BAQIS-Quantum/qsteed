@@ -283,11 +283,42 @@ SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
         );
         return best_swap->first; 
     }
-
-    // TODO
     else if ( this->heuristic == Heuristic::MIXTURE ) {
+        for ( const auto& swap : swap_candidates) {
+            double score = _score_heuristic(dag, Heuristic::DISTANCE, front_layer, extended_set, current_layout, swap);
+            swap_scores[swap] = score;
+        }
 
+        auto swap_mini = std::min_element(swap_scores.begin(), swap_scores.end(), 
+            [](const std::pair<SwapPos, double>& a, const std::pair<SwapPos, double>& b) {
+                return a.second < b.second;
+            }
+        );
 
+        std::vector<SwapPos> best_swaps;
+        for (const auto& pair : swap_scores) {
+            if (pair.second == swap_mini->second) {
+                best_swaps.push_back(pair.first);
+            }
+        }
+
+        SwapPos best_swap = swap_mini->first;
+        for (auto swap : best_swaps) {
+            double max_score = 0;
+            SwapPos physical_swap = std::minmax(current_layout[swap.first], current_layout[swap.second]);
+            if (unavailable_2qubits.find(physical_swap) == unavailable_2qubits.end()) {
+                double swap_cost = _swap_score(physical_swap);
+                double score_h= _score_heuristic(
+                    dag, Heuristic::FIDELITY, front_layer, extended_set, current_layout, swap
+                );
+                double score = swap_cost + score_h;
+                if (max_score > score) {
+                    max_score = score;
+                    best_swap = swap;
+                }
+            }
+        }
+        return best_swap;
     }
 
     return {0,0};
@@ -344,7 +375,7 @@ double SabreRouting::_compute_distance_cost(    const DAGCircuit& dag,
 double SabreRouting::_compute_fidelity_cost(    const DAGCircuit& dag, 
                                                 const std::vector<int>& layer,
                                                 const Layout& layout) const {
-    double cost = 0;                                                    
+    double cost = 0;
     int p1 = 0;
     int p2 = 0;
     for (auto node_index : layer) {

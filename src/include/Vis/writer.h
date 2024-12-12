@@ -1,5 +1,4 @@
 #pragma once
-#include "vis.h"
 
 namespace Vis
 {
