@@ -23,7 +23,7 @@ from quafu.elements import Barrier, Delay, XYResonance, Measure
 from quafu.elements.element_gates import CXGate, RXGate, RYGate, RZGate, IdGate, CPGate, CZGate, ISwapGate
 
 from qsteed.passes.basepass import BasePass
-from qsteed.passes.unroll.rules_library import Rules_dict, CX_rules
+from qsteed.passes.unroll.rules_library import Rules_dict, CX_rules, Swap_rules
 
 
 class UnrollToBasis(BasePass):
@@ -51,10 +51,14 @@ class UnrollToBasis(BasePass):
 
         if CZGate.name.lower() in self.basis_gates:
             Rules_dict.update(CX_rules[CZGate.name.lower()])
+            Rules_dict.update(Swap_rules[CZGate.name.lower()])
         elif ISwapGate.name.lower() in self.basis_gates:
             Rules_dict.update(CX_rules[ISwapGate.name.lower()])
         elif CPGate(0, 1, 0).name.lower() in self.basis_gates:
             Rules_dict.update(CX_rules[CPGate(0, 1, 0).name.lower()])
+
+        if CZGate.name.lower() not in self.basis_gates:
+            Rules_dict.update(Swap_rules[CXGate.name.lower()])
 
     def run(self, circuit: QuantumCircuit) -> QuantumCircuit:
         gates = circuit.gates

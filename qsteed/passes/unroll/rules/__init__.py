@@ -28,6 +28,7 @@ from qsteed.passes.unroll.rules.ct2cnot import CTToCNOT
 from qsteed.passes.unroll.rules.cy2cnot import CYToCNOT
 from qsteed.passes.unroll.rules.cz2cnot import CZToCNOT
 from qsteed.passes.unroll.rules.fredkin2toffoli import FredkinToToffoli
+from qsteed.passes.unroll.rules.h2rxry import HToRXRY
 from qsteed.passes.unroll.rules.h2ryrz import HToRYRZ
 from qsteed.passes.unroll.rules.iswap2cnot import ISWAPToCNOT
 from qsteed.passes.unroll.rules.mcrx2cnot import MCRXToCNOT
@@ -39,12 +40,14 @@ from qsteed.passes.unroll.rules.mcz2cnot import MCZToCNOT
 from qsteed.passes.unroll.rules.phase2rz import PhaseToRZ
 from qsteed.passes.unroll.rules.rxx2cnot import RXXToCNOT
 from qsteed.passes.unroll.rules.ryy2cnot import RYYToCNOT
-from qsteed.passes.unroll.rules.rz2sxry import RZToSXRY
 from qsteed.passes.unroll.rules.rz2rxry import RZToRXRY
+from qsteed.passes.unroll.rules.rz2sxry import RZToSXRY
 from qsteed.passes.unroll.rules.rzz2cnot import RZZToCNOT
 from qsteed.passes.unroll.rules.s2rz import SToRZ
 from qsteed.passes.unroll.rules.sdg2rz import SdgToRZ
 from qsteed.passes.unroll.rules.sw2ryrz import SWToRYRZ
+from qsteed.passes.unroll.rules.swap2czh import SwapToCZH
+from qsteed.passes.unroll.rules.swap2czrxry import SwapToCZRXRY
 from qsteed.passes.unroll.rules.swap2cnot import SwapToCNOT
 from qsteed.passes.unroll.rules.swdg2ryrz import SWdgToRYRZ
 from qsteed.passes.unroll.rules.sx2rx import SXToRX
@@ -73,6 +76,7 @@ __all__ = [
     'CZToCNOT',
     'FredkinToToffoli',
     'HToRYRZ',
+    'HToRXRY',
     'ISWAPToCNOT',
     'PhaseToRZ',
     'RXXToCNOT',
@@ -84,6 +88,8 @@ __all__ = [
     'SdgToRZ',
     'SWToRYRZ',
     'SWdgToRYRZ',
+    'SwapToCZH',
+    'SwapToCZRXRY',
     'SwapToCNOT',
     'SXToRX',
     'SXdgToRX',
