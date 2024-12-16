@@ -37,6 +37,7 @@ class SwapToCZRXRY(UnrollPass):
         super().__init__()
         self.original = SwapGate.name.lower()
         self.basis = [CZGate.name.lower(), RXGate(0, 0).name.lower(), RYGate(0, 0).name.lower()]
+        self.global_phase = pi
 
     def run(self, op: Instruction) -> List[Instruction]:
         rule = []
