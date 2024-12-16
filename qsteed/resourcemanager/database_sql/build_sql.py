@@ -16,26 +16,16 @@
 
 
 import configparser
+import warnings
 
 import networkx as nx
 
-from qsteed.resourcemanager.build_library import BuildLibrary
-from qsteed.resourcemanager.database_sql.sql_models import QPU, SubQPU, StdQPU, VQPU
-from qsteed.resourcemanager.database_sql.initialize_app_db import db
 from qsteed.config.get_config import get_config
 from qsteed.graph.couplinggraph import CouplingGraph
+from qsteed.resourcemanager.build_library import BuildLibrary
+from qsteed.resourcemanager.database_sql.initialize_app_db import db
+from qsteed.resourcemanager.database_sql.sql_models import QPU, SubQPU, StdQPU, VQPU
 from qsteed.resourcemanager.utils import virtual_qubits
-import warnings
-
-
-# import matplotlib
-# matplotlib.use('Agg')
-
-# CONFIG_FILE = get_config()
-# CONFIG = configparser.ConfigParser()
-# CONFIG.read(CONFIG_FILE)
-#
-# BACKENDS_SHAPE = eval(CONFIG['ChipsShape']['chips_shape'])
 
 
 def get_backend_shape():
@@ -190,14 +180,19 @@ def save_subqpu_data(qpu: QPU = None, reset=False):
                                                                      eval(qpu.priority_qubits))
         # substructure_CAL_dict = build_lib.build_substructure_library(qpu.structure, qpu.int_to_qubit,
         #                                                              PRIORITY_REGIONS[qpu.qpu_name])
+        subqpus = []
         for qubits_num, substructure_CAL_list in substructure_CAL_dict.items():
             for substructure_CAL in substructure_CAL_list:
                 data['qubits_num'] = qubits_num
                 data['calibration_benchmark'] = 'calibration'
                 data['substructure_CAL'] = substructure_CAL
                 obj = SubQPU(**data)
-                db.session.add(obj)
-                db.session.commit()
+                # db.session.add(obj)
+                # db.session.commit()
+                subqpus.append(obj)
+
+        db.session.bulk_save_objects(subqpus)
+        db.session.commit()
 
         # save_benchmark_substructure(data, qpu)
 
@@ -216,6 +211,7 @@ def save_subqpu_data(qpu: QPU = None, reset=False):
         db.session.add(record)
         new_id += 1
     db.session.commit()
+    return obj
 
 
 def save_vqpu_data(subqpu: SubQPU = None, cal_bm: str = 'cal'):
@@ -255,8 +251,9 @@ def save_vqpu_data(subqpu: SubQPU = None, cal_bm: str = 'cal'):
         raise ValueError("cal_bm can only be 'cal' or 'bm'.")
 
     obj = VQPU(**data)
-    db.session.add(obj)
-    db.session.commit()
+    # db.session.add(obj)
+    # db.session.commit()
+    return obj
 
 
 # def save_benchmark_substructure(data, qpu: QPU = None):
@@ -323,20 +320,6 @@ def qpu_embed_stdqpu(stdqpu: StdQPU = None, standard_graph=None):
     update_node_labels = {}
     update_edge_labels = {}
 
-    # nodes = standard_graph.nodes()
-    # edges = standard_graph.edges()
-
-    # qpu = stdqpu.std2qpu
-
-    # qpu_nodes = []
-    # node_to_qubit = {}
-    # for qubit in stdqpu.qubits_info.keys():
-    #     node = _map_string_to_tuple(qubit, dimension=dimension)
-    #     qpu_nodes.append(node)
-    #     node_to_qubit[node] = qubit
-    #
-    # qubit_to_node = {v: k for k, v in node_to_qubit.items()}
-
     qpu_nodes = list(stdqpu.node_to_qubit.keys())
 
     for node in standard_graph.nodes():
@@ -381,4 +364,3 @@ def _map_string_to_tuple(s, dimension=1):
         col = int(numbers[half_length:])
     tuple_node = (row, col)
     return tuple_node
-

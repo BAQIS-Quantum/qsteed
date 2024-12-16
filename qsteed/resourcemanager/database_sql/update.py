@@ -16,10 +16,10 @@
 
 
 from qsteed.backends.chipinfo import ChipInfo
-from qsteed.resourcemanager.database_sql.sql_models import QPU, SubQPU, StdQPU, VQPU
 from qsteed.resourcemanager.database_sql.build_sql import save_qpu_data, save_subqpu_data, save_stdqpu_data, \
     save_vqpu_data
 from qsteed.resourcemanager.database_sql.initialize_app_db import app, db
+from qsteed.resourcemanager.database_sql.sql_models import QPU, SubQPU, StdQPU, VQPU
 
 
 def update_sql(backend: str = None, chip_info_dict: dict = None):
@@ -83,6 +83,16 @@ def update_sql(backend: str = None, chip_info_dict: dict = None):
             save_subqpu_data(qpu, reset=True)
             print("SubQPU data are created successfully.")
 
+        # Get all records and sort them in ascending order by primary key value.
+        records = SubQPU.query.order_by(SubQPU.id).all()
+        # Update primary key values one by one to consecutive integers.
+        new_id = 1
+        for record in records:
+            record.id = new_id
+            db.session.add(record)
+            new_id += 1
+        db.session.commit()
+
         subqpus = SubQPU.query.filter_by(qpu_name=backend).all()
         stdqpu = StdQPU.query.filter_by(qpu_name=backend).first()
         for subqpu in subqpus:
@@ -95,13 +105,21 @@ def update_sql(backend: str = None, chip_info_dict: dict = None):
         if vqpu:
             print("Reset all VQPU of the %s" % qpu.qpu_name + ", using calibration data from " + str(
                 qpu.calibration_time))
+            vqpus = []
             for subqpu in subqpus:
-                save_vqpu_data(subqpu, cal_bm='cal')
+                obj = save_vqpu_data(subqpu, cal_bm='cal')
+                vqpus.append(obj)
+            db.session.bulk_save_objects(vqpus)
+            db.session.commit()
             print("VQPU data are updated successfully.")
         else:
             print("There is no VQPU data for the %s, create VQPU data." % qpu.qpu_name)
+            vqpus = []
             for subqpu in subqpus:
-                save_vqpu_data(subqpu, cal_bm='cal')
+                obj = save_vqpu_data(subqpu, cal_bm='cal')
+                vqpus.append(obj)
+            db.session.bulk_save_objects(vqpus)
+            db.session.commit()
             print("VQPU data are created successfully.")
 
         # Get all records and sort them in ascending order by primary key value.

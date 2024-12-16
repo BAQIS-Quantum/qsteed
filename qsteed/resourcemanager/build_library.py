@@ -16,14 +16,43 @@
 
 
 import copy
+import heapq
 import json
 import math
 import os
+import random
 import re
 from collections import defaultdict
 from queue import PriorityQueue
 
 import networkx as nx
+
+
+class RandomPriorityQueue:
+    def __init__(self):
+        self.data = []
+        self.all_items = []
+
+    def put(self, item):
+        heapq.heappush(self.data, item)
+        self.all_items.append(item)
+
+    def get(self):
+        item = heapq.heappop(self.data)
+        self.all_items.remove(item)
+        return item
+
+    def random_get(self):
+        if not self.all_items:
+            raise ValueError("Queue is empty")
+        item = random.choice(self.all_items)
+        self.all_items.remove(item)
+        self.data.remove(item)
+        heapq.heapify(self.data)
+        return item
+
+    def empty(self):
+        return len(self.data) == 0
 
 
 class BuildLibrary:
@@ -102,7 +131,7 @@ class BuildLibrary:
             G.remove_nodes_from(connected_nodes)
         return connected_substructure_list
 
-    def substructure(self, structure, connected_substructure_list, qubits_need):
+    def substructure(self, structure, connected_substructure_list, qubits_need, max_iterations: int = 3):
         """
         Args:
             structure(list): [[qubit1,qubit2,fidelity],...], get from get_structure()
@@ -115,6 +144,7 @@ class BuildLibrary:
             structure = [[item[0], item[1], item[2] / 100] for item in structure]
         fidelity_threshold_fixed = self.fidelity_threshold
         all_substructure = []
+        seen_structures = set()
         has_zero_fidelity = False
         available_connected_substructure_list = []
         for cg in connected_substructure_list:
@@ -124,54 +154,41 @@ class BuildLibrary:
         weight_name = list(list(connected_substructure_list[0].edges(data=True))[0][2].keys())[0]
 
         if available_connected_substructure_list:
-            while len(all_substructure) == 0:
+            iteration_count = 0
+            substructure_nodes = []
+            while len(all_substructure) == 0 or iteration_count < max_iterations:
+                iteration_count += 1
                 for cg in available_connected_substructure_list:
-                    # if len(cg.nodes()) >= qubits_need:
-                    substructure_nodes = []  #
                     fidelity_threshold = fidelity_threshold_fixed  #
                     sorted_edges = sorted(cg.edges(data=True), key=lambda x: x[2][weight_name], reverse=True)
                     for elem in sorted_edges:
                         if elem[2][weight_name] > fidelity_threshold:
-                            neighbors = PriorityQueue()
-                            neighbors.put((-1, elem[0]))
-                            ret_nodes = []
-                            log_weight_product = 0
-                            for node in cg.nodes():
-                                cg.nodes[node]['visited'] = False
-                            while neighbors.not_empty:
-                                temp = neighbors.get()
-                                node = temp[1]
-                                if cg.nodes[node]['visited']:
-                                    continue
-                                weight = -temp[0]
-                                if weight <= 0:
-                                    has_zero_fidelity = True
-                                    weight = 1e-10
-                                log_weight_product += math.log(weight)
-                                cg.nodes[node]['visited'] = True
-                                ret_nodes.append(node)
-                                if len(ret_nodes) == qubits_need:
-                                    break
-                                for neighbor in cg[node]:
-                                    if not cg.nodes[neighbor]['visited']:
-                                        weight = cg[node][neighbor][weight_name]
-                                        neighbors.put((-weight, neighbor))
-                            out = []
+                            if iteration_count == 0:
+                                ret_nodes = self.max_fidelity_substructure(cg, elem, qubits_need, weight_name,
+                                                                           random_queue=False)
+                            if iteration_count == 1:
+                                ret_nodes = self.max_degree_substructure(cg, elem, qubits_need, weight_name,
+                                                                         random_queue=False)
+                            else:
+                                ret_nodes = self.max_fidelity_substructure(cg, elem, qubits_need, weight_name,
+                                                                           random_queue=True)
+
+                            sub_edges = []
                             for edge in structure:
                                 if edge[0] in ret_nodes and edge[1] in ret_nodes:
-                                    out.append(edge)
+                                    sub_edges.append(edge)
                             if sorted(ret_nodes) not in substructure_nodes and all(
-                                    qubit[2] > fidelity_threshold for qubit in out):
+                                    qubit[2] > fidelity_threshold for qubit in sub_edges):
                                 substructure_nodes.append(sorted(ret_nodes))
                                 ave_weight = 0  # Dealing with loop structures
-                                for e in out:
+                                for e in sub_edges:
                                     if e[2] <= 0:  # If fidelity is 0, set it to 1e-10
                                         has_zero_fidelity = True
                                         e[2] = 1e-10
                                     ave_weight += math.log(e[2])
 
-                                ave_weight = ave_weight / len(out)
-                                all_substructure.append([ave_weight, out])
+                                ave_weight = ave_weight / len(sub_edges)
+                                all_substructure.append([ave_weight, sub_edges])
                             if not substructure_nodes:
                                 fidelity_threshold = fidelity_threshold - 0.01
 
@@ -184,7 +201,152 @@ class BuildLibrary:
         all_substructure = sorted(all_substructure, key=lambda x: x[0], reverse=True)
         # if has_zero_fidelity:  # If fidelity = 0, remove this substructure
         #     all_substructure = [sub for sub in all_substructure if not any(sublist[2] == 1e-10 for sublist in sub[1])]
+        # all_substructure = self.filter_subgraphs_with_isomorphic(all_substructure)
+        all_substructure = self.filter_subgraphs_with_hashing(all_substructure, keep_sub=3)
+        all_substructure = sorted(all_substructure, key=lambda x: x[0], reverse=True)
         return all_substructure
+
+    def filter_subgraphs_with_isomorphic(self, subqpu, keep_sub: int = 3):
+        """
+        Filter subgraphs, keeping only half of the graphs from each group of isomorphic subgraphs.
+
+        Args:
+            subqpu (List): A list of objects, each containing a substructure_CAL attribute
+                           with edges in the format [(node1, node2, weight), ...].
+
+        Returns:
+            List: A list of filtered substructures.
+        """
+        groups = []
+        groups_substructure = []
+
+        for subg in subqpu:
+            G = nx.Graph()
+            for edge in subg[1]:
+                G.add_edge(edge[0], edge[1])
+
+            found_group = False
+            for group in groups:
+                if nx.is_isomorphic(G, group[0][0]):
+                    group.append((G, subg))
+                    found_group = True
+                    break
+
+            if not found_group:
+                groups.append([(G, subg)])
+
+        filtered_substructure = []
+        for group in groups:
+            keep_count = min(len(group), keep_sub)
+            filtered_substructure.extend([subg for _, subg in group[:keep_count]])
+
+        return filtered_substructure
+
+    def filter_subgraphs_with_hashing(self, subqpu, keep_sub: int = 3):
+        """
+        Filter subgraphs, keeping only half of the graphs from each group of isomorphic subgraphs,
+        using graph hashing for efficiency.
+
+        Args:
+            subqpu (List): A list of objects, each containing a substructure_CAL attribute
+                           with edges in the format [(node1, node2, weight), ...].
+
+        Returns:
+            List: A list of filtered substructure.
+        """
+        groups = {}
+
+        for subg in subqpu:
+            G = nx.Graph()
+            for edge in subg[1]:
+                G.add_edge(edge[0], edge[1])
+
+            graph_hash = nx.weisfeiler_lehman_graph_hash(G)
+
+            if graph_hash not in groups:
+                groups[graph_hash] = []
+            groups[graph_hash].append((G, subg))
+
+        filtered_substructure = []
+        for group in groups.values():
+            keep_count = min(len(group), keep_sub)
+            sorted_group = sorted(group, key=lambda x: x[1][0], reverse=True)
+            filtered_substructure.extend([subg for _, subg in sorted_group[:keep_count]])
+
+        return filtered_substructure
+
+    def max_fidelity_substructure(self, cg, start_edge, qubits_need, weight_name, random_queue):
+        for node in cg.nodes():
+            cg.nodes[node]['visited'] = False
+
+        if random_queue:
+            neighbors = RandomPriorityQueue()
+        else:
+            neighbors = PriorityQueue()
+
+        w = start_edge[2][weight_name]
+        if w <= 0:
+            w = 1e-10
+        neighbors.put((-w, start_edge[0]))
+        neighbors.put((-w, start_edge[1]))
+
+        ret_nodes = []
+        while not neighbors.empty():
+            if random_queue:
+                temp = neighbors.random_get()
+            else:
+                temp = neighbors.get()
+            node = temp[1]
+            if cg.nodes[node]['visited']:
+                continue
+            cg.nodes[node]['visited'] = True
+            ret_nodes.append(node)
+            if len(ret_nodes) == qubits_need:
+                break
+
+            for neighbor in cg[node]:
+                if not cg.nodes[neighbor]['visited']:
+                    w = cg[node][neighbor][weight_name]
+                    if w <= 0:
+                        w = 1e-10
+                    neighbors.put((-w, neighbor))
+
+        return ret_nodes
+
+    def max_degree_substructure(self, cg, start_edge, qubits_need, weight_name, random_queue):
+        for node in cg.nodes():
+            cg.nodes[node]['visited'] = False
+
+        if random_queue:
+            neighbors = RandomPriorityQueue()
+        else:
+            neighbors = PriorityQueue()
+
+        neighbors.put((-cg.degree(start_edge[0]), start_edge[0]))
+        neighbors.put((-cg.degree(start_edge[1]), start_edge[1]))
+
+        ret_nodes = []
+        while not neighbors.empty():
+            if random_queue:
+                temp = neighbors.random_get()
+            else:
+                temp = neighbors.get()
+            node = temp[1]
+            if cg.nodes[node]['visited']:
+                continue
+            cg.nodes[node]['visited'] = True
+            ret_nodes.append(node)
+            if len(ret_nodes) == qubits_need:
+                break
+
+            for neighbor in cg[node]:
+                if not cg.nodes[neighbor]['visited']:
+                    w = cg.degree(neighbor)
+                    if w <= 0:
+                        w = 1e-10
+                    neighbors.put((-w, neighbor))
+
+        return ret_nodes
 
     def build_substructure_library(self, structure, int_to_qubit, priority_qubits=None):
         substructure_dict = {}
