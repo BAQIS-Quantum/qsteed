@@ -8,6 +8,7 @@
 #include "DAG/dag.h"
 #include "layout.h"
 #include "parameter.h"
+#include "Vis/visualization.h"
 
 
 namespace py = pybind11;
@@ -114,7 +115,9 @@ PYBIND11_MODULE(sabre, m) {
         .def("get_qubits_used", &DAGCircuit::get_qubits_used)
         .def("vertices", [](DAGCircuit &s) {return py::make_iterator(s.vertex_begin(), s.vertex_end());})
         .def("reverse", &DAGCircuit::reverse)
+#ifdef WITH_GRAPHVIZ
         .def("draw", &DAGCircuit::draw)
+#endif
         .def_readwrite("graph", &DAGCircuit::graph)
         .def_readwrite("measure", &DAGCircuit::measure);
 
@@ -165,5 +168,10 @@ PYBIND11_MODULE(sabre, m) {
         .def_readwrite("name", &Parameter::name)
         .def_readwrite("value", &Parameter::value)
         .def_readwrite("tunable", &Parameter::tunable);
+
+
+#ifdef WITH_GRAPHVIZ
+    m.def("hello", []() { return "Hello, Graphviz!"; });
+#endif
 
 }

@@ -4,13 +4,11 @@
 #include <tuple>
 #include <memory>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/floyd_warshall_shortest.hpp>
-#include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/graph_utility.hpp>
 
 
 using CouplingList = std::vector<std::tuple<int, int, float>>;
-const CouplingList EMPTY_COUPLING_LIST = {std::make_tuple(0, 0, 0)};
+const CouplingList EMPTY_COUPLING_LIST = {std::make_tuple(0, 0, 0.0f)};
 
 using Matrix = std::vector<std::vector<int>>;
 

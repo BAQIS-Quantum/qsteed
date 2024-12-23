@@ -1,4 +1,4 @@
-#include <set>
+﻿#include <set>
 #include <boost/graph/reverse_graph.hpp>
 #include <boost/graph/copy.hpp>
 #include <boost/graph/graph_utility.hpp>
@@ -12,7 +12,8 @@ DagGraph reverse_DagGraph(const DagGraph& graph) {
     return rev_graph;
 }
 
-
+#ifdef WITH_GRAPHVIZ
 void DAGCircuit::draw() const {
     Vis::draw_graph(this->graph);
 }
+#endif

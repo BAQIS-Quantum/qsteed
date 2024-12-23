@@ -82,4 +82,9 @@ setup(
         ],
     },
     cmake_install_dir="qsteed/passes/mapping/cpp_utils",
+    cmake_args=[
+        '-DBUILD_WITH_GRAPHVIZ=OFF',
+        # Set the hint path to the Graphviz root directory.
+        # '-DGRAPHVIZ_ROOT=',
+    ],
 )

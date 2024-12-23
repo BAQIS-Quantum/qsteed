@@ -14,6 +14,11 @@ endif()
 # Set CMake module path to include custom modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
+if (MSVC)
+  cmake_policy(SET CMP0167 NEW)
+  add_compile_options(/wd4244) # Disable warning C4244 (Conversion from 'int' to 'float', possible loss of data)
+  add_compile_options(/wd4819) # Disable warning C4819 (Code page in Unicode build)
+endif()
 
 # Find Boost
 find_package(Boost REQUIRED)
@@ -30,15 +35,25 @@ if(Boost_FOUND)
   endif()
 endif()
 
+
 # Find Graphviz
-find_package(Graphviz REQUIRED)
-if(GRAPHVIZ_FOUND)
-  include_directories(${GRAPHVIZ_INCLUDE_DIRS})
-  link_directories(${GRAPHVIZ_LIBRARY_DIRS})
-  message(STATUS "Graphviz library directories: ${GRAPHVIZ_LIBRARY_DIRS}")
-  message(STATUS "Graphviz include directories: ${GRAPHVIZ_INCLUDE_DIRS}")
+option(BUILD_WITH_GRAPHVIZ "Build with Graphviz support" OFF)
+message(STATUS "BUILD_WITH_GRAPHVIZ is set to ${BUILD_WITH_GRAPHVIZ}")
+
+# set(GRAPHVIZ_ROOT "" CACHE PATH "Path to Graphviz installation")
+if (BUILD_WITH_GRAPHVIZ)
+  find_package(Graphviz REQUIRED)
+  if(GRAPHVIZ_FOUND)
+    include_directories(${GRAPHVIZ_INCLUDE_DIRS})
+    link_directories(${GRAPHVIZ_LIBRARY_DIRS})
+    add_definitions(-DWITH_GRAPHVIZ)
+    message(STATUS "Graphviz library directories: ${GRAPHVIZ_LIBRARY_DIRS}")
+    message(STATUS "Graphviz include directories: ${GRAPHVIZ_INCLUDE_DIRS}")
+  else()
+    message(FATAL_ERROR "Graphviz not found")
+  endif()
 else()
-  message(FATAL_ERROR "Graphviz not found")
+  message(STATUS "Graphviz support disabled")
 endif()
 
 
@@ -67,26 +82,29 @@ else()
   add_subdirectory(extern/pybind11)
 
   add_executable(
-      sabre_test 
-          ${SOURCES} 
-          ${DAG_SOURCES}
-          ${Model_SOURCES}
-          "src/Vis/visualization.cpp"
+    sabre_test 
+      ${SOURCES} 
+      ${DAG_SOURCES}
+      ${Model_SOURCES}
+      "src/Vis/visualization.cpp"
   )
   target_include_directories(
     sabre_test 
     PRIVATE 
-        "src/include" 
-        "src/include/DAG" 
-        "src/include/Vis"
-        "src/include/Model"
+      "src/include" 
+      "src/include/DAG" 
+      "src/include/Vis"
+      "src/include/Model"
   )    
   target_link_libraries(
-      sabre_test 
-      PRIVATE 
-          Boost::headers
-          gvc cgraph
+    sabre_test 
+    PRIVATE 
+      Boost::headers
   )
+  if (BUILD_WITH_GRAPHVIZ)
+    target_link_libraries(sabre_test PRIVATE gvc cgraph)
+  endif()
+
   # target_compile_definitions(sabre_test PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
 endif()
 
@@ -96,29 +114,33 @@ endif()
 
 set(target sabre)
 pybind11_add_module(
-    ${target} THIN_LTO
-        src/Binding/binding.cpp 
-        ${SOURCES} 
-        ${DAG_SOURCES}
-        ${Model_SOURCES}
-        "src/Vis/visualization.cpp"
+  ${target} THIN_LTO
+    src/Binding/binding.cpp 
+    ${SOURCES} 
+    ${DAG_SOURCES}
+    ${Model_SOURCES}
+
+    "src/Vis/visualization.cpp"
 )
 target_include_directories(
-    ${target} 
-    PRIVATE 
-        "src/include" 
-        "src/include/DAG" 
-        "src/include/Vis"
-        "src/include/Model"
-)    
+  ${target} 
+  PRIVATE 
+    "src/include" 
+    "src/include/DAG" 
+    "src/include/Vis"
+    "src/include/Model"
+)
 
 target_link_libraries(
-    sabre 
-    PRIVATE 
-        pybind11::headers
-        Boost::headers
-        gvc cgraph
+  sabre 
+  PRIVATE 
+    pybind11::headers
+    Boost::headers
 )
+
+if (BUILD_WITH_GRAPHVIZ)
+  target_link_libraries(sabre PRIVATE gvc cgraph)
+endif()
 
 # Install
 install(TARGETS sabre LIBRARY DESTINATION .)

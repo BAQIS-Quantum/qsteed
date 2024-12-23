@@ -1,13 +1,13 @@
 #pragma once
+
+#ifdef WITH_GRAPHVIZ
 #include <string>
+#include <vector>
 #include "sabre_core.h"
 #include "DAG/dag.h"
 #include "coupling.h"
 
-/**
- * @namespace Vis
- * @brief Namespace containing functions for visualization (For Debugging).
- */
+
 namespace Vis {
 
     /**
@@ -42,3 +42,5 @@ namespace Vis {
      */
     void draw_dot(const std::string dot_str);
 }
+
+#endif

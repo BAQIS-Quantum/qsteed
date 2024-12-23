@@ -1,3 +1,5 @@
+﻿#ifdef WITH_GRAPHVIZ
+
 #include "visualization.h"
 #include "writer.h"
 #include <iostream>
@@ -62,3 +64,5 @@ namespace Vis {
     }
 
 }
+
+#endif

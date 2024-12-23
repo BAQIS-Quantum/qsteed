@@ -30,7 +30,7 @@ DAGCircuit test_dag() {
             std::cout << "Edge: " << *ei << std::endl;
         }
     }
-    dag.draw();
+    // dag.draw();
 
 
     return dag;
@@ -41,7 +41,7 @@ CouplingCircuit test_c_ciruit() {
     //     {0, 1, 0.99}, {2, 3, 0.67}, {2, 4, 0.89}, {1, 4, 0.89}, {3, 4, 0.89},
     // };
     CouplingList c_list  = {
-        {0, 1, 0.98}, {1, 0, 0.98}, {1, 2, 0.97}, {2, 1, 0.97},{2, 3, 0.982}, {3, 2, 0.982},
+        {0, 1, 0.98f}, {1, 0, 0.98f}, {1, 2, 0.97f}, {2, 1, 0.97f},{2, 3, 0.982f}, {3, 2, 0.982f},
     };
 
     CouplingCircuit c_circuit{c_list};  

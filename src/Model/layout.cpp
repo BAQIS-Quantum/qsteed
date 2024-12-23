@@ -1,4 +1,5 @@
 #include "layout.h"
+#include <numeric>
 
 Layout generate_random_layout(int virtual_qubits, int physical_qubits) {
     if (virtual_qubits > physical_qubits) 

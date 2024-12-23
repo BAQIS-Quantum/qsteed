@@ -1,6 +1,9 @@
-#include "coupling.h"
 #include <cmath>
 #include <stdexcept>
+#include <boost/graph/floyd_warshall_shortest.hpp>
+#include <boost/graph/dijkstra_shortest_paths.hpp>
+#include "coupling.h"
+#include "Vis/visualization.h"
 
 
 CouplingCircuit::CouplingCircuit(CouplingList c_list) : c_list(c_list) {
@@ -27,7 +30,6 @@ CouplingCircuit::CouplingCircuit(CouplingList c_list) : c_list(c_list) {
 }
 
 
-
 Matrix CouplingCircuit::get_distance_matrix() const {
     Matrix distance_matrix(boost::num_vertices(graph), std::vector<int>(boost::num_vertices(graph)));
     boost::constant_property_map<CouplingGraph::edge_descriptor, int> weight_map(1);
@@ -46,7 +48,7 @@ std::map<std::pair<int, int>, double> CouplingCircuit::get_fidelity_dict() const
         for (auto j=vertices.first; j!=vertices.second; ++j) {
             if (*i == *j)
                 continue;
-            fidelity_dict[std::make_pair(*i, *j)] =  this->get_fidelity(*i, *j);
+            fidelity_dict[std::make_pair(static_cast<int>(*i), static_cast<int>(*j))] = this->get_fidelity(*i, *j);
         }
     }
     return fidelity_dict;
@@ -78,7 +80,7 @@ double CouplingCircuit::get_fidelity(int source, int target) const {
         fidelity = std::log(graph[edge].fidelity);
     } 
     else {
-        for (size_t i = 0; i < path.size() - 2; ++i) { // SWAP gates need to be inserted
+        for (int i = 0; i < path.size() - 2; ++i) { // SWAP gates need to be inserted
             double min_f = std::min(std::log(graph[boost::edge(path[i], path[i + 1], graph).first].fidelity),
                                     std::log(graph[boost::edge(path[i + 1], path[i], graph).first].fidelity));
             double max_f = std::max(std::log(graph[boost::edge(path[i], path[i + 1], graph).first].fidelity),
