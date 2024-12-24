@@ -19,8 +19,8 @@ PYBIND11_MODULE(sabre, m) {
 
     py::class_<SabreLayout>(m, "SabreLayout")
         .def(py::init<const CouplingCircuit&>())
-        .def(py::init<const CouplingCircuit&, Heuristic>())
-        .def(py::init<const CouplingCircuit&, Heuristic, int>())
+        .def(py::init<const CouplingCircuit&, int, const std::string&>())
+        .def(py::init<const CouplingCircuit&, int, const std::string&, LayoutStructure>())
         .def("run", &SabreLayout::run)
         .def("get_model", &SabreLayout::get_model)
         .def_readwrite("c_circuit", &SabreLayout::c_circuit)
@@ -41,8 +41,8 @@ PYBIND11_MODULE(sabre, m) {
 
     py::class_<Model>(m, "Model")
         .def(py::init<>())
-        .def(py::init<Backend>())
-        .def_readwrite("init_layout", &Model::init_layout)
+        // .def(py::init<Backend>())
+        .def_readwrite("initial_layout", &Model::initial_layout)
         .def_readwrite("final_layout", &Model::final_layout);
 
 

@@ -31,4 +31,7 @@ public:
     Edge(node_pos_t source, node_pos_t target, EdgeProperties ep) 
         : source(source), target(target), ep(ep){
     }
+    Edge(node_pos_t source, node_pos_t target, int qubit_id) 
+        : source(source), target(target), ep(EdgeProperties(qubit_id)){
+    }
 };

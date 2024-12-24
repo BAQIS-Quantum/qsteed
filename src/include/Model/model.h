@@ -10,11 +10,24 @@ private:
     Backend _backend;
 
 public:
-    Layout init_layout;
+    Layout initial_layout;
     Layout final_layout;
 
-    Model();
-    Model(Backend backend);
+    Model() = default;
 
-    Backend get_backend() const; 
+    Model(Layout initial_layout)
+        : initial_layout(initial_layout) {}
+
+    Model(LayoutStructure initial_layout)
+        : initial_layout(Layout(initial_layout)) {}
+
+    Model(Layout initial_layout, Layout final_layout)
+        : initial_layout(initial_layout), final_layout(final_layout) {}
+
+    Model(LayoutStructure initial_layout, LayoutStructure final_layout)
+        : initial_layout(Layout(initial_layout)), final_layout(Layout(final_layout)) {}
+
+
+    // Model(Backend backend);
+    // Backend get_backend() const; 
 };

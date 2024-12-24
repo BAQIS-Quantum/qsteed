@@ -38,10 +38,10 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
     DAGCircuit mapped_dag;
 
     Layout current_layout;
-    if (model->init_layout.empty())
-        model->init_layout = generate_random_layout(qubits_used.size(), c_circuit.num_qubits);
+    if (model->initial_layout.empty())
+        model->initial_layout = generate_random_layout(qubits_used.size(), c_circuit.num_qubits);
 
-    current_layout = model->init_layout;
+    current_layout = model->initial_layout;
 
     std::unordered_map<int, int> pre_executed_counts;
     std::vector<int> front_layer; 

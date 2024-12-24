@@ -11,25 +11,28 @@ SabreLayout::SabreLayout(const CouplingCircuit& c_circuit)
 
     // Initialize the sabre_routing
     this->routing = std::make_unique<SabreRouting>(c_circuit);
-
     this->routing->model = this->model;
 }
 
-SabreLayout::SabreLayout(const CouplingCircuit& c_circuit, Heuristic heuristic) 
-    : c_circuit(c_circuit), heuristic(heuristic) {
+SabreLayout::SabreLayout(const CouplingCircuit& c_circuit, int max_iterations, const std::string& heuristic_str)
+    : c_circuit(c_circuit), max_iterations(max_iterations) {
 
+    this->heuristic = string2Heuristic(heuristic_str);
     this->model = std::make_shared<Model>();
 
     // Initialize the sabre_routing
     this->routing = std::make_unique<SabreRouting>(c_circuit, heuristic);
-
     this->routing->model = this->model;
-
 }
 
-SabreLayout::SabreLayout(const CouplingCircuit& c_circuit, Heuristic heuristic, int max_iterations)
-    : SabreLayout(c_circuit, heuristic) {
-        this->max_iterations = max_iterations;
+SabreLayout::SabreLayout(const CouplingCircuit& c_circuit, int max_iterations, const std::string& heuristic_str, LayoutStructure initial_layout)
+    : c_circuit(c_circuit), max_iterations(max_iterations) {
+
+    this->heuristic = string2Heuristic(heuristic_str);
+    this->model = std::make_shared<Model>(initial_layout);
+
+    this->routing = std::make_unique<SabreRouting>(c_circuit, heuristic);
+    this->routing->model = this->model;
 }
 
 
@@ -49,8 +52,9 @@ DAGCircuit SabreLayout::run(const DAGCircuit& dag) {
         throw std::runtime_error("More virtual qubits than physical qubits.");
     }
 
-    if (model->init_layout.empty()) {
-        model->init_layout = generate_random_layout(qubits_used.size(), c_circuit.num_qubits);
+    if (model->initial_layout.empty()) {
+        // std::cout << "empty initial layout." << std::endl;
+        model->initial_layout = generate_random_layout(qubits_used.size(), c_circuit.num_qubits);
     }
     
     this->routing->modify_dag = false;  // make sure modify_dag = false
@@ -60,7 +64,7 @@ DAGCircuit SabreLayout::run(const DAGCircuit& dag) {
     for (int i=0; i < max_iterations; i++) {
         for (const auto& direction : {0, 1}) {
             this->run_single(direction == 0 ? dag : rev_dag);
-            this->model->init_layout = this->model->final_layout;
+            this->model->initial_layout = this->model->final_layout;
         }
     }
 

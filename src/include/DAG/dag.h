@@ -81,8 +81,8 @@ public:
                 // 判断这条边的qubit是否在node的qubit_pos中
                 if ( std::find(node.qubit_pos.begin(), node.qubit_pos.end(), qubit) != node.qubit_pos.end() ) {
                     edges_to_remove.push_back(*ei);
-                    edges_to_add.push_back(Edge{boost::source(*ei, graph), node_index, EdgeProperties{qubit}});
-                    edges_to_add.push_back(Edge{node_index, end_node_pos, EdgeProperties{qubit}});
+                    edges_to_add.emplace_back(boost::source(*ei, graph), node_index, qubit);
+                    edges_to_add.emplace_back(node_index, end_node_pos, qubit);
                     node_remain_qubits.erase(std::remove(node_remain_qubits.begin(), node_remain_qubits.end(), qubit), node_remain_qubits.end());     
                 }
             }
@@ -93,8 +93,8 @@ public:
                 boost::add_edge(edge.source, edge.target, edge.ep, graph);
             }
             for (const auto& qubit: node_remain_qubits) {
-                add_edge(start_node_pos, node_index, EdgeProperties{qubit});
-                add_edge(node_index, end_node_pos, EdgeProperties{qubit});
+                add_edge(start_node_pos, node_index, qubit);
+                add_edge(node_index, end_node_pos, qubit);
             }
 
         } else {

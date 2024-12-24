@@ -67,7 +67,7 @@ void test_sabre_routing() {
 
 void test_sabre_layout() {
     CouplingCircuit c_circuit = test_c_ciruit();
-    SabreLayout sabre_layout{c_circuit, Heuristic::FIDELITY};
+    SabreLayout sabre_layout{c_circuit, 3, "fidelity"};
     DAGCircuit dag = test_dag();
     // Vis::draw_graph(dag.graph);
     sabre_layout.run(dag);

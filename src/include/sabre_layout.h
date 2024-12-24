@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "sabre_core.h"
 #include "coupling.h"
 #include "model.h"
 #include "sabre_routing.h"
@@ -7,6 +8,7 @@
 #include "layout.h"
 
 namespace sabre {
+
 
     class SabreLayout
     {
@@ -17,10 +19,11 @@ namespace sabre {
         Heuristic heuristic = Heuristic::DISTANCE;
         int max_iterations = 3; 
 
+
     public:
         SabreLayout(const CouplingCircuit& c_circuit);
-        SabreLayout(const CouplingCircuit& c_circuit, Heuristic heuristic);
-        SabreLayout(const CouplingCircuit& c_circuit, Heuristic heuristic, int max_iterations);
+        SabreLayout(const CouplingCircuit& c_circuit, int max_iterations, const std::string& heuristic_str);
+        SabreLayout(const CouplingCircuit& c_circuit, int max_iterations, const std::string& heuristic_str, LayoutStructure initial_layout);
 
         void set_model(const Model& model) { this->model = std::make_shared<Model>(model); }
 

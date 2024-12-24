@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 if(NOT CMAKE_BUILD_TYPE)
-    message(STATUS "Build type not set - defaulting to Release")
-    set(CMAKE_BUILD_TYPE Release)
+  message(STATUS "Build type not set - defaulting to Release")
+  set(CMAKE_BUILD_TYPE Release)
 endif()
 
 # Set CMake module path to include custom modules
@@ -119,12 +119,10 @@ pybind11_add_module(
     ${SOURCES} 
     ${DAG_SOURCES}
     ${Model_SOURCES}
-
     "src/Vis/visualization.cpp"
 )
 target_include_directories(
-  ${target} 
-  PRIVATE 
+  ${target} PRIVATE 
     "src/include" 
     "src/include/DAG" 
     "src/include/Vis"
@@ -137,7 +135,6 @@ target_link_libraries(
     pybind11::headers
     Boost::headers
 )
-
 if (BUILD_WITH_GRAPHVIZ)
   target_link_libraries(sabre PRIVATE gvc cgraph)
 endif()

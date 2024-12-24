@@ -24,10 +24,18 @@ def QuantumCircuit_to_cppDag(circuit: QuantumCircuit) -> Cpp_DAGCircuit:
         Cpp_DAGCircuit: The converted Cpp_DAGCircuit object.
     """
     dag = Cpp_DAGCircuit()
+
+    used_qubits = set() 
     for gate in circuit.gates:
         node = gate_to_cppNode(gate)
-        dag.add_instruction_node_end(node) 
-          
+        dag.add_instruction_node_end(node)
+        for pos in node.qubit_pos:
+            used_qubits.add(pos)
+
+    for key in circuit.measures.keys():
+        if key not in used_qubits:
+            dag.add_edge(0,1, key)
+
     dag.measure = circuit.measures
 
     return dag

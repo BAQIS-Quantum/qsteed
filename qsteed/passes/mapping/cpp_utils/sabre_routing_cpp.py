@@ -45,7 +45,6 @@ class SabreRouting():
         c_circuit = Cpp_CouplingCircuit(c_list)
 
         self.sabre_routing = Cpp_SabreRouting(c_circuit, self.heuristic)
-        # self.sabre_routinf.heuristic = self.heuristic
 
 
     def run(self, dag):

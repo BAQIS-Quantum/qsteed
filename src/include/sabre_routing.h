@@ -1,8 +1,9 @@
 #pragma once
 #include <iostream>
-#include <model.h>
 #include <algorithm>
 #include <cmath>
+#include "sabre_core.h"
+#include "model.h"
 #include "DAG/dag.h"
 #include "coupling.h"
 #include "layout.h"
