@@ -14,13 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from qsteed.graph.couplinggraph import CouplingGraph
-from qsteed.graph.subgraph import random_subgraph
+from qsteed.graph.subgraph import max_dense_subgraph
 from qsteed.passes.mapping.create_layout import CreateLayout
 
 
-class RandomLayout(CreateLayout):
+class InitialLayoutDense(CreateLayout):
     def __init__(self,
                  coupling_graph: CouplingGraph = None,
                  coupling_list: list = None,
@@ -36,7 +35,7 @@ class RandomLayout(CreateLayout):
 
         """
         graph = self.get_graph()
-        subgraph = random_subgraph(graph=graph, num_nodes=self.num_qubits)
+        subgraph = max_dense_subgraph(graph=graph, num_nodes=self.num_qubits)
         phys_qubits_list = list(subgraph.nodes())
         self.v2p = dict(zip(self.qubits_list, phys_qubits_list))
         self.p2v = {p: v for v, p in self.v2p.items()}

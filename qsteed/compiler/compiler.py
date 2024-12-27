@@ -113,6 +113,7 @@ class Compiler:
         # Calculate compile time
         compile_time = time.time() - compile_begin_time
 
+        # step4. Program verification
         # Check if openqasm satisfies the qubit coupling graph of the hardware
         # and check the number of single-qubit and two-qubit gates.
         check_qasm, single_nums, two_nums = check_openqasm(compiled_openqasm, qpu[0].structure,
@@ -180,6 +181,7 @@ class Compiler:
         return optimal_vqpu
 
     def call_transpiler(self, circuit: str):
+        # step1. Standardized circuit
         # Calculate the physical and classical bits actually used by the circuit
         qubits, cbits = actually_bits(circuit)
 
@@ -192,9 +194,6 @@ class Compiler:
         new_circuit = StandardizedCircuit(input_qasm)
         input_qasm = new_circuit.standardized_circuit()
 
-        # Finding available vqpus
-        # available_vqpus = self.find_available_vqpus(len(qubits))
-
         if isinstance(input_qasm, quafuQC):
             logical_circuit = input_qasm
             qubit_num = logical_circuit.num
@@ -205,9 +204,12 @@ class Compiler:
         else:
             raise TypeError("The input_circuit needs to be quafu QuantumCircuit class or openQASM 2.0 string.")
 
+        # step2. Optimal VQPU selector
         used_vqpu = self.get_optimal_vqpu(qubit_num=qubit_num)
+
+        # step3. Transpiler
         initial_model = self._set_backend_model(used_vqpu)
-        transpiler = Transpiler(initial_model=initial_model)
+        transpiler = Transpiler(passflow = self.passflow, initial_model=initial_model)
         transpiled_circuit = transpiler.transpile(logical_circuit, optimization_level=self.optimization_level)
         transpiled_openqasm = transpiled_circuit.to_openqasm(with_para=True)
 

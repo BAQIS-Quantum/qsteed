@@ -28,6 +28,10 @@ from quafu.elements.element_gates.pauli import *
 from .dagcircuit import DAGCircuit
 from .instruction_node import InstructionNode
 
+StartColor = "#90EE90"
+EndColor = "#F44336"
+MiddleColor = "#ADD8E6"
+
 GATE_CLASSES = {
     "x": XGate,
     "y": YGate,
@@ -135,40 +139,40 @@ def circuit_to_dag(circuit: QuantumCircuit, measure_flag=True):
 
     # Add the start node
     start_node = -1
-    g.add_node(start_node, color="green")
+    g.add_node(start_node, color=StartColor)
 
     for gate in circuit.gates:
         # Transform gate to node
         hashable_gate = gate_to_node(gate, specific_label=i)
         i += 1
-        g.add_node(hashable_gate, color="blue")
+        g.add_node(hashable_gate, color=MiddleColor)
 
         # Add edges based on qubit_last_use; update last use
         for qubit in hashable_gate.pos:
             prev_node = qubit_last_use.get(qubit, start_node)
             g.add_edge(
-                prev_node, hashable_gate, label=f'q{qubit}', color="green" if prev_node == start_node else "black")
+                prev_node, hashable_gate, label=f'q{qubit}', color=StartColor if prev_node == start_node else "black")
             qubit_last_use[qubit] = hashable_gate
 
     if measure_flag:
         # Add measure_gate node
         measure_pos = copy.deepcopy(circuit.measures)
         measure_gate = InstructionNode("measure", measure_pos, None, None, None, label="m")
-        g.add_node(measure_gate, color="blue")
+        g.add_node(measure_gate, color=MiddleColor)
 
         # Add edges from qubit_last_use to measure_gate
         for qubit in measure_gate.pos:
             prev_node = qubit_last_use.get(qubit, start_node)
             g.add_edge(
-                prev_node, measure_gate, label=f'q{qubit}', color="green" if prev_node == start_node else "black")
+                prev_node, measure_gate, label=f'q{qubit}', color=StartColor if prev_node == start_node else "black")
             qubit_last_use[qubit] = measure_gate
 
     # Add the end node
     end_node = float('inf')
-    g.add_node(end_node, color="red")
+    g.add_node(end_node, color=EndColor)
 
     for qubit, last_node in qubit_last_use.items():
-        g.add_edge(last_node, end_node, label=f'q{qubit}', color="red")
+        g.add_edge(last_node, end_node, label=f'q{qubit}', color=EndColor)
 
     # Update DAGCircuit attributes
     g.update_qubits_used()
@@ -270,38 +274,24 @@ def dag_to_circuit(dep_graph, qubits: int):
     return qcircuit
 
 
-def draw_dag(dep_g, output_format="png"):
+def draw_dag(dep_g, output_format="png", orientation="TB"):
     """
-    Helper function to visualize the DAG
+    Helper function to visualize the DAG with additional customization for layout and appearance.
 
     Args:
         dep_g (DAG): DAG with Hashable Gates
-        output_format (str): output format, "png" or "svg"
+        output_format (str): Output format, either "png" or "svg".
+        orientation (str): Layout orientation, either "LR" or "TB".
 
     Returns:
-        img (Image or SVG): show the image of DAG, which is Image(filename="dag.png") or SVG(filename="dag.svg")
+        img (Image or SVG): Show the image of DAG, either Image(filename="dag.png") or SVG(filename="dag.svg").
 
     example:
-        .. jupyter-execute::
-        ex1:
-            # directly draw  PNG picture
-            draw_dag(dep_g, output_format="png")    # save a png picture "dag.png" and show it in jupyter notebook
+        # To visualize DAG with a vertical layout
+        draw_dag(dep_g, output_format="png", orientation="TB")
 
-            # directly draw  SVG   picture
-            draw_dag(dep_g, output_format="svg")    # save a svg picture "dag.svg" and show it in jupyter notebook
-
-        ex2:
-            # generate   PNG  picture
-            img_png = draw_dag(dep_g, output_format="png")
-
-            # generate   SVG  picture
-            img_svg = draw_dag(dep_g, output_format="svg")
-
-            # show PNG picture
-            img_png
-
-            # show SVG picture
-            img_svg
+        # To visualize DAG with a horizontal layout
+        draw_dag(dep_g, output_format="svg", orientation="LR")
     """
     from IPython.display import Image, SVG
 
@@ -316,8 +306,47 @@ def draw_dag(dep_g, output_format="png"):
         from networkx.drawing.nx_agraph import write_dot
         write_dot(dep_g, "dag.dot")
         G = pygraphviz.AGraph("dag.dot")
-        G.layout(prog="dot")
 
+        # Set the layout direction
+        G.layout(prog="dot", args=f"-Grankdir={orientation}")
+
+        # Customize node and edge appearance for pygraphviz
+        for node in dep_g.nodes(data=True):
+            node_id = str(node[0])
+            node_data = node[1]
+            color = node_data.get("color", MiddleColor)  # Default Light grey
+            font_color = node_data.get("font_color", "black")  # Black text color
+            font_size = node_data.get("font_size", "12")  # Default font size
+            shape = node_data.get("shape", "ellipse")  # Node shape, default to ellipse
+            penwidth = node_data.get("penwidth", "1")  # Solid black border width
+
+            # Set the node properties
+            G.get_node(node_id).attr.update({
+                'color': 'black',  # Black border color
+                'fontcolor': font_color,
+                'fontsize': font_size,
+                'shape': shape,
+                'style': 'filled',  # Solid or filled
+                'penwidth': penwidth,  # Solid black border
+                'fillcolor': color  # Node fill color
+            })
+
+        for edge in dep_g.edges(data=True):
+            edge_data = edge[2]
+            edge_color = edge_data.get("color", "black")
+            edge_font_color = edge_data.get("font_color", "black")  # Edge label text color
+            edge_label = edge_data.get("label", "")
+            edge_style = edge_data.get("style", "solid")  # Edge style
+
+            # Set edge properties
+            G.get_edge(str(edge[0]), str(edge[1])).attr.update({
+                'color': edge_color,
+                'fontcolor': edge_font_color,
+                'label': edge_label,
+                'style': edge_style
+            })
+
+        # Render the graph to a file
         if output_format == "png":
             G.draw("dag.png")
             return Image(filename="dag.png")
@@ -335,12 +364,40 @@ def draw_dag(dep_g, output_format="png"):
 
         dot = Digraph()
 
-        # Add nodes and edges to the Digraph object based on the DAG
+        # Set layout direction
+        dot.attr(rankdir=orientation)  # Set orientation
+
+        # Customize node and edge appearance
         for node in dep_g.nodes(data=True):
-            dot.node(str(node[0]), color=node[1].get("color", "black"), style="solid")
+            node_id = str(node[0])
+            node_data = node[1]
+            color = node_data.get("color", MiddleColor)  # Default Light grey
+            font_color = node_data.get("font_color", "black")  # Black text color
+            font_size = node_data.get("font_size", "12")  # Default font size
+            shape = node_data.get("shape", "ellipse")  # Node shape, default to ellipse
+            penwidth = node_data.get("penwidth", "1")  # Solid black border width
+
+            dot.node(node_id,
+                     color="black",  # Black border color
+                     fontcolor=font_color,
+                     fontsize=font_size,
+                     shape=shape,
+                     style="filled",  # Solid or filled
+                     penwidth=penwidth,  # Solid black border
+                     fillcolor=color)  # Node fill color
 
         for edge in dep_g.edges(data=True):
-            dot.edge(str(edge[0]), str(edge[1]), color=edge[2].get("color", "black"), label=edge[2].get("label", ""))
+            edge_data = edge[2]
+            edge_color = edge_data.get("color", "black")
+            edge_font_color = edge_data.get("font_color", "black")  # Edge label text color
+            edge_label = edge_data.get("label", "")
+            edge_style = edge_data.get("style", "solid")  # Edge style
+
+            dot.edge(str(edge[0]), str(edge[1]),
+                     color=edge_color,
+                     fontcolor=edge_font_color,
+                     label=edge_label,
+                     style=edge_style)
 
         # Render the graph to a file
         if output_format == "png":
@@ -372,26 +429,26 @@ def nodelist_to_dag(op_nodes: List[Any]) -> DAGCircuit:
 
     # Add the start node
     start_node = -1
-    g.add_node(start_node, color="green")
+    g.add_node(start_node, color=StartColor)
 
     for op_node in op_nodes:
         # Transform gate to node
         hashable_gate = copy.deepcopy(op_node)
-        g.add_node(hashable_gate, color="blue")
+        g.add_node(hashable_gate, color="#888888")
 
         # Add edges based on qubit_last_use and update last use
         for qubit in hashable_gate.pos:
             prev_node = qubit_last_use.get(qubit, start_node)
             g.add_edge(
-                prev_node, hashable_gate, label=f'q{qubit}', color="green" if prev_node == start_node else "black")
+                prev_node, hashable_gate, label=f'q{qubit}', color=StartColor if prev_node == start_node else "black")
             qubit_last_use[qubit] = hashable_gate
 
     # Add the end node
     end_node = float('inf')
-    g.add_node(end_node, color="red")
+    g.add_node(end_node, color=EndColor)
 
     for qubit, last_node in qubit_last_use.items():
-        g.add_edge(last_node, end_node, label=f'q{qubit}', color="red")
+        g.add_edge(last_node, end_node, label=f'q{qubit}', color=EndColor)
 
     # Update DAGCircuit attributes
     g.qubits_used = g.update_qubits_used()

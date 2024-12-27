@@ -24,9 +24,9 @@ from qsteed.graph.couplinggraph import CouplingGraph
 from qsteed.passes.basepass import BasePass
 from qsteed.passes.datadict import DataDict
 from qsteed.passes.mapping.baselayout import Layout
-from qsteed.passes.mapping.layout.dense_layout import DenseLayout
-from qsteed.passes.mapping.layout.fidelity_layout import FidelityLayout
-from qsteed.passes.mapping.layout.random_layout import RandomLayout
+from qsteed.passes.mapping.layout.initial_layout_dense import InitialLayoutDense
+from qsteed.passes.mapping.layout.initial_layout_fidelity import InitialLayoutFidelity
+from qsteed.passes.mapping.layout.initial_layout_random import InitialLayoutRandom
 from qsteed.passes.mapping.routing.sabre_routing import SabreRouting
 from qsteed.utils.reverse_circuit import reverse_circuit
 
@@ -154,11 +154,11 @@ class SabreLayout(BasePass):
                 self.model.set_used_subgraph(self.coupling_graph)
             elif len(dag.qubits_used) < self.coupling_graph.num_qubits:
                 if self.initial_layout_method == 'random':
-                    layout = RandomLayout(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
+                    layout = InitialLayoutRandom(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
                 elif self.initial_layout_method == 'fidelity':
-                    layout = FidelityLayout(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
+                    layout = InitialLayoutFidelity(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
                 elif self.initial_layout_method == 'dense':
-                    layout = DenseLayout(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
+                    layout = InitialLayoutDense(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
                 else:
                     raise ValueError("initial_layout_method can only be 'random', 'fidelity' or 'dense'.")
 
