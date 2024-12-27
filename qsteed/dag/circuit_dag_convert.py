@@ -412,7 +412,7 @@ def draw_dag(dep_g, output_format="png", orientation="TB"):
             raise ValueError("Unsupported output format: choose either 'png' or 'svg'")
 
 
-def nodelist_to_dag(op_nodes: List[Any]) -> DAGCircuit:
+def nodelist_to_dag(op_nodes: list[Any]) -> DAGCircuit:
     """
     Transform a list of operation nodes into a DAGCircuit.
 
