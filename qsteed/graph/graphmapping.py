@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
 from collections import defaultdict
 
 import networkx as nx
@@ -38,7 +39,7 @@ def node_degree(g):
     return g_node_degree
 
 
-def initial_layout_degree(circuit, coupling):
+def initial_layout(circuit, coupling, method: str = None):
     """Get the initial mapping according to the degree of the node of the circuit graph
     and the qubit coupling graph. Mainly used for initial layout of Sabre algorithm.
 
@@ -53,32 +54,47 @@ def initial_layout_degree(circuit, coupling):
     for item in coupling:
         g2.add_edges_from([(item[0], item[1], {'weight': item[2]})])
 
-    g1_node_degree = node_degree(g1)
-    g2_node_degree = node_degree(g2)
+    matcher = nx.isomorphism.GraphMatcher(g1, g2)
 
     dict_mapping = {}
-    for index in range(len(g1_node_degree)):
-        dict_mapping[g1_node_degree[index][0]] = g2_node_degree[index][0]
+    if matcher.is_isomorphic():
+        mapping = matcher.mapping
+        for node_g1, node_g2 in mapping.items():
+            dict_mapping[node_g1] = node_g2
+    else:
+        if method == 'fidelity':
+            dict_mapping = initial_mapping_fidelity(g1, g2)
+        elif method == 'degree':
+            dict_mapping = initial_mapping_degree(g1, g2)
+        elif method is None or "random":
+            nodes_g1 = list(g1.nodes())
+            nodes_g2 = list(g2.nodes())
+            if len(nodes_g1) != len(nodes_g2):
+                raise ValueError(
+                    "The number of nodes in a circuit is different from the number of nodes in a given coupling structure.")
+
+            shuffled_g2 = nodes_g2[:]
+            random.shuffle(shuffled_g2)
+            dict_mapping = dict(zip(nodes_g1, shuffled_g2))
+        else:
+            raise ValueError("Method does not exist.")
 
     # Do not perform any initial layout sorting.
-    # phys_qubits = [dict_mapping[i] for i in range(len(dict_mapping))]
-    # v2p_dict = {i: phys_qubits[i] for i in range(len(phys_qubits))}
-    # initial_layout = Layout(v2p_dict)
+    phys_qubits = [dict_mapping[i] for i in range(len(dict_mapping))]
+    v2p_dict = {i: phys_qubits[i] for i in range(len(phys_qubits))}
+    initial_layout = Layout(v2p_dict)
 
     # Initialize sorting according to the minimum fidelity qubit.
     # initial_layout = _sort_layout_minimum_fidelity(dict_mapping, coupling)
 
     # Sort the initialized Layout according to the product of all qubits fidelity.
-    initial_layout = _sort_layout_all_fidelity(dict_mapping, coupling)
+    # initial_layout = _sort_layout_all_fidelity(dict_mapping, coupling)
     return initial_layout
 
 
-def initial_layout_fidelity(circuit, coupling):
-    """The initial mapping is obtained according to the node degrees
-     and edge weights of the circuit graph and qubit coupling graph.
-     Prioritize the mapping of nodes with high degrees,
-     and map to nodes with large edge weights when the nodes have the same degree.
-     Mainly used for initial layout of Sabre algorithm.
+def initial_layout_isomorphism(circuit, coupling):
+    """Get the initial mapping according to the degree of the node of the circuit graph
+    and the qubit coupling graph. Mainly used for initial layout of Sabre algorithm.
 
     Args:
         circuit (QuantumCircuit): a pyquafu QuantumCircuit
@@ -91,6 +107,60 @@ def initial_layout_fidelity(circuit, coupling):
     for item in coupling:
         g2.add_edges_from([(item[0], item[1], {'weight': item[2]})])
 
+    matcher = nx.isomorphism.GraphMatcher(g1, g2)
+
+    dict_mapping = {}
+    if matcher.is_isomorphic():
+        mapping = matcher.mapping
+        for node_g1, node_g2 in mapping.items():
+            dict_mapping[node_g1] = node_g2
+    else:
+        nodes_g1 = list(g1.nodes())
+        nodes_g2 = list(g2.nodes())
+        if len(nodes_g1) != len(nodes_g2):
+            raise ValueError(
+                "The number of nodes in a circuit is different from the number of nodes in a given coupling structure.")
+
+        shuffled_g2 = nodes_g2[:]
+        random.shuffle(shuffled_g2)
+        dict_mapping = dict(zip(nodes_g1, shuffled_g2))
+
+    # Sort the initialized Layout according to the product of all qubits fidelity.
+    # initial_layout = _sort_layout_all_fidelity(dict_mapping, coupling)
+
+    # Do not perform any initial layout sorting.
+    phys_qubits = [dict_mapping[i] for i in range(len(dict_mapping))]
+    v2p_dict = {i: phys_qubits[i] for i in range(len(phys_qubits))}
+    initial_layout = Layout(v2p_dict)
+    return initial_layout
+
+
+def initial_mapping_degree(g1, g2):
+    """
+    """
+    g1_node_degree = node_degree(g1)
+    g2_node_degree = node_degree(g2)
+
+    dict_mapping = {}
+    for index in range(len(g1_node_degree)):
+        dict_mapping[g1_node_degree[index][0]] = g2_node_degree[index][0]
+
+    return dict_mapping
+
+
+def initial_mapping_fidelity(g1, g2):
+    """The initial mapping is obtained according to the node degrees
+     and edge weights of the circuit graph and qubit coupling graph.
+     Prioritize the mapping of nodes with high degrees,
+     and map to nodes with large edge weights when the nodes have the same degree.
+     Mainly used for initial layout of Sabre algorithm.
+
+    Args:
+        circuit (QuantumCircuit): a pyquafu QuantumCircuit
+        coupling (list): qubits coupling list, [[q0, q1, fidelity],...]
+    Returns:
+        initial_layout (Layout): initial layout
+    """
     g1_node_degree = node_degree(g1)
     g2_node_degree = node_degree(g2)
 
@@ -162,12 +232,7 @@ def initial_layout_fidelity(circuit, coupling):
             else:
                 pass
 
-    # Initialize sorting according to the minimum fidelity qubit
-    # initial_layout = _sort_layout_minimum_fidelity(dict_mapping, coupling)
-
-    # Sort the initialized Layout according to the product of all qubits fidelity
-    initial_layout = _sort_layout_all_fidelity(dict_mapping, coupling)
-    return initial_layout
+    return dict_mapping
 
 
 def _sort_layout_minimum_fidelity(dict_mapping, coupling):
