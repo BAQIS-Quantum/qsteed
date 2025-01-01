@@ -24,9 +24,9 @@ from qsteed.graph.couplinggraph import CouplingGraph
 from qsteed.passes.basepass import BasePass
 from qsteed.passes.datadict import DataDict
 from qsteed.passes.mapping.baselayout import Layout
-from qsteed.passes.mapping.layout.initial_layout_dense import InitialLayoutDense
-from qsteed.passes.mapping.layout.initial_layout_fidelity import InitialLayoutFidelity
-from qsteed.passes.mapping.layout.initial_layout_random import InitialLayoutRandom
+from qsteed.passes.mapping.layout.overall_layout_dense import OverallLayoutDense
+from qsteed.passes.mapping.layout.overall_layout_fidelity import OverallLayoutFidelity
+from qsteed.passes.mapping.layout.overall_layout_random import OverallLayoutRandom
 from qsteed.passes.mapping.routing.sabre_routing import SabreRouting
 from qsteed.utils.reverse_circuit import reverse_circuit
 
@@ -154,15 +154,15 @@ class SabreLayout(BasePass):
                 self.model.set_used_subgraph(self.coupling_graph)
             elif len(dag.qubits_used) < self.coupling_graph.num_qubits:
                 if self.initial_layout_method == 'random':
-                    layout = InitialLayoutRandom(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
+                    layout = OverallLayoutRandom(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
                 elif self.initial_layout_method == 'fidelity':
-                    layout = InitialLayoutFidelity(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
+                    layout = OverallLayoutFidelity(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
                 elif self.initial_layout_method == 'dense':
-                    layout = InitialLayoutDense(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
+                    layout = OverallLayoutDense(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
                 else:
                     raise ValueError("initial_layout_method can only be 'random', 'fidelity' or 'dense'.")
 
-                subgraph = layout.create_layout()
+                subgraph = layout.overall_layout()
                 weight = list(list(subgraph.edges(data=True))[0][2].keys())[0]
                 sub_coupling_list = [(u, v, data[weight]) for u, v, data in subgraph.edges(data=True)]
                 used_subgraph = CouplingGraph(sub_coupling_list)

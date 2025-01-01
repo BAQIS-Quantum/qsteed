@@ -19,7 +19,7 @@ from qsteed.passes.mapping.baselayout import Layout
 from qsteed.graph.couplinggraph import CouplingGraph
 
 
-class CreateLayout(Layout):
+class OverallLayout(Layout):
     def __init__(self,
                  coupling_graph: CouplingGraph = None,
                  coupling_list: list = None,
@@ -50,5 +50,6 @@ class CreateLayout(Layout):
         else:
             raise ValueError('coupling_graph and coupling_list must be given one.')
 
-    def create_layout(self):
+    def overall_layout(self):
+        """Used to layout quantum circuits as a whole to the appropriate area of the chip."""
         pass

@@ -16,10 +16,10 @@
 
 from qsteed.graph.couplinggraph import CouplingGraph
 from qsteed.graph.subgraph import max_dense_subgraph
-from qsteed.passes.mapping.create_layout import CreateLayout
+from qsteed.passes.mapping.overall_layout import OverallLayout
 
 
-class InitialLayoutDense(CreateLayout):
+class OverallLayoutDense(OverallLayout):
     def __init__(self,
                  coupling_graph: CouplingGraph = None,
                  coupling_list: list = None,
@@ -28,7 +28,7 @@ class InitialLayoutDense(CreateLayout):
                  ):
         super().__init__(coupling_graph, coupling_list, num_qubits, qubits_list)
 
-    def create_layout(self):
+    def overall_layout(self):
         """
 
         Returns:
