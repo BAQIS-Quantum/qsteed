@@ -81,6 +81,18 @@ class CouplingGraph:
             self._qubits_list = list(self.graph.nodes())
         return self._qubits_list
 
+    @property
+    def coupling_list(self)-> list:
+        """Get a list of edges with their fidelity values.
+
+        This property returns a list of tuples, where each tuple represents an edge
+        in the coupling graph along with its associated fidelity value.
+
+        Returns:
+            list: A list of tuples in the form (q0, q1, fidelity)
+        """
+        return[(u, v, data['fidelity']) for u, v, data in self.graph.edges(data=True)]
+
     def subgraph(self, node_list):
         """Get the subgraph of this graph.
 

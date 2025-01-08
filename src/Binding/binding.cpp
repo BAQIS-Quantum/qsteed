@@ -113,6 +113,7 @@ PYBIND11_MODULE(sabre, m) {
         .def("add_edge", py::overload_cast<const int, const int, const EdgeProperties&>(&DAGCircuit::add_edge))
         .def("get_num_nodes", &DAGCircuit::get_num_nodes)
         .def("get_qubits_used", &DAGCircuit::get_qubits_used)
+        .def("num_qubits", &DAGCircuit::num_qubits)
         .def("vertices", [](DAGCircuit &s) {return py::make_iterator(s.vertex_begin(), s.vertex_end());})
         .def("reverse", &DAGCircuit::reverse)
 #ifdef WITH_GRAPHVIZ

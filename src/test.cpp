@@ -30,6 +30,7 @@ DAGCircuit test_dag() {
             std::cout << "Edge: " << *ei << std::endl;
         }
     }
+    std::cout << dag.num_qubits() << std::endl;
     // dag.draw();
 
 
@@ -37,21 +38,23 @@ DAGCircuit test_dag() {
 }
 
 CouplingCircuit test_c_ciruit() {
-    // CouplingList c_list = {
-    //     {0, 1, 0.99}, {2, 3, 0.67}, {2, 4, 0.89}, {1, 4, 0.89}, {3, 4, 0.89},
+    // CouplingList c_list  = {
+    //     {0, 1, 0.98f}, {1, 0, 0.98f}, {1, 2, 0.97f}, {2, 1, 0.97f},{2, 3, 0.982f}, {3, 2, 0.982f},
     // };
-    CouplingList c_list  = {
-        {0, 1, 0.98f}, {1, 0, 0.98f}, {1, 2, 0.97f}, {2, 1, 0.97f},{2, 3, 0.982f}, {3, 2, 0.982f},
+
+    CouplingList c_list = {
+        {1, 2, 0.97f}, {2, 1, 0.97f},{2, 3, 0.982f}, {3, 2, 0.982f},
     };
 
-    CouplingCircuit c_circuit{c_list};  
 
-    std::map<std::pair<int, int>, double> fd = c_circuit.get_fidelity_dict();
+    CouplingCircuit c_circuit{c_list};
 
+
+    // std::map<std::pair<int, int>, double> fd = c_circuit.get_fidelity_dict();
 
     // std::vector<int> path = c_circuit.get_mini_path(1,4);
 
-    //c_circuit.draw_self();
+    // c_circuit.draw_self();
     return c_circuit;
 }
 
@@ -77,8 +80,8 @@ void test_sabre_layout() {
 
 int main() {
     std::cout << "---- main function ----" << std::endl;
-    // test_c_ciruit();
+    test_c_ciruit();
     // test_sabre_routing();
-    test_dag();
+    // test_dag();
     // test_sabre_layout();
 }

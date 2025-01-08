@@ -303,8 +303,8 @@ SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
         }
 
         SwapPos best_swap = swap_mini->first;
-        for (auto swap : best_swaps) {
-            double max_score = 0;
+        double max_score = 0;
+        for (const auto& swap : best_swaps) {
             SwapPos physical_swap = std::minmax(current_layout[swap.first], current_layout[swap.second]);
             if (unavailable_2qubits.find(physical_swap) == unavailable_2qubits.end()) {
                 double swap_cost = _swap_score(physical_swap);

@@ -49,7 +49,7 @@ class SabreLayout(BasePass):
         self.coupling_list = coupling_list
         self.routing_pass = routing_pass
         self.max_iterations = max_iterations
-        self.sabre_initial_layout = sabre_initial_layout
+        self.sabre_initial_layout: Layout = sabre_initial_layout
         self.model :Model = None
         self.heuristic: str = heuristic
         self.initial_layout_method: str = initial_layout_method
@@ -66,18 +66,11 @@ class SabreLayout(BasePass):
         """
         self.model = model
     
-        self.coupling_list = model.get_backend().get_property("coupling_list") 
-        self._c_circuit = Cpp_CouplingCircuit(self.coupling_list)
+        # self.coupling_list = model.get_backend().get_property("coupling_list") 
+        # self._c_circuit = Cpp_CouplingCircuit(self.coupling_list)
+        self.coupling_graph = self.model.get_backend().get_property('coupling_graph')
+        self._c_circuit = Cpp_CouplingCircuit(self.coupling_graph.coupling_list)
 
-        if self.coupling_graph is None:
-            if self.coupling_list is not None:
-                coupling_graph = CouplingGraph(self.coupling_list)
-                if coupling_graph.is_bidirectional is False:
-                    coupling_graph.do_bidirectional()
-                self.coupling_graph = coupling_graph
-            else:
-                raise ValueError("Error: There is no qubits coupling structure.")
-        
         if self.model.datadict is None:
             self.model.datadict = DataDict()
 
@@ -96,6 +89,16 @@ class SabreLayout(BasePass):
         Returns:
             The optimized circuit circuit.
         """
+
+        if isinstance(circuit, DAGCircuit):
+            circuit = dag_to_cppDag(circuit)
+        elif isinstance(circuit, QuantumCircuit):
+            circuit = QuantumCircuit_to_cppDag(circuit)
+        else:
+            raise TypeError('Error: SabreLayout pass only supports QuantumCircuit or DAGCircuit.')
+
+        qubits_used = list(circuit.get_qubits_used())
+
         # Try to get Initial layout. 
         if self.sabre_initial_layout is not None:
             self.model.set_layout({'initial_layout': self.sabre_initial_layout})
@@ -110,9 +113,37 @@ class SabreLayout(BasePass):
             used_subgraph = self.coupling_graph.subgraph(qubits_list)
             self.model.set_used_subgraph(used_subgraph)
 
-        elif self.model.get_layout()["initial_layout"] is None: 
-            self.model.set_layout({'initial_layout': Layout()})
+        if self.model.get_layout()["initial_layout"] is None:
+            if len(qubits_used) == self.coupling_graph.num_qubits:
+                layout = Layout()
+                # Method1: Choose a trivial initial_layout.
+                # layout.generate_trivial_layout(virtual_qubits=dag.circuit_qubits)
+                # Method2: Choose a random initial_layout.
+                layout.generate_random_layout(len(qubits_used), self.coupling_graph.num_qubits)
+                self.model.set_layout({'initial_layout': layout})
+                self.model.set_used_subgraph(self.coupling_graph)
+                print("random!")
 
+            elif len(qubits_used) < self.coupling_graph.num_qubits:
+                if self.initial_layout_method == 'random':
+                    layout = RandomLayout(coupling_graph=self.coupling_graph, qubits_list=qubits_used)
+                elif self.initial_layout_method == 'fidelity':
+                    layout = FidelityLayout(coupling_graph=self.coupling_graph, qubits_list=qubits_used)
+                elif self.initial_layout_method == 'dense':
+                    layout = DenseLayout(coupling_graph=self.coupling_graph, qubits_list=qubits_used)
+                else:
+                    raise ValueError("initial_layout_method can only be 'random', 'fidelity' or 'dense'.")
+
+                subgraph = layout.create_layout()
+                weight = list(list(subgraph.edges(data=True))[0][2].keys())[0]
+                sub_coupling_list = [(u, v, data[weight]) for u, v, data in subgraph.edges(data=True)]
+                used_subgraph = CouplingGraph(sub_coupling_list)
+                self.model.set_layout({'initial_layout': layout})
+                self.model.set_used_subgraph(used_subgraph)
+            else:
+                raise ValueError("The required qubits are more than the number of physical qubits.")
+
+        self._c_circuit = Cpp_CouplingCircuit(self.model.get_backend().get_property("used_subgraph").coupling_list)
 
         # Initialize SabreLayout C++ Class
         self._sabre_layout = Cpp_SabreLayout(
@@ -124,17 +155,8 @@ class SabreLayout(BasePass):
 
 
         # Run
-        if isinstance(circuit, DAGCircuit):
-            circuit = dag_to_cppDag(circuit)
-            optimized_circuit = self._sabre_layout.run(circuit)
-            optimized_circuit = cppDag_to_QuantumCircuit(optimized_circuit)
-        elif isinstance(circuit, QuantumCircuit):
-            circuit = QuantumCircuit_to_cppDag(circuit)
-            optimized_circuit = self._sabre_layout.run(circuit)
-            optimized_circuit =  cppDag_to_QuantumCircuit(optimized_circuit)
-        else:
-            raise TypeError('Error: SabreLayout pass only supports QuantumCircuit or DAGCircuit.')
-
+        optimized_circuit = self._sabre_layout.run(circuit)
+        optimized_circuit = cppDag_to_QuantumCircuit(optimized_circuit)
 
         self.model._layout["initial_layout"] = Layout(self._sabre_layout.get_model().initial_layout.get_v2p())
         self.model._layout["final_layout"] = Layout(self._sabre_layout.get_model().final_layout.get_v2p())

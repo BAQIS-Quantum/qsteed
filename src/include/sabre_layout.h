@@ -17,7 +17,7 @@ namespace sabre {
         std::shared_ptr<Model> model;
         std::unique_ptr<SabreRouting> routing;
         Heuristic heuristic = Heuristic::DISTANCE;
-        int max_iterations = 3; 
+        int max_iterations = 3;
 
 
     public:
