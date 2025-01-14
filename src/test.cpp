@@ -43,18 +43,17 @@ CouplingCircuit test_c_ciruit() {
     // };
 
     CouplingList c_list = {
-        {1, 2, 0.97f}, {2, 1, 0.97f},{2, 3, 0.982f}, {3, 2, 0.982f},
+        {2, 3, 0.982f}, {3, 2, 0.982f},
     };
-
 
     CouplingCircuit c_circuit{c_list};
 
 
     // std::map<std::pair<int, int>, double> fd = c_circuit.get_fidelity_dict();
-
     // std::vector<int> path = c_circuit.get_mini_path(1,4);
+    c_circuit.print();
 
-    // c_circuit.draw_self();
+
     return c_circuit;
 }
 

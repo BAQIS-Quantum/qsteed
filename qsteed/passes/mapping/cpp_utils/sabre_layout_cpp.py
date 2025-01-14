@@ -7,9 +7,9 @@ from .qc_converter import *
 from qsteed.passes.basepass import BasePass
 from qsteed.graph.couplinggraph import CouplingGraph
 from qsteed.passes.mapping.baselayout import Layout
-from qsteed.passes.mapping.layout.dense_layout import DenseLayout
-from qsteed.passes.mapping.layout.fidelity_layout import FidelityLayout
-from qsteed.passes.mapping.layout.random_layout import RandomLayout
+from qsteed.passes.mapping.layout.overall_layout_dense import DenseLayout
+from qsteed.passes.mapping.layout.overall_layout_fidelity import FidelityLayout
+from qsteed.passes.mapping.layout.overall_layout_random import RandomLayout
 from qsteed.passes.datadict import DataDict
 from qsteed.passes.model import Model
 
@@ -122,7 +122,6 @@ class SabreLayout(BasePass):
                 layout.generate_random_layout(len(qubits_used), self.coupling_graph.num_qubits)
                 self.model.set_layout({'initial_layout': layout})
                 self.model.set_used_subgraph(self.coupling_graph)
-                print("random!")
 
             elif len(qubits_used) < self.coupling_graph.num_qubits:
                 if self.initial_layout_method == 'random':

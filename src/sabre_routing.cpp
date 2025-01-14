@@ -330,9 +330,14 @@ double SabreRouting::_score_heuristic(  const DAGCircuit& dag,
                                         const std::vector<int>& front_layer, 
                                         const std::set<int>& extended_set, 
                                         const Layout& current_layout,
-                                        const SwapPos& swap_pos) const {
+                                        const SwapPos& swap_pos
+) const {
     Layout trial_layout = Layout(current_layout);
     trial_layout.swap(swap_pos.first, swap_pos.second);
+
+    double decay_fisrt = qubits_decay.at(swap_pos.first);
+    double decay_second = qubits_decay.at(swap_pos.second);
+
 
     if ( heuristic == Heuristic::DISTANCE) {
         double front_cost = _compute_distance_cost(dag, front_layer, trial_layout) / static_cast<double>(front_layer.size());
@@ -341,18 +346,18 @@ double SabreRouting::_score_heuristic(  const DAGCircuit& dag,
             const std::vector<int> extended_vector(extended_set.begin(), extended_set.end());
             extended_cost = _compute_distance_cost(dag, extended_vector , trial_layout) / static_cast<double>(extended_set.size());
         }
-        double total_cost = front_cost + extended_cost*extended_set_weight;
-        return total_cost * std::max(qubits_decay.at(swap_pos.first), qubits_decay.at(swap_pos.second));
+        double total_cost = front_cost + extended_cost * extended_set_weight;
+        return total_cost * std::max(decay_fisrt, decay_second);
     } 
     else if ( heuristic == Heuristic::FIDELITY ) {
         double noise_front_cost = _compute_fidelity_cost(dag, front_layer, trial_layout);
-        double noise_extended_cost = 0;
+        double noise_extended_cost = 0.0;
         if ( !extended_set.empty() ) {
              noise_extended_cost = _compute_fidelity_cost(dag, front_layer, trial_layout);
         }
-        double noise_total_cost = noise_front_cost + this->extended_set_weight * noise_extended_cost;
+        double noise_total_cost = noise_front_cost + extended_set_weight * noise_extended_cost;
 
-        return 0.5 * (this->qubits_decay.at(swap_pos.first) + this->qubits_decay.at(swap_pos.second)) * noise_total_cost;
+        return 0.5 * (decay_fisrt + decay_second) * noise_total_cost;
     }
     else {
         throw std::runtime_error("Unrecognized Heuristic type");

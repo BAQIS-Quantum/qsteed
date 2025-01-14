@@ -77,9 +77,11 @@ public:
         if (!this->empty()) {
             const node_pos_t node_index = add_node(node);
             std::vector<DagGraph::edge_descriptor> edges_to_remove;
+            edges_to_remove.reserve(boost::in_degree(end_node_pos, graph));
             std::vector<Edge> edges_to_add;
-            std::vector<qubit_t> node_remain_qubits = node.qubit_pos;  
-              
+            edges_to_add.reserve(boost::in_degree(end_node_pos, graph) * 2);
+            std::unordered_set<qubit_t> node_remain_qubits(node.qubit_pos.begin(), node.qubit_pos.end());
+
             DagGraph::in_edge_iterator ei, ei_end;
             for (boost::tie(ei, ei_end) = boost::in_edges(end_node_pos, graph); ei != ei_end; ++ei) {
                 const qubit_t qubit = graph[*ei].qubit_id; 
@@ -88,7 +90,7 @@ public:
                     edges_to_remove.push_back(*ei);
                     edges_to_add.emplace_back(boost::source(*ei, graph), node_index, qubit);
                     edges_to_add.emplace_back(node_index, end_node_pos, qubit);
-                    node_remain_qubits.erase(std::remove(node_remain_qubits.begin(), node_remain_qubits.end(), qubit), node_remain_qubits.end());     
+                    node_remain_qubits.erase(qubit);
                 }
             }
             for (const auto& edge: edges_to_remove) {
