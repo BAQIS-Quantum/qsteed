@@ -7,12 +7,11 @@ from .qc_converter import *
 from qsteed.passes.basepass import BasePass
 from qsteed.graph.couplinggraph import CouplingGraph
 from qsteed.passes.mapping.baselayout import Layout
-from qsteed.passes.mapping.layout.overall_layout_dense import DenseLayout
-from qsteed.passes.mapping.layout.overall_layout_fidelity import FidelityLayout
-from qsteed.passes.mapping.layout.overall_layout_random import RandomLayout
+from qsteed.passes.mapping.layout.overall_layout_dense import OverallLayoutDense
+from qsteed.passes.mapping.layout.overall_layout_fidelity import OverallLayoutFidelity
+from qsteed.passes.mapping.layout.overall_layout_random import OverallLayoutRandom
 from qsteed.passes.datadict import DataDict
 from qsteed.passes.model import Model
-
 
 
 class SabreLayout(BasePass):
@@ -35,7 +34,7 @@ class SabreLayout(BasePass):
         model: The model of backend.
     """
 
-    def __init__(self, 
+    def __init__(self,
                  coupling_list: List = None,
                  heuristic: str = "distance",
                  routing_pass=None,
@@ -50,7 +49,7 @@ class SabreLayout(BasePass):
         self.routing_pass = routing_pass
         self.max_iterations = max_iterations
         self.sabre_initial_layout: Layout = sabre_initial_layout
-        self.model :Model = None
+        self.model: Model = None
         self.heuristic: str = heuristic
         self.initial_layout_method: str = initial_layout_method
 
@@ -65,8 +64,7 @@ class SabreLayout(BasePass):
             model: The model to be set.
         """
         self.model = model
-    
-        # self.coupling_list = model.get_backend().get_property("coupling_list") 
+        # self.coupling_list = model.get_backend().get_property("coupling_list")
         # self._c_circuit = Cpp_CouplingCircuit(self.coupling_list)
         self.coupling_graph = self.model.get_backend().get_property('coupling_graph')
         self._c_circuit = Cpp_CouplingCircuit(self.coupling_graph.coupling_list)
@@ -74,10 +72,8 @@ class SabreLayout(BasePass):
         if self.model.datadict is None:
             self.model.datadict = DataDict()
 
-
     def get_model(self):
         return self.model
-
 
     def run(self, circuit: Union[QuantumCircuit, DAGCircuit]) -> QuantumCircuit:
         """
@@ -99,7 +95,7 @@ class SabreLayout(BasePass):
 
         qubits_used = list(circuit.get_qubits_used())
 
-        # Try to get Initial layout. 
+        # Try to get Initial layout.
         if self.sabre_initial_layout is not None:
             self.model.set_layout({'initial_layout': self.sabre_initial_layout})
             qubits_list = list(self.sabre_initial_layout.p2v.keys())
@@ -125,15 +121,15 @@ class SabreLayout(BasePass):
 
             elif len(qubits_used) < self.coupling_graph.num_qubits:
                 if self.initial_layout_method == 'random':
-                    layout = RandomLayout(coupling_graph=self.coupling_graph, qubits_list=qubits_used)
+                    layout = OverallLayoutRandom(coupling_graph=self.coupling_graph, qubits_list=qubits_used)
                 elif self.initial_layout_method == 'fidelity':
-                    layout = FidelityLayout(coupling_graph=self.coupling_graph, qubits_list=qubits_used)
+                    layout = OverallLayoutFidelity(coupling_graph=self.coupling_graph, qubits_list=qubits_used)
                 elif self.initial_layout_method == 'dense':
-                    layout = DenseLayout(coupling_graph=self.coupling_graph, qubits_list=qubits_used)
+                    layout = OverallLayoutDense(coupling_graph=self.coupling_graph, qubits_list=qubits_used)
                 else:
                     raise ValueError("initial_layout_method can only be 'random', 'fidelity' or 'dense'.")
 
-                subgraph = layout.create_layout()
+                subgraph = layout.overall_layout()
                 weight = list(list(subgraph.edges(data=True))[0][2].keys())[0]
                 sub_coupling_list = [(u, v, data[weight]) for u, v, data in subgraph.edges(data=True)]
                 used_subgraph = CouplingGraph(sub_coupling_list)
@@ -151,7 +147,6 @@ class SabreLayout(BasePass):
             self.heuristic,
             self.model.get_layout()["initial_layout"].v2p,
         )
-
 
         # Run
         optimized_circuit = self._sabre_layout.run(circuit)
