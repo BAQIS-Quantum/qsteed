@@ -57,12 +57,12 @@ else()
 endif()
 
 
-
 # File filter
-file(GLOB SOURCES "src/*.cpp")
-file(GLOB DAG_SOURCES "src/DAG/*.cpp")
-file(GLOB Vis_SOURCES "src/Vis/*.cpp")
-file(GLOB Model_SOURCES "src/Model/*.cpp")
+file(GLOB SOURCES "qsteedcpp/src/*.cpp")
+file(GLOB DAG_SOURCES "qsteedcpp/src/DAG/*.cpp")
+file(GLOB Vis_SOURCES "qsteedcpp/src/Vis/*.cpp")
+file(GLOB Model_SOURCES "qsteedcpp/src/Model/*.cpp")
+
 
 
 if(SKBUILD)
@@ -86,15 +86,15 @@ else()
       ${SOURCES} 
       ${DAG_SOURCES}
       ${Model_SOURCES}
-      "src/Vis/visualization.cpp"
+      "qsteedcpp/src/Vis/visualization.cpp"
   )
   target_include_directories(
     sabre_test 
     PRIVATE 
-      "src/include" 
-      "src/include/DAG" 
-      "src/include/Vis"
-      "src/include/Model"
+      "qsteedcpp/include" 
+      "qsteedcpp/include/DAG" 
+      "qsteedcpp/include/Vis" 
+      "qsteedcpp/include/Model"
   )    
   target_link_libraries(
     sabre_test 
@@ -115,18 +115,18 @@ endif()
 set(target sabre)
 pybind11_add_module(
   ${target} THIN_LTO
-    src/Binding/binding.cpp 
+    qsteedcpp/src/Binding/binding.cpp 
     ${SOURCES} 
     ${DAG_SOURCES}
     ${Model_SOURCES}
-    "src/Vis/visualization.cpp"
+    "qsteedcpp/src/Vis/visualization.cpp"
 )
 target_include_directories(
   ${target} PRIVATE 
-    "src/include" 
-    "src/include/DAG" 
-    "src/include/Vis"
-    "src/include/Model"
+    "qsteedcpp/include" 
+    "qsteedcpp/include/DAG" 
+    "qsteedcpp/include/Vis" 
+    "qsteedcpp/include/Model"
 )
 
 target_link_libraries(
