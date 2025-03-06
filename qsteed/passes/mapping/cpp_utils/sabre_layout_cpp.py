@@ -154,5 +154,5 @@ class SabreLayout(BasePass):
 
         self.model._layout["initial_layout"] = Layout(self._sabre_layout.get_model().initial_layout.get_v2p())
         self.model._layout["final_layout"] = Layout(self._sabre_layout.get_model().final_layout.get_v2p())
-
+        self.model.datadict['add_swap_count'] = self._sabre_layout.get_add_swap_count()
         return optimized_circuit

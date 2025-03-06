@@ -29,6 +29,8 @@ namespace sabre {
 
         Model get_model() const { return *(this->model); }
 
+        int get_add_swap_count() const { return this->routing->get_add_swap_count(); }
+
         DAGCircuit run_single(const DAGCircuit& dag);
 
         DAGCircuit run(const DAGCircuit& dag);

@@ -23,6 +23,7 @@ PYBIND11_MODULE(sabre, m) {
         .def(py::init<const CouplingCircuit&, int, const std::string&, LayoutStructure>())
         .def("run", &SabreLayout::run)
         .def("get_model", &SabreLayout::get_model)
+        .def("get_add_swap_count", &SabreLayout::get_add_swap_count)
         .def_readwrite("c_circuit", &SabreLayout::c_circuit)
         .def_readwrite("max_iterations", &SabreLayout::max_iterations)
         .def_readwrite("heuristic", &SabreLayout::heuristic);
@@ -32,6 +33,7 @@ PYBIND11_MODULE(sabre, m) {
         .def(py::init<const CouplingCircuit&, Heuristic>()) 
         .def("set_model", &SabreRouting::set_model)
         .def("get_model", &SabreRouting::get_model)
+        .def("get_add_swap_count", &SabreRouting::get_add_swap_count)
         .def("run", &SabreRouting::run)
         .def_readwrite("modify_dag", &SabreRouting::modify_dag);
 

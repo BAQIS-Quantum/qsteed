@@ -27,6 +27,8 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
         throw std::runtime_error("More virtual qubits than physical qubits.");
     }
 
+    this->add_swap_count = 0;
+
     for(const auto& qubit : qubits_used)
         this->qubits_decay[qubit] = 1;
 
@@ -125,7 +127,7 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
         const SwapPos best_swap = _get_best_swap(dag, swap_candidates, current_layout, front_layer, extended_set, unavailable_2qubits); 
         const InstructionNode swap_gate = InstructionNode("swap", std::vector<qubit_t>{best_swap.first, best_swap.second}); 
         _apply_gate(mapped_dag, swap_gate, current_layout);
-        this->add_swap_counter++;
+        this->add_swap_count++;
         current_layout.swap(best_swap.first, best_swap.second);
 
         // Update excute_gate_list, unavailable_2qubits

@@ -25,7 +25,7 @@ namespace sabre {
         const Matrix distance_matrix = c_circuit.get_distance_matrix();
         const std::map<std::pair<int, int>, double> fidelity_dict = c_circuit.get_fidelity_dict();
         std::unordered_map<int, int> qubits_decay = {};
-        int add_swap_counter = 0;
+        int add_swap_count = 0;
 
     public:
         SabreRouting(const CouplingCircuit& c_circuit) 
@@ -41,6 +41,11 @@ namespace sabre {
         Model get_model() { 
             return *(this->model); 
         }
+
+        int get_add_swap_count() const { 
+            return this->add_swap_count; 
+        }
+
 
         DAGCircuit run(const DAGCircuit& dag); 
 
