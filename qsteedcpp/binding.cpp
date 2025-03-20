@@ -1,21 +1,21 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "backend.h"
-#include "model.h"
-#include "coupling.h"
+#include "Model/backend.h"
+#include "Model/model.h"
+#include "Model/coupling.h"
+#include "Model/layout.h"
 #include "sabre_layout.h"
 #include "sabre_routing.h"
 #include "DAG/dag.h"
-#include "layout.h"
-#include "parameter.h"
+#include "DAG/parameter.h"
 #include "Vis/visualization.h"
 
 
 namespace py = pybind11;
 using namespace sabre;
 
-PYBIND11_MODULE(sabre, m) {
-    m.doc() = "Sabre Algorithm"; // optional module docstring
+PYBIND11_MODULE(qsteedcpp, m) {
+    m.doc() = "QSteed C++ Extensions";
 
     py::class_<SabreLayout>(m, "SabreLayout")
         .def(py::init<const CouplingCircuit&>())

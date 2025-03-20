@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <boost/graph/floyd_warshall_shortest.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
-#include "coupling.h"
+#include "Model/coupling.h"
 #include "Vis/visualization.h"
 
 

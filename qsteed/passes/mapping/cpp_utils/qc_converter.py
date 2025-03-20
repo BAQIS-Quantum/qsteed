@@ -1,8 +1,8 @@
-from qsteed.passes.mapping.cpp_utils.sabre import DAGCircuit as Cpp_DAGCircuit
-from qsteed.passes.mapping.cpp_utils.sabre import InstructionNode as Cpp_InstructionNode
-from qsteed.passes.mapping.cpp_utils.sabre import Parameter as Cpp_Parameter
-from qsteed.passes.mapping.cpp_utils.sabre import ParameterType as Cpp_ParameterType
-from qsteed.passes.mapping.cpp_utils.sabre import OperatorType
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import DAGCircuit as Cpp_DAGCircuit
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import InstructionNode as Cpp_InstructionNode
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import Parameter as Cpp_Parameter
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import ParameterType as Cpp_ParameterType
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import OperatorType
 
 
 from quafu import QuantumCircuit

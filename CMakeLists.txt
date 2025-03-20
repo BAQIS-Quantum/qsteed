@@ -58,10 +58,38 @@ endif()
 
 
 # File filter
-file(GLOB SOURCES "qsteedcpp/src/*.cpp")
-file(GLOB DAG_SOURCES "qsteedcpp/src/DAG/*.cpp")
-file(GLOB Vis_SOURCES "qsteedcpp/src/Vis/*.cpp")
-file(GLOB Model_SOURCES "qsteedcpp/src/Model/*.cpp")
+set(QSTEED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qsteedcpp")
+set(QARSER_DIR "${QSTEED_CPP_DIR}/Qarser")
+set(SABRE_DIR "${QSTEED_CPP_DIR}/SABRE")
+
+file(GLOB_RECURSE QARSER_SOURCES "${QARSER_DIR}/*.cpp")
+file(GLOB_RECURSE SABRE_SOURCES "${SABRE_DIR}/*.cpp")
+
+
+# 1. Build Qaser module
+add_library(qarser_lib STATIC ${QARSER_SOURCES})
+target_include_directories(
+  qarser_lib
+  PUBLIC
+    "${QARSER_DIR}/include"
+)
+
+# 2. Build SABRE module
+add_library(sabre_lib STATIC ${SABRE_SOURCES})
+target_include_directories(
+  sabre_lib 
+  PUBLIC 
+    "${SABRE_DIR}/include"
+)    
+target_link_libraries(
+  sabre_lib
+  PUBLIC
+    Boost::headers
+)
+if (BUILD_WITH_GRAPHVIZ)
+    target_link_libraries(sabre_lib PRIVATE gvc cgraph)
+endif()
+# target_compile_definitions(sabre_test PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
 
 
 
@@ -77,67 +105,49 @@ if(SKBUILD)
   set(PYBIND11_FINDPYTHON ON)
   find_package(pybind11 REQUIRED CONFIG)
 else()
-  # Build Debug
+  ## --  Build Testing -- ##
   set(PYBIND11_FINDPYTHON ON)
   add_subdirectory(extern/pybind11)
 
   add_executable(
-    sabre_test 
-      ${SOURCES} 
-      ${DAG_SOURCES}
-      ${Model_SOURCES}
-      "qsteedcpp/src/Vis/visualization.cpp"
+    qsteedcpp_test
+      "${QSTEED_CPP_DIR}/test.cpp"
   )
-  target_include_directories(
-    sabre_test 
-    PRIVATE 
-      "qsteedcpp/include" 
-      "qsteedcpp/include/DAG" 
-      "qsteedcpp/include/Vis" 
-      "qsteedcpp/include/Model"
-  )    
   target_link_libraries(
-    sabre_test 
-    PRIVATE 
-      Boost::headers
+    qsteedcpp_test PRIVATE
+      qarser_lib
+      sabre_lib
   )
-  if (BUILD_WITH_GRAPHVIZ)
-    target_link_libraries(sabre_test PRIVATE gvc cgraph)
-  endif()
-
-  # target_compile_definitions(sabre_test PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
 endif()
 
 # message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
 # message(STATUS "Python Version: ${Python_VERSION}")
 
 
-set(target sabre)
+set(target qsteedcpp)
 pybind11_add_module(
-  ${target} THIN_LTO
-    qsteedcpp/src/Binding/binding.cpp 
-    ${SOURCES} 
-    ${DAG_SOURCES}
-    ${Model_SOURCES}
-    "qsteedcpp/src/Vis/visualization.cpp"
+  ${target}
+    ${QARSER_SOURCES}
+    ${SABRE_SOURCES}
+    "${QSTEED_CPP_DIR}/binding.cpp"
 )
 target_include_directories(
-  ${target} PRIVATE 
-    "qsteedcpp/include" 
-    "qsteedcpp/include/DAG" 
-    "qsteedcpp/include/Vis" 
-    "qsteedcpp/include/Model"
+  ${target}
+  PUBLIC
+    "${QARSER_DIR}/include"
+    "${SABRE_DIR}/include"
 )
-
 target_link_libraries(
-  sabre 
+  ${target} 
   PRIVATE 
+    sabre_lib 
+    qarser_lib
     pybind11::headers
-    Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
-  target_link_libraries(sabre PRIVATE gvc cgraph)
+  target_link_libraries(${target} PRIVATE gvc cgraph)
 endif()
 
+
 # Install
-install(TARGETS sabre LIBRARY DESTINATION .)
+install(TARGETS ${target} LIBRARY DESTINATION .)

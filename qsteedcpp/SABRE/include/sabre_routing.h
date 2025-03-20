@@ -3,10 +3,10 @@
 #include <algorithm>
 #include <cmath>
 #include "sabre_core.h"
-#include "model.h"
+#include "Model/model.h"
+#include "Model/coupling.h"
+#include "Model/layout.h"
 #include "DAG/dag.h"
-#include "coupling.h"
-#include "layout.h"
 
 namespace sabre {
 

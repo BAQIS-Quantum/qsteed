@@ -1,9 +1,9 @@
 #include <iostream>
 #include "sabre_layout.h"
 #include "DAG/dag.h"
-#include "coupling.h"
-#include "visualization.h"
-#include "layout.h"
+#include "Model/coupling.h"
+#include "Model/layout.h"
+#include "Vis/visualization.h"
 
 #include <boost/graph/graph_utility.hpp>
 #include <iomanip>

@@ -1,6 +1,6 @@
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import SabreLayout as Cpp_SabreLayout
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import CouplingCircuit as Cpp_CouplingCircuit
 from typing import Union
-from qsteed.passes.mapping.cpp_utils.sabre import SabreLayout as Cpp_SabreLayout
-from qsteed.passes.mapping.cpp_utils.sabre import CouplingCircuit as Cpp_CouplingCircuit
 from .dag_converter import *
 from .qc_converter import *
 

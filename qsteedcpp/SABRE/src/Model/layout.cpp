@@ -1,4 +1,4 @@
-#include "layout.h"
+#include "Model/layout.h"
 #include <numeric>
 
 Layout generate_random_layout(int virtual_qubits, int physical_qubits) {

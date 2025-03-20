@@ -20,12 +20,12 @@ using DagGraph = boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirect
 
 class DAGCircuit
 /*
-   A directed acyclic graph (DAG) representation of a quantum circuit.     
+   A directed acyclic graph (DAG) representation of a quantum circuit.
 
    Using boost graph library to represent the DAG.
-   Each vertex is an InstructionNode which represents a quantum gate or operation. 
+   Each vertex is an InstructionNode which represents a quantum gate or operation.
    Each edge is an EdgeProperties which represents qubit.
-*/ 
+*/
 {
 public:
     DagGraph graph;
@@ -47,7 +47,7 @@ public:
         boost::add_edge(from, to, ep, graph); 
     }
     void add_edge(const int from, const int to, const qubit_t qubit_id) {
-        boost::add_edge(from, to, EdgeProperties{qubit_id}, graph); 
+        boost::add_edge(from, to, EdgeProperties{qubit_id}, graph);
     }
 
     int get_num_nodes() const {

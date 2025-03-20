@@ -1,6 +1,6 @@
-from qsteed.passes.mapping.cpp_utils.sabre import SabreRouting as Cpp_SabreRouting
-from qsteed.passes.mapping.cpp_utils.sabre import CouplingCircuit as Cpp_CouplingCircuit
-from qsteed.passes.mapping.cpp_utils.sabre import Heuristic
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import SabreRouting as Cpp_SabreRouting
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import CouplingCircuit as Cpp_CouplingCircuit
+from qsteed.passes.mapping.cpp_utils.qsteedcpp import Heuristic
 
 from .dag_converter import *
 from .qc_converter import *
