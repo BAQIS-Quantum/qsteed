@@ -1,14 +1,11 @@
 #pragma once
 
-#ifdef WITH_GRAPHVIZ
 #include <string>
 #include <vector>
-#include "sabre_core.h"
-#include "DAG/dag.h"
-#include "coupling.h"
+#include "dag.h"
+#include "Model/coupling.h"
 
-
-namespace Vis {
+#ifdef WITH_GRAPHVIZ
 
     /**
      * @brief Draws a graph using the specified graph object.
@@ -41,6 +38,5 @@ namespace Vis {
      * @param dot_str The DOT string representation of the graph.
      */
     void draw_dot(const std::string dot_str);
-}
 
-#endif
+#endif // WITH_GRAPHVIZ

@@ -1,5 +1,6 @@
 ﻿#ifdef WITH_GRAPHVIZ
 
+#include "dag.h"
 #include "visualization.h"
 #include "writer.h"
 #include <iostream>
@@ -8,7 +9,6 @@
 
 #include <graphviz/gvc.h>
 
-namespace Vis {
 
     void draw_graph(const DagGraph& graph) { 
         draw_dot(graph_to_dot(graph));
@@ -63,6 +63,5 @@ namespace Vis {
         gvFreeContext(gvc);
     }
 
-}
 
 #endif

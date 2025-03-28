@@ -28,7 +28,7 @@ namespace qarser {
 
         void report() {
             if (empty())
-                std::cout << "Done !" << std::endl;
+                std::cout << "SA Done!" << std::endl;
             else
                 this->print();
         }

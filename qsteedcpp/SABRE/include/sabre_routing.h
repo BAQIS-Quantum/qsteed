@@ -6,7 +6,7 @@
 #include "Model/model.h"
 #include "Model/coupling.h"
 #include "Model/layout.h"
-#include "DAG/dag.h"
+#include "dag.h"
 
 namespace sabre {
 

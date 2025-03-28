@@ -6,9 +6,11 @@
 #include "Model/layout.h"
 #include "sabre_layout.h"
 #include "sabre_routing.h"
-#include "DAG/dag.h"
-#include "DAG/parameter.h"
-#include "Vis/visualization.h"
+#include "dag.h"
+#include "parameter.h"
+#include "visualization.h"
+#include "parser.h"
+#include "AST/dag_converter.hpp"
 
 
 namespace py = pybind11;
@@ -118,9 +120,9 @@ PYBIND11_MODULE(qsteedcpp, m) {
         .def("num_qubits", &DAGCircuit::num_qubits)
         .def("vertices", [](DAGCircuit &s) {return py::make_iterator(s.vertex_begin(), s.vertex_end());})
         .def("reverse", &DAGCircuit::reverse)
-#ifdef WITH_GRAPHVIZ
-        .def("draw", &DAGCircuit::draw)
-#endif
+// #ifdef WITH_GRAPHVIZ
+//         .def("draw", &DAGCircuit::draw)
+// #endif
         .def_readwrite("graph", &DAGCircuit::graph)
         .def_readwrite("measure", &DAGCircuit::measure);
 
@@ -172,6 +174,13 @@ PYBIND11_MODULE(qsteedcpp, m) {
         .def_readwrite("value", &Parameter::value)
         .def_readwrite("tunable", &Parameter::tunable);
 
+
+    py::class_<qarser::Parser>(m, "Parser")
+        .def(py::init<const std::string&>())
+        .def("parse", &qarser::Parser::parse);
+
+    
+    m.def("qasm_to_dag", &qarser::qasm_to_dag);
 
 #ifdef WITH_GRAPHVIZ
     m.def("hello", []() { return "Hello, Graphviz!"; });

@@ -7,16 +7,13 @@
 #include <boost/graph/labeled_graph.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/copy.hpp>
-#include "sabre_core.h"
 #include "instructionNode.h"
 #include "edge.h"
 
-#include "vendor/prettyprint.hpp"
-
-using namespace sabre;
+// #include "vendor/prettyprint.hpp"
 
 using DagGraph = boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, InstructionNode, EdgeProperties>;
-
+void draw_graph(const DagGraph& graph);
 
 class DAGCircuit
 /*
@@ -140,9 +137,11 @@ public:
         return boost::vertices(graph).second;
     }
 
-#ifdef WITH_GRAPHVIZ
-    void draw() const;
-#endif
+// #ifdef WITH_GRAPHVIZ
+//     void draw() const {
+//         draw_graph(this->graph);
+//     }
+// #endif
 
 
 private:
@@ -163,4 +162,8 @@ private:
 
 };
 
-DagGraph reverse_DagGraph(const DagGraph& graph);
+inline DagGraph reverse_DagGraph(const DagGraph& graph) {
+    DagGraph rev_graph;
+    boost::copy_graph(boost::make_reverse_graph(graph), rev_graph);
+    return rev_graph;
+}

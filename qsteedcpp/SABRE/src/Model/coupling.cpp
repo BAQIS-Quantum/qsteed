@@ -3,7 +3,7 @@
 #include <boost/graph/floyd_warshall_shortest.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include "Model/coupling.h"
-#include "Vis/visualization.h"
+#include "visualization.h"
 
 
 CouplingCircuit::CouplingCircuit(CouplingList c_list) : c_list(c_list) {

@@ -9,6 +9,5 @@ include tests/*.json
 
 # Include cpp source code & Cmakefile
 recursive-include qsteedcpp *.cpp *.hpp *.h
-recursive-include qsteedcpp *.cpp *.hpp *.h
 recursive-include cmake *.cmake
 include CMakeLists.txt

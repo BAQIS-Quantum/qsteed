@@ -1,9 +1,9 @@
 #include <iostream>
 #include "sabre_layout.h"
-#include "DAG/dag.h"
+#include "dag.h"
 #include "Model/coupling.h"
 #include "Model/layout.h"
-#include "Vis/visualization.h"
+#include "visualization.h"
 
 #include <boost/graph/graph_utility.hpp>
 #include <iomanip>
@@ -62,14 +62,14 @@ void test_sabre_routing() {
     DAGCircuit dag = test_dag();
 
     // c_circuit.draw_self();
-    SabreRouting sabre_routing{c_circuit};
+    sabre::SabreRouting sabre_routing{c_circuit};
     sabre_routing.run(dag);
 }
 
 
 void test_sabre_layout() {
     CouplingCircuit c_circuit = test_c_ciruit();
-    SabreLayout sabre_layout{c_circuit, 3, "fidelity"};
+    sabre::SabreLayout sabre_layout{c_circuit, 3, "fidelity"};
     DAGCircuit dag = test_dag();
     // Vis::draw_graph(dag.graph);
     sabre_layout.run(dag);

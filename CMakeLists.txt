@@ -61,9 +61,33 @@ endif()
 set(QSTEED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qsteedcpp")
 set(QARSER_DIR "${QSTEED_CPP_DIR}/Qarser")
 set(SABRE_DIR "${QSTEED_CPP_DIR}/SABRE")
+set(DAG_DIR "${QSTEED_CPP_DIR}/DAG")
 
 file(GLOB_RECURSE QARSER_SOURCES "${QARSER_DIR}/*.cpp")
 file(GLOB_RECURSE SABRE_SOURCES "${SABRE_DIR}/*.cpp")
+file(GLOB_RECURSE DAG_SOURCES "${DAG_DIR}/*.cpp")
+
+include_directories(
+  "${QSTEED_CPP_DIR}"
+)
+
+# 0. Build DAG module
+add_library(dag_lib STATIC ${DAG_SOURCES})
+target_include_directories(
+  dag_lib
+  PUBLIC
+    "${DAG_DIR}/include"
+    "${SABRE_DIR}/include"
+)
+target_link_libraries(
+  dag_lib
+  PUBLIC
+    Boost::headers
+)
+if (BUILD_WITH_GRAPHVIZ)
+    target_link_libraries(dag_lib PRIVATE gvc cgraph)
+endif()
+
 
 
 # 1. Build Qaser module
@@ -72,6 +96,14 @@ target_include_directories(
   qarser_lib
   PUBLIC
     "${QARSER_DIR}/include"
+    "${DAG_DIR}/include"
+    "${SABRE_DIR}/include" 
+)
+target_link_libraries(
+  qarser_lib
+  PUBLIC
+    dag_lib
+    Boost::headers
 )
 
 # 2. Build SABRE module
@@ -80,10 +112,12 @@ target_include_directories(
   sabre_lib 
   PUBLIC 
     "${SABRE_DIR}/include"
+    "${DAG_DIR}/include"
 )    
 target_link_libraries(
   sabre_lib
   PUBLIC
+    dag_lib
     Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
@@ -111,10 +145,13 @@ else()
 
   add_executable(
     qsteedcpp_test
-      "${QSTEED_CPP_DIR}/test.cpp"
+      # "${QSTEED_CPP_DIR}/test.cpp"
+      "${QARSER_DIR}/src/test.cpp"
+
   )
   target_link_libraries(
     qsteedcpp_test PRIVATE
+      dag_lib
       qarser_lib
       sabre_lib
   )
@@ -136,10 +173,12 @@ target_include_directories(
   PUBLIC
     "${QARSER_DIR}/include"
     "${SABRE_DIR}/include"
+    "${DAG_DIR}/include"
 )
 target_link_libraries(
   ${target} 
   PRIVATE 
+    dag_lib
     sabre_lib 
     qarser_lib
     pybind11::headers

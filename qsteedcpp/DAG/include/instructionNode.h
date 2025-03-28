@@ -1,10 +1,15 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "sabre_core.h"
+// #include "sabre_core.h"
 #include "parameter.h"
 
-using namespace sabre;
+// using namespace sabre;
+using qubit_t = int;
+using cbit_t = int;
+using node_pos_t = uint64_t;
+using edge_pos_t = std::pair<node_pos_t, node_pos_t>;
+
 
 struct InstructionNode 
 {

@@ -10,6 +10,7 @@
 
 #include "vendor/prettyprint.hpp"
 
+namespace sabre {
 /*
     Return a @c DAGCircuit : The original dag or the mapped_dag with added swap gate depending on modify_flag.
 */
@@ -392,3 +393,5 @@ double SabreRouting::_compute_fidelity_cost(    const DAGCircuit& dag,
     }
     return cost;
 }
+
+}; // namespace sabre

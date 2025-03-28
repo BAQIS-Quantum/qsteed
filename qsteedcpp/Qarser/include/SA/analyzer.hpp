@@ -83,8 +83,9 @@ namespace qarser {
             context.get_symbols().add_gate("rz", 1, 1);  // 绕Z轴旋转
 
             // QE Standard User-Defined Gates
-            context.get_symbols().add_gate("cz", 0, 2);   // 受控-Z门
+            context.get_symbols().add_gate("cx", 0, 2);   // 受控-X门
             context.get_symbols().add_gate("cy", 0, 2);   // 受控-Y门
+            context.get_symbols().add_gate("cz", 0, 2);   // 受控-Z门
             context.get_symbols().add_gate("ch", 0, 2);   // 受控-H门
             context.get_symbols().add_gate("ccx", 0, 3);  // Toffoli门
             context.get_symbols().add_gate("crz", 1, 2);  // 受控-RZ门

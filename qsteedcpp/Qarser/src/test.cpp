@@ -3,6 +3,8 @@
 #include "parser.h"
 #include "AST/printer.hpp"
 #include "SA/analyzer.hpp"
+#include "AST/dag_converter.hpp"
+#include "visualization.h"
 
 std::string debug_qasm2 = R"(
     OPENQASM 2.0;
@@ -96,11 +98,29 @@ void test_sa() {
 }
 
 
+void test_dag_converter() {
+    qarser::Parser parser(debug_qasm2);
+    auto ast = parser.parse();
+
+    qarser::AstPrinter printer;
+    ast->accept(printer);
+
+    qarser::SemanticAnalyzer sa;
+    sa.analyze(*ast);
+
+    qarser::AstToDagConverter converter;
+    ast->accept(converter);
+
+    draw_graph(converter.dag.graph);
+    // std::cout << "DAGCircuit: " << std::endl;
+    // std::cout << converter.dag.graph << std::endl;
+}
 
 
 int main() {
     // test_lexer();
-    test_parser();
-    test_sa();
+    // test_parser();
+    // test_sa();
+    test_dag_converter();
     return 0;
 }

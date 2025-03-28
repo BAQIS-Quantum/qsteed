@@ -1,7 +1,6 @@
 #pragma once
+#include <dag.h>
 
-namespace Vis
-{
     class DagNodeWriter {
     public:
         DagGraph g;
@@ -62,5 +61,3 @@ namespace Vis
             os << "[label=\"" << edge.fidelity << "\"]";
         }
     };
-
-}
