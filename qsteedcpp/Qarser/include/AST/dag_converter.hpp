@@ -94,20 +94,5 @@ namespace qarser {
     };
 
 
-    inline DAGCircuit qasm_to_dag(const std::string& src) {
-        qarser::Parser parser{src};
-        auto ast = parser.parse();
-
-        // qarser::AstPrinter printer;
-        // ast->accept(printer);
-
-        qarser::SemanticAnalyzer sa;
-        sa.analyze(*ast);
-
-        qarser::AstToDagConverter converter;
-        ast->accept(converter);
-        
-        return converter.dag;
-    }
 
 };

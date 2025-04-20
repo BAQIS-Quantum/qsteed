@@ -14,6 +14,9 @@ private:
 
 public:
     Parser(const std::string& source);
+    Parser();
+
+
     std::unique_ptr<Program> parse();
 
 private:

@@ -11,6 +11,7 @@
 #include "visualization.h"
 #include "parser.h"
 #include "AST/dag_converter.hpp"
+#include "compiler.h"
 
 
 namespace py = pybind11;
@@ -179,7 +180,16 @@ PYBIND11_MODULE(qsteedcpp, m) {
         .def(py::init<const std::string&>())
         .def("parse", &qarser::Parser::parse);
 
-    
+    py::class_<qarser::QasmCompiler>(m, "QasmCompiler")
+        .def(py::init<const std::string&, bool>())
+        .def("parse", &qarser::QasmCompiler::parse)
+        .def("analyze", &qarser::QasmCompiler::analyze)
+        .def("convert_to_dag", &qarser::QasmCompiler::convert_to_dag)
+        .def("load_from_file", &qarser::QasmCompiler::load_from_file)
+        .def("print_source", &qarser::QasmCompiler::print_source)
+        .def("get_dag", &qarser::QasmCompiler::get_dag);
+
+
     m.def("qasm_to_dag", &qarser::qasm_to_dag);
 
 #ifdef WITH_GRAPHVIZ
