@@ -1,0 +1,72 @@
+name: Build Wheels
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  build-wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14]
+        python-version: ["3.10", "3.11"]
+        include:
+          - os: macos-14
+            architecture: arm64
+          - os: ubuntu-latest
+            architecture: x64
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: ${{ matrix.architecture }}
+
+    - name: Install C++ dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install boost
+        brew install graphviz
+
+    - name: Install C++ dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libboost-all-dev
+        sudo apt-get install -y graphviz graphviz-dev
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build wheel setuptools scikit-build cmake ninja
+        pip install 'pyquafu>=0.4.1'
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Build wheel
+      run: |
+        python -m build
+
+    - name: Upload wheels to release
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/*.whl
+        tag_name: ${{ github.event.release.tag_name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload wheels as artifacts
+      if: github.event_name == 'workflow_dispatch'
+      uses: actions/upload-artifact@v3
+      with:
+        name: wheels-${{ matrix.os }}-${{ matrix.python-version }}
+        path: dist/*.whl 

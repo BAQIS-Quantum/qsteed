@@ -62,10 +62,12 @@ set(QSTEED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qsteedcpp")
 set(QARSER_DIR "${QSTEED_CPP_DIR}/Qarser")
 set(SABRE_DIR "${QSTEED_CPP_DIR}/SABRE")
 set(DAG_DIR "${QSTEED_CPP_DIR}/DAG")
+set(GATES_DIR "${QSTEED_CPP_DIR}/Gates")
 
 file(GLOB_RECURSE QARSER_SOURCES "${QARSER_DIR}/*.cpp")
 file(GLOB_RECURSE SABRE_SOURCES "${SABRE_DIR}/*.cpp")
 file(GLOB_RECURSE DAG_SOURCES "${DAG_DIR}/*.cpp")
+file(GLOB_RECURSE GATES_SOURCES "${GATES_DIR}/*.cpp")
 
 include_directories(
   "${QSTEED_CPP_DIR}"
@@ -98,6 +100,7 @@ target_include_directories(
     "${QARSER_DIR}/include"
     "${DAG_DIR}/include"
     "${SABRE_DIR}/include" 
+    "${GATES_DIR}/include"
 )
 target_link_libraries(
   qarser_lib
@@ -187,6 +190,28 @@ if (BUILD_WITH_GRAPHVIZ)
   target_link_libraries(${target} PRIVATE gvc cgraph)
 endif()
 
-
-# Install
 install(TARGETS ${target} LIBRARY DESTINATION .)
+
+
+## -- Module Testing -- ##
+option(BUILD_TESTS "Build test programs" OFF)
+message(STATUS "BUILD_TESTS is set to ${BUILD_TESTS}")
+
+if(BUILD_TESTS)
+    enable_testing()
+    
+    # Google Test
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG release-1.12.1
+    )
+    FetchContent_MakeAvailable(googletest)
+    
+    # Test Modules
+    add_subdirectory(${QSTEED_CPP_DIR}/Gates/tests)
+    # add_subdirectory(Qarser/tests)
+    # add_subdirectory(DAG/tests)
+    # add_subdirectory(SABRE/tests)
+endif()

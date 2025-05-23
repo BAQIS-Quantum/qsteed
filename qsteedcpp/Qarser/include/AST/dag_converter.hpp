@@ -4,8 +4,8 @@
 #include "SA/analyzer.hpp"
 #include "parser.h"
 #include "dag.h"
-
-
+#include <unordered_set>
+#include "gates/standard_gates.h"
 
 namespace qarser {
 
@@ -14,7 +14,60 @@ namespace qarser {
         DAGCircuit dag;
         std::unordered_map<std::string, int> qreg;
         std::unordered_map<std::string, int> creg;
-        
+
+        // 支持的门
+        bool check_supported_gate = false;
+        static inline const std::unordered_set<std::string> supported_gates = []() {
+            std::unordered_set<std::string> gates;
+            
+            // 添加所有标准门
+            gates.insert(::Gate::IdGate::NAME);        // "ID"
+            gates.insert(::Gate::PauliXGate::NAME);    // "X"
+            gates.insert(::Gate::PauliYGate::NAME);    // "Y"
+            gates.insert(::Gate::PauliZGate::NAME);    // "Z"
+            gates.insert(::Gate::HadamardGate::NAME);  // "H"
+            gates.insert(::Gate::SGate::NAME);         // "S"
+            gates.insert(::Gate::SdgGate::NAME);       // "Sdg"
+            gates.insert(::Gate::TGate::NAME);         // "T"
+            gates.insert(::Gate::TdgGate::NAME);       // "Tdg"
+            gates.insert(::Gate::SXGate::NAME);        // "SX"
+            gates.insert(::Gate::SXdgGate::NAME);      // "SXdg"
+            gates.insert(::Gate::SYGate::NAME);        // "SY"
+            gates.insert(::Gate::SYdgGate::NAME);      // "SYdg"
+            gates.insert(::Gate::WGate::NAME);         // "W"
+            gates.insert(::Gate::SWGate::NAME);        // "SW"
+            gates.insert(::Gate::SWdgGate::NAME);      // "SWdg"
+            gates.insert(::Gate::CNOTGate::NAME);      // "CNOT"
+            gates.insert(::Gate::CZGate::NAME);        // "CZ"
+            gates.insert(::Gate::SWAPGate::NAME);      // "SWAP"
+            gates.insert(::Gate::ISwapGate::NAME);     // "ISWAP"
+            gates.insert(::Gate::ToffoliGate::NAME);   // "CCNOT"
+            
+            // 添加参数化门
+            gates.insert(::Gate::RXGate::NAME);        // "RX"
+            gates.insert(::Gate::RYGate::NAME);        // "RY"
+            gates.insert(::Gate::RZGate::NAME);        // "RZ"
+            gates.insert(::Gate::U3Gate::NAME);        // "U3"
+            gates.insert(::Gate::PhaseGate::NAME);     // "P"
+            gates.insert(::Gate::RXXGate::NAME);       // "RXX"
+            gates.insert(::Gate::RYYGate::NAME);       // "RYY"
+            gates.insert(::Gate::RZZGate::NAME);       // "RZZ"
+            
+            // 添加新的受控门
+            gates.insert(::Gate::CYGate::NAME);        // "CY"
+            gates.insert(::Gate::CSGate::NAME);        // "CS"
+            gates.insert(::Gate::CTGate::NAME);        // "CT"
+            gates.insert(::Gate::CRXGate::NAME);       // "CRX"
+            gates.insert(::Gate::CRYGate::NAME);       // "CRY"
+            gates.insert(::Gate::CRZGate::NAME);       // "CRZ"
+            
+            // 添加多控制门
+            gates.insert(::Gate::MCXGate::NAME);       // "MCX"
+            gates.insert(::Gate::MCYGate::NAME);       // "MCY"
+            gates.insert(::Gate::MCZGate::NAME);       // "MCZ"
+            
+            return gates;
+        }();
 
     public:
         void visit(Program& program) {
@@ -35,6 +88,17 @@ namespace qarser {
         }
 
         void visit(Gate& gate) {
+            // 检查门是否被支持
+            if (check_supported_gate) {
+                if (supported_gates.find(gate.name) == supported_gates.end()) {
+                    std::string error_msg = "Unsupported gate: " + gate.name + "\nSupported gates are:\n";
+                    for (const auto& supported_gate : supported_gates) {
+                    error_msg += "  - " + supported_gate + "\n";
+                    }
+                    throw std::runtime_error(error_msg);
+                }
+            }
+
             std::vector<qubit_t> qubit_pos = get_gate_pos(gate);
             if (qubit_pos.empty()) {
                 throw std::runtime_error("No qubits found for gate: " + gate.name);
@@ -43,7 +107,6 @@ namespace qarser {
             InstructionNode node(gate.name, qubit_pos);
             dag.add_instruction_node_end(node);
         }
-
 
     private:
         std::vector<int> last_qubit_node;
@@ -69,8 +132,6 @@ namespace qarser {
             return it->second + index;
         }
 
-
-
         std::vector<qubit_t> get_gate_pos(const Gate& gate) {
             std::vector<qubit_t> qubit_pos;
             for (const auto& qubit : gate.qubits) {
@@ -89,10 +150,6 @@ namespace qarser {
             }
             return qubit_pos;
         }
-
-
     };
 
-
-
-};
+} // namespace qarser
