@@ -51,6 +51,17 @@ jobs:
         pip install 'pyquafu==0.4.2'
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+    - name: Debug directory structure
+      run: |
+        pwd
+        ls -la
+        echo "CMakeLists.txt exists:"
+        test -f CMakeLists.txt && echo "Yes" || echo "No"
+        echo "Python version:"
+        python --version
+        echo "Installed packages:"
+        pip list
+
     - name: Build wheel
       run: |
         python -m build
