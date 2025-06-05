@@ -1,5 +1,8 @@
 ## Project Setting
 cmake_minimum_required(VERSION 3.15...3.29)
+
+# Set vcpkg toolchain file
+
 project(sabre LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -14,10 +17,17 @@ endif()
 # Set CMake module path to include custom modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
+# Add conda environment paths for Boost
+if(DEFINED ENV{CONDA_PREFIX})
+    list(APPEND CMAKE_PREFIX_PATH $ENV{CONDA_PREFIX})
+    list(APPEND CMAKE_PREFIX_PATH "$ENV{CONDA_PREFIX}/Library")
+endif()
+
 if (MSVC)
   cmake_policy(SET CMP0167 NEW)
   add_compile_options(/wd4244) # Disable warning C4244 (Conversion from 'int' to 'float', possible loss of data)
   add_compile_options(/wd4819) # Disable warning C4819 (Code page in Unicode build)
+  add_definitions(-D_USE_MATH_DEFINES)
 endif()
 
 # Find Boost

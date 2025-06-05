@@ -108,9 +108,9 @@ std::vector<int> CouplingCircuit::get_mini_path(int source, int target) const {
 
     boost::dijkstra_shortest_paths(
         graph, 
-        source,
-        boost::predecessor_map(&predecessors[0])
-            .distance_map(&distances[0])
+        boost::vertex(source, graph),
+        boost::predecessor_map(boost::make_iterator_property_map(predecessors.begin(), boost::get(boost::vertex_index, graph)))
+            .distance_map(boost::make_iterator_property_map(distances.begin(), boost::get(boost::vertex_index, graph)))
             .weight_map(boost::make_constant_property<CGEdgeDesc>(1.0))
     );
 
