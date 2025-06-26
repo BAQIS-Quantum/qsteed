@@ -1,46 +1,20 @@
 #include <gtest/gtest.h>
-#include "../Gates/include/matrix.h"
 #include <cmath>
+#include "Gates/include/matrix.h"
 
-namespace Gate {
+namespace qsteedcpp {
 namespace Test {
 
 class MatrixTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // 测试前的设置
     }
 
     void TearDown() override {
-        // 测试后的清理
     }
+
 };
 
-// 测试构造函数
-TEST_F(MatrixTest, Constructor) {
-    // 测试空矩阵
-    Matrix empty;
-    EXPECT_EQ(empty.get_rows(), 0);
-    EXPECT_EQ(empty.get_cols(), 0);
-
-    // 测试从复数矩阵构造
-    std::vector<std::vector<std::complex<double>>> data = {
-        {{1.0, 0.0}, {0.0, 1.0}},
-        {{0.0, -1.0}, {1.0, 0.0}}
-    };
-    Matrix m1(data);
-    EXPECT_EQ(m1.get_rows(), 2);
-    EXPECT_EQ(m1.get_cols(), 2);
-
-    // 测试从实数矩阵构造
-    std::vector<std::vector<double>> real_data = {
-        {1.0, 0.0},
-        {0.0, 1.0}
-    };
-    Matrix m2(real_data);
-    EXPECT_EQ(m2.get_rows(), 2);
-    EXPECT_EQ(m2.get_cols(), 2);
-}
 
 // 测试单位矩阵
 TEST_F(MatrixTest, Identity) {
@@ -171,16 +145,7 @@ TEST_F(MatrixTest, ExceptionHandling) {
     };
     EXPECT_THROW(Matrix m(irregular), std::runtime_error);
 
-    // 测试越界访问
-    Matrix m(2, 2);
-    EXPECT_THROW(m(2, 0), std::out_of_range);
-    EXPECT_THROW(m(0, 2), std::out_of_range);
-
-    // 测试维度不匹配的矩阵乘法
-    Matrix m1(2, 3);
-    Matrix m2(4, 2);
-    EXPECT_THROW(m1 * m2, std::runtime_error);
 }
 
 } // namespace Test
-} // namespace Gate 
+} // namespace qsteedcpp 

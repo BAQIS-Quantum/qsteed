@@ -9,7 +9,7 @@ description = "Quantum Software of Compilation for supporting Real Quantum devic
 authors = [
     {name = "Xuhongze", email = "xhzby1995@163.com"}
 ]
-license = {text = "Apache-2.0 License"}
+license = "Apache-2.0"
 keywords = ["qsteed", "quantum compiling", "quantum computing", "quantum operating system"]
 requires-python = ">=3.10"
 

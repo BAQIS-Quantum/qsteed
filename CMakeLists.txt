@@ -36,8 +36,39 @@ if(Boost_FOUND)
 endif()
 
 
+# FetchContent for dependencies
+include(FetchContent)
+
+# Eigen3
+set(EIGEN_BUILD_DOC OFF CACHE BOOL "Disable Eigen documentation")
+set(EIGEN_BUILD_UNSUPPORTED OFF CACHE BOOL "Disable Eigen unsupported module")
+set(EIGEN_BUILD_PKGCONFIG OFF CACHE BOOL "Disable Eigen pkgconfig")
+set(EIGEN_BUILD_BENCHMARKS OFF CACHE BOOL "Disable Eigen benchmarks")
+set(BUILD_TESTING OFF CACHE BOOL "Disable all testing") # Autodiff will conflict with Eigen's testing
+FetchContent_Declare(
+    Eigen3
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+    GIT_TAG 3.4.0
+    GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(Eigen3)
+
+
+# autodiff
+set(AUTODIFF_BUILD_TESTS OFF CACHE BOOL "Disable autodiff tests")
+set(AUTODIFF_BUILD_PYTHON OFF CACHE BOOL "Disable autodiff Python bindings")
+set(AUTODIFF_BUILD_EXAMPLES OFF CACHE BOOL "Disable autodiff examples")
+FetchContent_Declare(
+    autodiff
+    GIT_REPOSITORY https://github.com/autodiff/autodiff
+    GIT_TAG v1.0.3
+    GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(autodiff)
+
 # Find Graphviz
-option(BUILD_WITH_GRAPHVIZ "Build with Graphviz support" OFF)
+# option(BUILD_WITH_GRAPHVIZ "Build with Graphviz support" OFF)
+set(BUILD_WITH_GRAPHVIZ OFF CACHE BOOL "Disable Graphviz support")
 message(STATUS "BUILD_WITH_GRAPHVIZ is set to ${BUILD_WITH_GRAPHVIZ}")
 
 # set(GRAPHVIZ_ROOT "" CACHE PATH "Path to Graphviz installation")
@@ -73,17 +104,34 @@ include_directories(
   "${QSTEED_CPP_DIR}"
 )
 
-# 0. Build DAG module
+# 0. Build Gates module)
+add_library(gates_lib INTERFACE)
+target_include_directories(
+  gates_lib
+  INTERFACE
+    "${GATES_DIR}/include"
+)
+target_link_libraries(
+  gates_lib
+  INTERFACE
+    Boost::headers
+    Eigen3::Eigen
+    autodiff::autodiff
+)
+
+# 1. Build DAG module
 add_library(dag_lib STATIC ${DAG_SOURCES})
 target_include_directories(
   dag_lib
   PUBLIC
     "${DAG_DIR}/include"
     "${SABRE_DIR}/include"
+    "${GATES_DIR}/include"
 )
 target_link_libraries(
   dag_lib
   PUBLIC
+    gates_lib
     Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
@@ -92,7 +140,7 @@ endif()
 
 
 
-# 1. Build Qaser module
+# 2. Build Qarser module
 add_library(qarser_lib STATIC ${QARSER_SOURCES})
 target_include_directories(
   qarser_lib
@@ -106,28 +154,30 @@ target_link_libraries(
   qarser_lib
   PUBLIC
     dag_lib
+    gates_lib
     Boost::headers
 )
 
-# 2. Build SABRE module
+# 3. Build SABRE module
 add_library(sabre_lib STATIC ${SABRE_SOURCES})
 target_include_directories(
   sabre_lib 
   PUBLIC 
     "${SABRE_DIR}/include"
     "${DAG_DIR}/include"
+    "${GATES_DIR}/include"
 )    
 target_link_libraries(
   sabre_lib
   PUBLIC
     dag_lib
+    gates_lib
     Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
     target_link_libraries(sabre_lib PRIVATE gvc cgraph)
 endif()
 # target_compile_definitions(sabre_test PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
-
 
 
 if(SKBUILD)
@@ -154,6 +204,7 @@ else()
   )
   target_link_libraries(
     qsteedcpp_test PRIVATE
+      gates_lib
       dag_lib
       qarser_lib
       sabre_lib
@@ -177,10 +228,12 @@ target_include_directories(
     "${QARSER_DIR}/include"
     "${SABRE_DIR}/include"
     "${DAG_DIR}/include"
+    "${GATES_DIR}/include"
 )
 target_link_libraries(
   ${target} 
   PRIVATE 
+    gates_lib
     dag_lib
     sabre_lib 
     qarser_lib
@@ -194,14 +247,13 @@ install(TARGETS ${target} LIBRARY DESTINATION .)
 
 
 ## -- Module Testing -- ##
-option(BUILD_TESTS "Build test programs" OFF)
+option(BUILD_TESTS "Build test programs" ON)
 message(STATUS "BUILD_TESTS is set to ${BUILD_TESTS}")
 
 if(BUILD_TESTS)
     enable_testing()
     
-    # Google Test
-    include(FetchContent)
+    # 使用 FetchContent 管理 Google Test
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
@@ -210,7 +262,7 @@ if(BUILD_TESTS)
     FetchContent_MakeAvailable(googletest)
     
     # Test Modules
-    add_subdirectory(${QSTEED_CPP_DIR}/Gates/tests)
+    add_subdirectory(qsteedcpp/tests)
     # add_subdirectory(Qarser/tests)
     # add_subdirectory(DAG/tests)
     # add_subdirectory(SABRE/tests)

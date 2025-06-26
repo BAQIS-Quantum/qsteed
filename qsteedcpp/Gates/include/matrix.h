@@ -1,162 +1,279 @@
 #pragma once
-#include <vector>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 #include <complex>
-#include <stdexcept>
-#include <cmath>
+#include <iostream>
 
-namespace Gate {
+namespace qsteedcpp {
+
 using Complex = std::complex<double>;
+using MatrixXcd = Eigen::Matrix<Complex, Eigen::Dynamic, Eigen::Dynamic>;
+using VectorXcd = Eigen::Vector<Complex, Eigen::Dynamic>;
 
 class Matrix {
 private:
-    std::vector<std::vector<Complex>> data;
-    size_t rows;
-    size_t cols;
+    MatrixXcd data;
 
 public:
-
-    Matrix() : rows(0), cols(0) {}
+    // 默认构造函数
+    Matrix() : data(0, 0) {}
     
-    Matrix(const std::vector<std::vector<Complex>>& matrix) 
-        : data(matrix), rows(matrix.size()), cols(matrix.empty() ? 0 : matrix[0].size()) {
+    // 从行列数构造
+    Matrix(size_t rows, size_t cols) : data(rows, cols) {
+        data.setZero();
+    }
+    
+    // 从Eigen矩阵构造
+    Matrix(const MatrixXcd& matrix) : data(matrix) {}
+    
+    // 从复数vector构造
+    Matrix(const std::vector<std::vector<Complex>>& matrix) {
+        if (matrix.empty()) {
+            data = MatrixXcd(0, 0);
+            return;
+        }
+        
+        size_t rows = matrix.size();
+        size_t cols = matrix[0].size();
+        
+        // 检查矩阵是否规整
         for (const auto& row : matrix) {
             if (row.size() != cols) {
                 throw std::runtime_error("Irregular matrix");
             }
         }
-    }
-    
-    Matrix(const std::vector<std::vector<double>>& matrix) 
-        : rows(matrix.size()), cols(matrix.empty() ? 0 : matrix[0].size()) {
-        data.resize(rows);
+        
+        data = MatrixXcd(rows, cols);
         for (size_t i = 0; i < rows; ++i) {
-            data[i].resize(cols);
             for (size_t j = 0; j < cols; ++j) {
-                data[i][j] = Complex(matrix[i][j], 0.0);
+                data(i, j) = matrix[i][j];
             }
         }
     }
     
-    // 建单位矩阵
+    // 从实数vector构造
+    Matrix(const std::vector<std::vector<double>>& matrix) {
+        if (matrix.empty()) {
+            data = MatrixXcd(0, 0);
+            return;
+        }
+        
+        size_t rows = matrix.size();
+        size_t cols = matrix[0].size();
+        
+        data = MatrixXcd(rows, cols);
+        for (size_t i = 0; i < rows; ++i) {
+            for (size_t j = 0; j < cols; ++j) {
+                data(i, j) = Complex(matrix[i][j], 0.0);
+            }
+        }
+    }
+    
+    // 创建单位矩阵
     static Matrix identity(size_t size) {
         Matrix result;
-        result.rows = result.cols = size;
-        result.data.resize(size, std::vector<Complex>(size, Complex(0.0, 0.0)));
-        for (size_t i = 0; i < size; ++i) {
-            result.data[i][i] = Complex(1.0, 0.0);
-        }
+        result.data = MatrixXcd::Identity(size, size);
         return result;
     }
     
     // 创建零矩阵
     static Matrix zeros(size_t rows, size_t cols) {
         Matrix result;
-        result.rows = rows;
-        result.cols = cols;
-        result.data.resize(rows, std::vector<Complex>(cols, Complex(0.0, 0.0)));
+        result.data = MatrixXcd::Zero(rows, cols);
         return result;
     }
     
-    size_t get_rows() const { return rows; }
-    size_t get_cols() const { return cols; }
+    // 创建随机矩阵
+    static Matrix random(size_t rows, size_t cols) {
+        Matrix result;
+        result.data = MatrixXcd::Random(rows, cols);
+        return result;
+    }
     
+    // 获取维度
+    size_t get_rows() const { return data.rows(); }
+    size_t get_cols() const { return data.cols(); }
+    
+    // 元素访问
     Complex& operator()(size_t i, size_t j) {
-        if (i >= rows || j >= cols) {
-            throw std::out_of_range("Matrix index out of range");
-        }
-        return data[i][j];
+        return data(i, j);
     }
     
     const Complex& operator()(size_t i, size_t j) const {
-        if (i >= rows || j >= cols) {
-            throw std::out_of_range("Matrix index out of range");
-        }
-        return data[i][j];
+        return data(i, j);
     }
     
-    // 矩阵乘法
+    // 获取Eigen矩阵引用（用于高级操作）
+    MatrixXcd& eigen_matrix() { return data; }
+    const MatrixXcd& eigen_matrix() const { return data; }
+    
+    // 矩阵运算
     Matrix operator*(const Matrix& other) const {
-        if (cols != other.rows) {
-            throw std::runtime_error("Matrix dimensions do not match for multiplication");
-        }
-        
-        Matrix result = Matrix::zeros(rows, other.cols);
-        for (size_t i = 0; i < rows; ++i) {
-            for (size_t j = 0; j < other.cols; ++j) {
-                Complex sum(0.0, 0.0);
-                for (size_t k = 0; k < cols; ++k) {
-                    sum += data[i][k] * other.data[k][j];
-                }
-                result.data[i][j] = sum;
-            }
-        }
-        return result;
+        return Matrix(data * other.data);
     }
     
-    // 矩阵加法
     Matrix operator+(const Matrix& other) const {
-        if (rows != other.rows || cols != other.cols) {
-            throw std::runtime_error("Matrix dimensions do not match for addition");
-        }
-        
-        Matrix result = Matrix::zeros(rows, cols);
-        for (size_t i = 0; i < rows; ++i) {
-            for (size_t j = 0; j < cols; ++j) {
-                result.data[i][j] = data[i][j] + other.data[i][j];
-            }
-        }
-        return result;
+        return Matrix(data + other.data);
     }
     
-    // 标量乘法
+    Matrix operator-(const Matrix& other) const {
+        return Matrix(data - other.data);
+    }
+    
     Matrix operator*(const Complex& scalar) const {
-        Matrix result = Matrix::zeros(rows, cols);
-        for (size_t i = 0; i < rows; ++i) {
-            for (size_t j = 0; j < cols; ++j) {
-                result.data[i][j] = data[i][j] * scalar;
-            }
-        }
-        return result;
+        return Matrix(data * scalar);
     }
     
     // 共轭转置
     Matrix conjugate_transpose() const {
-        Matrix result = Matrix::zeros(cols, rows);
-        for (size_t i = 0; i < rows; ++i) {
-            for (size_t j = 0; j < cols; ++j) {
-                result.data[j][i] = std::conj(data[i][j]);
-            }
+        return Matrix(data.adjoint());
+    }
+    
+    // 转置
+    Matrix transpose() const {
+        return Matrix(data.transpose());
+    }
+    
+    // 共轭
+    Matrix conjugate() const {
+        return Matrix(data.conjugate());
+    }
+    
+    // 行列式
+    Complex determinant() const {
+        if (data.rows() != data.cols()) {
+            throw std::runtime_error("Determinant only defined for square matrices");
         }
+        return data.determinant();
+    }
+    
+    // 迹
+    Complex trace() const {
+        if (data.rows() != data.cols()) {
+            throw std::runtime_error("Trace only defined for square matrices");
+        }
+        return data.trace();
+    }
+    
+    // 范数
+    double norm() const {
+        return data.norm();
+    }
+    
+    double frobenius_norm() const {
+        return data.norm();
+    }
+    
+    // 特征值分解
+    struct EigenDecomposition {
+        VectorXcd eigenvalues;
+        MatrixXcd eigenvectors;
+    };
+    
+    EigenDecomposition eigendecomposition() const {
+        if (data.rows() != data.cols()) {
+            throw std::runtime_error("Eigendecomposition only defined for square matrices");
+        }
+        
+        Eigen::ComplexEigenSolver<MatrixXcd> solver(data);
+        EigenDecomposition result;
+        result.eigenvalues = solver.eigenvalues();
+        result.eigenvectors = solver.eigenvectors();
         return result;
     }
     
-    // 检查是否是酉矩阵（量子门必须是酉矩阵）
-    bool is_unitary() const {
-        if (rows != cols) return false;
-        
-        Matrix product = (*this) * this->conjugate_transpose();
-        Matrix identity = Matrix::identity(rows);
-        
-        // 检查是否接近单位矩阵
-        const double epsilon = 1e-10;
-        for (size_t i = 0; i < rows; ++i) {
-            for (size_t j = 0; j < cols; ++j) {
-                if (std::abs(product(i, j) - identity(i, j)) > epsilon) {
-                    return false;
-                }
-            }
-        }
-        return true;
+    // SVD分解
+    struct SVD {
+        MatrixXcd U;
+        Eigen::VectorXd singularValues;
+        MatrixXcd V;
+    };
+    
+    SVD svd() const {
+        Eigen::JacobiSVD<MatrixXcd> svd(data, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        SVD result;
+        result.U = svd.matrixU();
+        result.singularValues = svd.singularValues();
+        result.V = svd.matrixV();
+        return result;
     }
     
-
-    void print() const {
-        for (size_t i = 0; i < rows; ++i) {
-            for (size_t j = 0; j < cols; ++j) {
-                std::cout << data[i][j] << " ";
-            }
-            std::cout << std::endl;
+    // 矩阵求逆
+    Matrix inverse() const {
+        if (data.rows() != data.cols()) {
+            throw std::runtime_error("Inverse only defined for square matrices");
         }
+        return Matrix(data.inverse());
+    }
+    
+    // 矩阵指数
+    Matrix exp() const {
+        if (data.rows() != data.cols()) {
+            throw std::runtime_error("Matrix exponential only defined for square matrices");
+        }
+        
+        // 使用特征值分解计算矩阵指数
+        auto eig = eigendecomposition();
+        VectorXcd exp_eigenvals = eig.eigenvalues.array().exp();
+        return Matrix(eig.eigenvectors * exp_eigenvals.asDiagonal() * eig.eigenvectors.inverse());
+    }
+    
+    // 矩阵对数
+    Matrix log() const {
+        if (data.rows() != data.cols()) {
+            throw std::runtime_error("Matrix logarithm only defined for square matrices");
+        }
+        
+        auto eig = eigendecomposition();
+        VectorXcd log_eigenvals = eig.eigenvalues.array().log();
+        return Matrix(eig.eigenvectors * log_eigenvals.asDiagonal() * eig.eigenvectors.inverse());
+    }
+    
+    // 检查是否是酉矩阵（改进版本）
+    bool is_unitary(double epsilon = 1e-10) const {
+        if (data.rows() != data.cols()) return false;
+        
+        MatrixXcd product = data * data.adjoint();
+        MatrixXcd identity = MatrixXcd::Identity(data.rows(), data.cols());
+        
+        return (product - identity).norm() < epsilon;
+    }
+    
+    // 检查是否是厄米矩阵
+    bool is_hermitian(double epsilon = 1e-10) const {
+        if (data.rows() != data.cols()) return false;
+        return (data - data.adjoint()).norm() < epsilon;
+    }
+    
+    // 检查是否是对角矩阵
+    bool is_diagonal(double epsilon = 1e-10) const {
+        if (data.rows() != data.cols()) return false;
+        
+        MatrixXcd diag_matrix = data.diagonal().asDiagonal();
+        return (data - diag_matrix).norm() < epsilon;
+    }
+    
+    // 获取对角元素
+    VectorXcd diagonal() const {
+        return data.diagonal();
+    }
+    
+    // 打印矩阵
+    void print() const {
+        std::cout << data << std::endl;
+    }
+    
+    // 保存为Matlab格式
+    void print_matlab() const {
+        std::cout << "[";
+        for (int i = 0; i < data.rows(); ++i) {
+            for (int j = 0; j < data.cols(); ++j) {
+                std::cout << data(i, j);
+                if (j < data.cols() - 1) std::cout << ", ";
+            }
+            if (i < data.rows() - 1) std::cout << "; ";
+        }
+        std::cout << "]" << std::endl;
     }
 };
 
