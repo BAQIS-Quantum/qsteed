@@ -1,43 +1,467 @@
 #pragma once
 #include <string>
+#include <memory>
 #include <map>
+#include <vector>
+#include <functional>
 #include <autodiff/reverse/var.hpp>
 
 namespace qsteedcpp {
 
-using Parameter = autodiff::var;
+using namespace autodiff;
 
-inline Parameter get_parameter(const std::string& name, 
-                              const std::map<std::string, double>& values, 
-                              double default_value = 0.0) {
-    auto it = values.find(name);
-    return Parameter(it != values.end() ? it->second : default_value);
-}
+// 前向声明
+class ExpressionNode;
 
-// 创建参数化函数
-template<typename F>
-auto make_parameterized_function(F&& func) {
-    return [func = std::forward<F>(func)](const std::map<std::string, double>& params) {
-        return func(params);
-    };
-}
-
-
-
-// 参数表达式类
-class ParameterExpression {
-private:
-    std::vector<std::variant<Parameter, double, std::string>> operands;
-    std::vector<std::function<Parameter(Parameter, Parameter)>> operations;
-    
+// 表达式节点基类
+class ExpressionNode {
 public:
-    void add_operand(const std::string& param_name);
-    void add_operand(double constant);
-    void add_operand(const Parameter& param);
-    
-    void add_operation(std::function<Parameter(Parameter, Parameter)> op);
-    
-    Parameter evaluate(const std::map<std::string, double>& context = {}) const;
+    virtual ~ExpressionNode() = default;
+    virtual double evaluate(const std::map<std::string, double>& params) const = 0;
+    virtual std::vector<std::string> get_parameters() const = 0;
+    virtual std::unique_ptr<ExpressionNode> clone() const = 0;
+    virtual std::string to_string() const = 0;
+    virtual var evaluate_autodiff(const std::map<std::string, double>& params,
+                                 const std::string& target_param,
+                                 var target_value) const = 0;
 };
 
-} // namespace qsteedcpp 
+// 常量节点
+class ConstantNode : public ExpressionNode {
+private:
+    double value_;
+public:
+    explicit ConstantNode(double value) : value_(value) {}
+    
+    double evaluate(const std::map<std::string, double>& params) const override {
+        return value_;
+    }
+    
+    std::vector<std::string> get_parameters() const override {
+        return {};
+    }
+    
+    std::unique_ptr<ExpressionNode> clone() const override {
+        return std::make_unique<ConstantNode>(value_);
+    }
+    
+    std::string to_string() const override {
+        return std::to_string(value_);
+    }
+
+    var evaluate_autodiff(const std::map<std::string, double>& params,
+                         const std::string& target_param,
+                         var target_value) const override {
+        return value_; // 常量节点直接返回其值
+    }
+};
+
+// 变量节点
+class VariableNode : public ExpressionNode {
+private:
+    std::string name_;
+public:
+    explicit VariableNode(const std::string& name) : name_(name) {}
+    
+    double evaluate(const std::map<std::string, double>& params) const override {
+        auto it = params.find(name_);
+        if (it != params.end()) {
+            return it->second;
+        }
+        return 0.0; // 默认值
+    }
+    
+    std::vector<std::string> get_parameters() const override {
+        return {name_};
+    }
+    
+    std::unique_ptr<ExpressionNode> clone() const override {
+        return std::make_unique<VariableNode>(name_);
+    }
+    
+    std::string to_string() const override {
+        return name_;
+    }
+
+    var evaluate_autodiff(const std::map<std::string, double>& params,
+                         const std::string& target_param,
+                         var target_value) const override {
+        if (name_ == target_param) {
+            return target_value; // 如果是目标参数，返回 autodiff 变量
+        } else {
+            auto it = params.find(name_);
+            if (it != params.end()) {
+                return it->second; // 其他参数返回数值
+            }
+            return 0.0; // 默认值
+        }
+    }
+};
+
+// 二元运算节点
+class BinaryOpNode : public ExpressionNode {
+private:
+    std::unique_ptr<ExpressionNode> left_;
+    std::unique_ptr<ExpressionNode> right_;
+    std::function<double(double, double)> op_;
+    std::string op_symbol_;
+    
+public:
+    BinaryOpNode(std::unique_ptr<ExpressionNode> left, 
+                 std::unique_ptr<ExpressionNode> right,
+                 std::function<double(double, double)> op,
+                 const std::string& op_symbol)
+        : left_(std::move(left)), right_(std::move(right)), 
+          op_(op), op_symbol_(op_symbol) {}
+    
+    double evaluate(const std::map<std::string, double>& params) const override {
+        return op_(left_->evaluate(params), right_->evaluate(params));
+    }
+    
+    std::vector<std::string> get_parameters() const override {
+        auto left_params = left_->get_parameters();
+        auto right_params = right_->get_parameters();
+        left_params.insert(left_params.end(), right_params.begin(), right_params.end());
+        return left_params;
+    }
+    
+    std::unique_ptr<ExpressionNode> clone() const override {
+        return std::make_unique<BinaryOpNode>(left_->clone(), right_->clone(), op_, op_symbol_);
+    }
+    
+    std::string to_string() const override {
+        return "(" + left_->to_string() + " " + op_symbol_ + " " + right_->to_string() + ")";
+    }
+
+    var evaluate_autodiff(const std::map<std::string, double>& params,
+                         const std::string& target_param,
+                         var target_value) const override {
+        var left_val = left_->evaluate_autodiff(params, target_param, target_value);
+        var right_val = right_->evaluate_autodiff(params, target_param, target_value);
+        
+        // 根据运算符类型执行相应的 autodiff 运算
+        if (op_symbol_ == "+") {
+            return left_val + right_val;
+        } else if (op_symbol_ == "-") {
+            return left_val - right_val;
+        } else if (op_symbol_ == "*") {
+            return left_val * right_val;
+        } else if (op_symbol_ == "/") {
+            return left_val / right_val;
+        } else {
+            // 默认返回加法
+            return left_val + right_val;
+        }
+    }
+};
+
+// 一元运算节点
+class UnaryOpNode : public ExpressionNode {
+private:
+    std::unique_ptr<ExpressionNode> operand_;
+    std::function<double(double)> op_;
+    std::string op_symbol_;
+    
+public:
+    UnaryOpNode(std::unique_ptr<ExpressionNode> operand,
+                std::function<double(double)> op,
+                const std::string& op_symbol)
+        : operand_(std::move(operand)), op_(op), op_symbol_(op_symbol) {}
+    
+    double evaluate(const std::map<std::string, double>& params) const override {
+        return op_(operand_->evaluate(params));
+    }
+    
+    std::vector<std::string> get_parameters() const override {
+        return operand_->get_parameters();
+    }
+    
+    std::unique_ptr<ExpressionNode> clone() const override {
+        return std::make_unique<UnaryOpNode>(operand_->clone(), op_, op_symbol_);
+    }
+    
+    std::string to_string() const override {
+        return op_symbol_ + "(" + operand_->to_string() + ")";
+    }
+
+    var evaluate_autodiff(const std::map<std::string, double>& params,
+                         const std::string& target_param,
+                         var target_value) const override {
+        var operand_val = operand_->evaluate_autodiff(params, target_param, target_value);
+        
+        // 根据函数类型执行相应的 autodiff 运算
+        if (op_symbol_.find("sin") == 0) {
+            return sin(operand_val);
+        } else if (op_symbol_.find("cos") == 0) {
+            return cos(operand_val);
+        } else if (op_symbol_.find("tan") == 0) {
+            return tan(operand_val);
+        } else if (op_symbol_.find("exp") == 0) {
+            return exp(operand_val);
+        } else if (op_symbol_.find("log") == 0) {
+            return log(operand_val);
+        } else if (op_symbol_.find("sqrt") == 0) {
+            return sqrt(operand_val);
+        } else if (op_symbol_.find("pow") == 0) {
+            // 从字符串中提取指数
+            size_t start = op_symbol_.find('(') + 1;
+            size_t end = op_symbol_.find(')');
+            double exponent = std::stod(op_symbol_.substr(start, end - start));
+            return pow(operand_val, exponent);
+        } else if (op_symbol_ == "-") {
+            return -operand_val;
+        } else {
+            // 默认返回原值
+            return operand_val;
+        }
+    }
+};
+
+class Parameter {
+private:
+    std::unique_ptr<ExpressionNode> expression_;
+    std::string name_;
+
+public:
+    // 构造函数
+    explicit Parameter(const std::string& name = "") 
+        : expression_(std::make_unique<ConstantNode>(0.0)), name_(name) {}
+    
+    explicit Parameter(double val, const std::string& name = "") 
+        : expression_(std::make_unique<ConstantNode>(val)), name_(name) {}
+    
+    explicit Parameter(std::unique_ptr<ExpressionNode> expr, const std::string& name = "") 
+        : expression_(std::move(expr)), name_(name) {}
+
+    // 获取当前值
+    double value(const std::map<std::string, double>& param_map = {}) const {
+        return expression_->evaluate(param_map);
+    }
+
+    // 设置参数值
+    void set_value(double val) {
+        expression_ = std::make_unique<ConstantNode>(val);
+    }
+
+    // 获取表达式
+    const ExpressionNode* get_expression() const {
+        return expression_.get();
+    }
+
+    // 获取参数名
+    std::string get_name() const {
+        return name_;
+    }
+
+    // 获取表达式中包含的参数名
+    std::vector<std::string> get_parameters() const {
+        return expression_->get_parameters();
+    }
+
+    // 计算梯度（使用 autodiff）
+    std::map<std::string, double> compute_gradients(const std::map<std::string, double>& param_values) const {
+        std::map<std::string, double> gradients;
+        
+        // 获取所有参数
+        auto params = get_parameters();
+        
+        for (const auto& param_name : params) {
+            auto it = param_values.find(param_name);
+            if (it != param_values.end()) {
+                // 创建 autodiff 变量
+                var x = it->second;
+                
+                // 创建 autodiff 函数：将表达式转换为 autodiff 函数
+                auto f = [this, &param_values, &param_name](var x) -> var {
+                    // 重新构建表达式，将目标参数替换为 autodiff 变量
+                    return this->evaluate_with_autodiff(param_values, param_name, x);
+                };
+                
+                // 计算梯度
+                var y = f(x);
+                gradients[param_name] = derivatives(y, wrt(x))[0];
+            } else {
+                gradients[param_name] = 0.0;
+            }
+        }
+        
+        return gradients;
+    }
+
+    // 运算符重载
+    friend Parameter operator+(const Parameter& lhs, const Parameter& rhs) {
+        auto left = lhs.expression_->clone();
+        auto right = rhs.expression_->clone();
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a + b; }, "+"));
+    }
+
+    friend Parameter operator+(const Parameter& lhs, double rhs) {
+        auto left = lhs.expression_->clone();
+        auto right = std::make_unique<ConstantNode>(rhs);
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a + b; }, "+"));
+    }
+
+    friend Parameter operator+(double lhs, const Parameter& rhs) {
+        auto left = std::make_unique<ConstantNode>(lhs);
+        auto right = rhs.expression_->clone();
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a + b; }, "+"));
+    }
+
+    friend Parameter operator-(const Parameter& lhs, const Parameter& rhs) {
+        auto left = lhs.expression_->clone();
+        auto right = rhs.expression_->clone();
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a - b; }, "-"));
+    }
+
+    friend Parameter operator-(const Parameter& lhs, double rhs) {
+        auto left = lhs.expression_->clone();
+        auto right = std::make_unique<ConstantNode>(rhs);
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a - b; }, "-"));
+    }
+
+    friend Parameter operator-(double lhs, const Parameter& rhs) {
+        auto left = std::make_unique<ConstantNode>(lhs);
+        auto right = rhs.expression_->clone();
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a - b; }, "-"));
+    }
+
+    friend Parameter operator*(const Parameter& lhs, const Parameter& rhs) {
+        auto left = lhs.expression_->clone();
+        auto right = rhs.expression_->clone();
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a * b; }, "*"));
+    }
+
+    friend Parameter operator*(const Parameter& lhs, double rhs) {
+        auto left = lhs.expression_->clone();
+        auto right = std::make_unique<ConstantNode>(rhs);
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a * b; }, "*"));
+    }
+
+    friend Parameter operator*(double lhs, const Parameter& rhs) {
+        auto left = std::make_unique<ConstantNode>(lhs);
+        auto right = rhs.expression_->clone();
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a * b; }, "*"));
+    }
+
+    friend Parameter operator/(const Parameter& lhs, const Parameter& rhs) {
+        auto left = lhs.expression_->clone();
+        auto right = rhs.expression_->clone();
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a / b; }, "/"));
+    }
+
+    friend Parameter operator/(const Parameter& lhs, double rhs) {
+        auto left = lhs.expression_->clone();
+        auto right = std::make_unique<ConstantNode>(rhs);
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a / b; }, "/"));
+    }
+
+    friend Parameter operator/(double lhs, const Parameter& rhs) {
+        auto left = std::make_unique<ConstantNode>(lhs);
+        auto right = rhs.expression_->clone();
+        return Parameter(std::make_unique<BinaryOpNode>(
+            std::move(left), std::move(right),
+            [](double a, double b) { return a / b; }, "/"));
+    }
+
+    // 负号
+    Parameter operator-() const {
+        auto operand = expression_->clone();
+        return Parameter(std::make_unique<UnaryOpNode>(
+            std::move(operand),
+            [](double x) { return -x; }, "-"));
+    }
+
+    // 数学函数
+    friend Parameter sin(const Parameter& p) {
+        auto operand = p.expression_->clone();
+        return Parameter(std::make_unique<UnaryOpNode>(
+            std::move(operand),
+            [](double x) { return std::sin(x); }, "sin"));
+    }
+
+    friend Parameter cos(const Parameter& p) {
+        auto operand = p.expression_->clone();
+        return Parameter(std::make_unique<UnaryOpNode>(
+            std::move(operand),
+            [](double x) { return std::cos(x); }, "cos"));
+    }
+
+    friend Parameter tan(const Parameter& p) {
+        auto operand = p.expression_->clone();
+        return Parameter(std::make_unique<UnaryOpNode>(
+            std::move(operand),
+            [](double x) { return std::tan(x); }, "tan"));
+    }
+
+    friend Parameter exp(const Parameter& p) {
+        auto operand = p.expression_->clone();
+        return Parameter(std::make_unique<UnaryOpNode>(
+            std::move(operand),
+            [](double x) { return std::exp(x); }, "exp"));
+    }
+
+    friend Parameter log(const Parameter& p) {
+        auto operand = p.expression_->clone();
+        return Parameter(std::make_unique<UnaryOpNode>(
+            std::move(operand),
+            [](double x) { return std::log(x); }, "log"));
+    }
+
+    friend Parameter sqrt(const Parameter& p) {
+        auto operand = p.expression_->clone();
+        return Parameter(std::make_unique<UnaryOpNode>(
+            std::move(operand),
+            [](double x) { return std::sqrt(x); }, "sqrt"));
+    }
+
+    friend Parameter pow(const Parameter& p, double exponent) {
+        auto operand = p.expression_->clone();
+        return Parameter(std::make_unique<UnaryOpNode>(
+            std::move(operand),
+            [exponent](double x) { return std::pow(x, exponent); }, 
+            "pow(" + std::to_string(exponent) + ")"));
+    }
+
+    // 打印表达式
+    std::string to_string() const {
+        return expression_->to_string();
+    }
+
+    // 静态方法：创建变量
+    static Parameter variable(const std::string& name) {
+        return Parameter(std::make_unique<VariableNode>(name), name);
+    }
+
+private:
+    // 辅助方法：使用 autodiff 重新求值表达式
+    var evaluate_with_autodiff(const std::map<std::string, double>& param_values, 
+                              const std::string& target_param, 
+                              var target_value) const {
+        // 递归构建 autodiff 表达式
+        return expression_->evaluate_autodiff(param_values, target_param, target_value);
+    }
+};
+
+} // namespace qsteedcpp

@@ -15,12 +15,12 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 if (MSVC)
-  cmake_policy(SET CMP0167 NEW)
   add_compile_options(/wd4244) # Disable warning C4244 (Conversion from 'int' to 'float', possible loss of data)
   add_compile_options(/wd4819) # Disable warning C4819 (Code page in Unicode build)
 endif()
 
 # Find Boost
+cmake_policy(SET CMP0167 NEW)
 find_package(Boost REQUIRED)
 if(Boost_FOUND)
   if(NOT TARGET Boost::headers)
@@ -40,31 +40,38 @@ endif()
 include(FetchContent)
 
 # Eigen3
+message(STATUS "正在配置 Eigen3 依赖...")
 set(EIGEN_BUILD_DOC OFF CACHE BOOL "Disable Eigen documentation")
 set(EIGEN_BUILD_UNSUPPORTED OFF CACHE BOOL "Disable Eigen unsupported module")
 set(EIGEN_BUILD_PKGCONFIG OFF CACHE BOOL "Disable Eigen pkgconfig")
 set(EIGEN_BUILD_BENCHMARKS OFF CACHE BOOL "Disable Eigen benchmarks")
-set(BUILD_TESTING OFF CACHE BOOL "Disable all testing") # Autodiff will conflict with Eigen's testing
+set(BUILD_TESTING OFF CACHE BOOL "Disable all testing")
 FetchContent_Declare(
     Eigen3
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
     GIT_TAG 3.4.0
     GIT_PROGRESS TRUE
+    GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(Eigen3)
+message(STATUS "Eigen3 依赖配置完成")
 
-
-# autodiff
+# Autodiff
+message(STATUS "使用 autodiff 进行符号计算和自动微分")
 set(AUTODIFF_BUILD_TESTS OFF CACHE BOOL "Disable autodiff tests")
 set(AUTODIFF_BUILD_PYTHON OFF CACHE BOOL "Disable autodiff Python bindings")
 set(AUTODIFF_BUILD_EXAMPLES OFF CACHE BOOL "Disable autodiff examples")
 FetchContent_Declare(
     autodiff
-    GIT_REPOSITORY https://github.com/autodiff/autodiff
-    GIT_TAG v1.0.3
+    GIT_REPOSITORY https://github.com/autodiff/autodiff.git
+    GIT_TAG v1.1.2
     GIT_PROGRESS TRUE
+    GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(autodiff)
+message(STATUS "autodiff 依赖配置完成")
+
+
 
 # Find Graphviz
 # option(BUILD_WITH_GRAPHVIZ "Build with Graphviz support" OFF)
