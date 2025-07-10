@@ -227,7 +227,9 @@ pybind11_add_module(
   ${target}
     ${QARSER_SOURCES}
     ${SABRE_SOURCES}
+    ${GATES_SOURCES}
     "${QSTEED_CPP_DIR}/binding.cpp"
+    "${QSTEED_CPP_DIR}/gate_bindings.cpp"
 )
 target_include_directories(
   ${target}

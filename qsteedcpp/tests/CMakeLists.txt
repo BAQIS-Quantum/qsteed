@@ -2,6 +2,7 @@ add_executable(
     gates_test
     matrix_test.cpp
     parameter_test.cpp
+    gates_test.cpp
 )
 
 target_link_libraries(gates_test

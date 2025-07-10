@@ -12,13 +12,16 @@
 #include "parser.h"
 #include "AST/dag_converter.hpp"
 #include "compiler.h"
-
+#include "gate_bindings.h"  // 包含门绑定头文件
 
 namespace py = pybind11;
 using namespace sabre;
 
 PYBIND11_MODULE(qsteedcpp, m) {
     m.doc() = "QSteed C++ Extensions";
+
+    // 绑定门相关的类
+    bind_gates(m);
 
     py::class_<SabreLayout>(m, "SabreLayout")
         .def(py::init<const CouplingCircuit&>())

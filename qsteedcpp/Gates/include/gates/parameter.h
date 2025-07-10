@@ -10,8 +10,6 @@ namespace qsteedcpp {
 
 using namespace autodiff;
 
-// 前向声明
-class ExpressionNode;
 
 // 表达式节点基类
 class ExpressionNode {
@@ -52,7 +50,7 @@ public:
     var evaluate_autodiff(const std::map<std::string, double>& params,
                          const std::string& target_param,
                          var target_value) const override {
-        return value_; // 常量节点直接返回其值
+        return value_;
     }
 };
 
@@ -87,13 +85,13 @@ public:
                          const std::string& target_param,
                          var target_value) const override {
         if (name_ == target_param) {
-            return target_value; // 如果是目标参数，返回 autodiff 变量
+            return target_value;
         } else {
             auto it = params.find(name_);
             if (it != params.end()) {
-                return it->second; // 其他参数返回数值
+                return it->second;
             }
-            return 0.0; // 默认值
+            return 0.0;
         }
     }
 };
@@ -233,27 +231,49 @@ public:
     explicit Parameter(std::unique_ptr<ExpressionNode> expr, const std::string& name = "") 
         : expression_(std::move(expr)), name_(name) {}
 
+    // 拷贝构造函数
+    Parameter(const Parameter& other) 
+        : expression_(other.expression_->clone()), name_(other.name_) {}
+
+    // 拷贝赋值运算符
+    Parameter& operator=(const Parameter& other) {
+        if (this != &other) {
+            expression_ = other.expression_->clone();
+            name_ = other.name_;
+        }
+        return *this;
+    }
+
+    // 移动构造函数
+    Parameter(Parameter&& other) noexcept
+        : expression_(std::move(other.expression_)), name_(std::move(other.name_)) {}
+
+    // 移动赋值运算符
+    Parameter& operator=(Parameter&& other) noexcept {
+        if (this != &other) {
+            expression_ = std::move(other.expression_);
+            name_ = std::move(other.name_);
+        }
+        return *this;
+    }
+
     // 获取当前值
     double value(const std::map<std::string, double>& param_map = {}) const {
         return expression_->evaluate(param_map);
     }
 
-    // 设置参数值
     void set_value(double val) {
         expression_ = std::make_unique<ConstantNode>(val);
     }
 
-    // 获取表达式
     const ExpressionNode* get_expression() const {
         return expression_.get();
     }
 
-    // 获取参数名
     std::string get_name() const {
         return name_;
     }
 
-    // 获取表达式中包含的参数名
     std::vector<std::string> get_parameters() const {
         return expression_->get_parameters();
     }
@@ -268,7 +288,6 @@ public:
         for (const auto& param_name : params) {
             auto it = param_values.find(param_name);
             if (it != param_values.end()) {
-                // 创建 autodiff 变量
                 var x = it->second;
                 
                 // 创建 autodiff 函数：将表达式转换为 autodiff 函数
