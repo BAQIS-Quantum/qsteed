@@ -43,6 +43,17 @@ public:
         return values;
     }
     
+    // 更新参数值
+    void update_parameters(const std::map<std::string, double>& param_values) {
+        for (auto& param : parameters_) {
+            // 对于每个参数，如果它是一个简单的变量且在param_values中，则更新它
+            auto param_vars = param.get_parameters();
+            if (param_vars.size() == 1 && param_values.find(param_vars[0]) != param_values.end()) {
+                param.set_value(param_values.at(param_vars[0]));
+            }
+        }
+    }
+    
         
     Matrix apply(const Matrix& state, const std::map<std::string, double>& param_map = {}) const {
         return get_matrix(param_map) * state;

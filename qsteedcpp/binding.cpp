@@ -13,6 +13,7 @@
 #include "AST/dag_converter.hpp"
 #include "compiler.h"
 #include "gate_bindings.h"  // 包含门绑定头文件
+#include "circuit_bindings.h"  // 包含电路绑定头文件
 
 namespace py = pybind11;
 using namespace sabre;
@@ -22,6 +23,9 @@ PYBIND11_MODULE(qsteedcpp, m) {
 
     // 绑定门相关的类
     bind_gates(m);
+    
+    // 绑定量子电路类
+    bind_quantum_circuit(m);
 
     py::class_<SabreLayout>(m, "SabreLayout")
         .def(py::init<const CouplingCircuit&>())

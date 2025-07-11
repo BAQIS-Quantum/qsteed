@@ -8,16 +8,36 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <set>
 
 namespace qsteedcpp {
+
+// 参数梯度信息的数据结构
+struct ParameterGradInfo {
+    size_t gate_index;    // 门在电路中的索引
+    size_t param_index;   // 参数在该门中的索引
+    double grad_value;    // 梯度值
+    
+    ParameterGradInfo(size_t gi, size_t pi, double gv) 
+        : gate_index(gi), param_index(pi), grad_value(gv) {}
+};
+
+// parameter_grads 的类型定义
+using ParameterGrads = std::map<std::string, std::vector<ParameterGradInfo>>;
 
 class QuantumCircuit {
 private:
     int num_qubits_;
     std::vector<std::pair<std::unique_ptr<Gate>, std::vector<int>>> instructions_;
     
+    // 参数梯度相关的私有成员
+    mutable ParameterGrads parameter_grads_;
+    mutable std::vector<std::string> variables_;
+    mutable bool grads_computed_;
+    
 public:
-    explicit QuantumCircuit(int num_qubits) : num_qubits_(num_qubits) {}
+    explicit QuantumCircuit(int num_qubits) 
+        : num_qubits_(num_qubits), grads_computed_(false) {}
     
     int num_qubits() const { return num_qubits_; }
     size_t num_gates() const { return instructions_.size(); }
@@ -129,6 +149,137 @@ public:
         return all_params;
     }
     
+    // 获取参数梯度信息（类似Python版本的get_parameter_grads）
+    const ParameterGrads& get_parameter_grads() const {
+        if (!grads_computed_) {
+            compute_parameter_grads();
+        }
+        return parameter_grads_;
+    }
+    
+    // 获取电路中的所有变量（去重后的参数列表）
+    const std::vector<std::string>& get_variables() const {
+        if (!grads_computed_) {
+            compute_parameter_grads();
+        }
+        return variables_;
+    }
+    
+    // 更新参数值（类似Python版本的_update_params）
+    void update_parameters(const std::map<std::string, double>& param_values) {
+        for (auto& instruction : instructions_) {
+            if (instruction.first->has_parameters()) {
+                instruction.first->update_parameters(param_values);
+            }
+        }
+        // 参数更新后，需要重新计算梯度
+        grads_computed_ = false;
+    }
+    
+    // 计算特定参数的梯度（使用autodiff）
+    std::map<std::string, double> compute_gradients_for_parameter(
+        size_t gate_index, 
+        size_t param_index,
+        const std::map<std::string, double>& param_values) const {
+        
+        if (gate_index >= instructions_.size()) {
+            throw std::out_of_range("Gate index out of range");
+        }
+        
+        const auto& gate = instructions_[gate_index].first;
+        if (!gate->has_parameters() || param_index >= gate->parameter_count()) {
+            throw std::out_of_range("Parameter index out of range");
+        }
+        
+        const Parameter& param = gate->get_parameter(param_index);
+        return param.compute_gradients(param_values);
+    }
+    
+    // 打印参数梯度信息（用于调试）
+    void print_parameter_grads() const {
+        const auto& grads = get_parameter_grads();
+        const auto& vars = get_variables();
+        
+        std::cout << "Parameter Gradients Information:" << std::endl;
+        std::cout << "Total variables: " << vars.size() << std::endl;
+        
+        for (const auto& var : vars) {
+            std::cout << "Variable: " << var << std::endl;
+            auto it = grads.find(var);
+            if (it != grads.end()) {
+                for (const auto& grad_info : it->second) {
+                    std::cout << "  Gate[" << grad_info.gate_index << "] Param[" 
+                              << grad_info.param_index << "] Grad: " 
+                              << grad_info.grad_value << std::endl;
+                }
+            }
+        }
+        std::cout << std::endl;
+    }
+
+private:
+    // 计算并缓存参数梯度信息
+    void compute_parameter_grads() const {
+        parameter_grads_.clear();
+        std::set<std::string> unique_variables;
+        
+        // 遍历所有门和它们的参数
+        for (size_t gate_idx = 0; gate_idx < instructions_.size(); ++gate_idx) {
+            const auto& gate = instructions_[gate_idx].first;
+            
+            if (gate->has_parameters()) {
+                for (size_t param_idx = 0; param_idx < gate->parameter_count(); ++param_idx) {
+                    const Parameter& param = gate->get_parameter(param_idx);
+                    
+                    // 获取这个参数中包含的所有变量名
+                    auto param_variables = param.get_parameters();
+                    
+                    for (const auto& var_name : param_variables) {
+                        if (!var_name.empty()) {
+                            unique_variables.insert(var_name);
+                            
+                            // 计算这个变量在当前参数中的梯度值
+                            // 这里我们假设对于简单的Parameter，梯度为1.0
+                            // 对于复杂的ParameterExpression，需要使用autodiff计算
+                            double grad_value = 1.0;
+                            
+                            // 如果参数包含表达式，计算实际的梯度
+                            if (param_variables.size() > 1 || param.to_string() != var_name) {
+                                // 这是一个表达式，需要计算偏导数
+                                std::map<std::string, double> dummy_values;
+                                for (const auto& v : param_variables) {
+                                    dummy_values[v] = 1.0; // 使用默认值
+                                }
+                                
+                                try {
+                                    auto gradients = param.compute_gradients(dummy_values);
+                                    auto it = gradients.find(var_name);
+                                    if (it != gradients.end()) {
+                                        grad_value = it->second;
+                                    }
+                                } catch (...) {
+                                    // 如果梯度计算失败，使用默认值1.0
+                                    grad_value = 1.0;
+                                }
+                            }
+                            
+                            // 添加到parameter_grads_映射中
+                            parameter_grads_[var_name].emplace_back(gate_idx, param_idx, grad_value);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 更新variables_列表
+        variables_.clear();
+        variables_.reserve(unique_variables.size());
+        for (const auto& var : unique_variables) {
+            variables_.push_back(var);
+        }
+        
+        grads_computed_ = true;
+    }
 
 };
 

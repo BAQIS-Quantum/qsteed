@@ -41,12 +41,12 @@ TEST_F(MatrixTest, Zeros) {
 // 测试矩阵乘法
 TEST_F(MatrixTest, Multiplication) {
     // 创建 X 门和 Y 门
-    Matrix x_gate({
+    Matrix x_gate(std::vector<std::vector<Complex>>{
         {{0.0, 0.0}, {1.0, 0.0}},
         {{1.0, 0.0}, {0.0, 0.0}}
     });
     
-    Matrix y_gate({
+    Matrix y_gate(std::vector<std::vector<Complex>>{
         {{0.0, 0.0}, {0.0, -1.0}},
         {{0.0, 1.0}, {0.0, 0.0}}
     });
@@ -65,12 +65,12 @@ TEST_F(MatrixTest, Multiplication) {
 
 // 测试矩阵加法
 TEST_F(MatrixTest, Addition) {
-    Matrix m1({
+    Matrix m1(std::vector<std::vector<Complex>>{
         {{1.0, 0.0}, {2.0, 0.0}},
         {{3.0, 0.0}, {4.0, 0.0}}
     });
     
-    Matrix m2({
+    Matrix m2(std::vector<std::vector<Complex>>{
         {{5.0, 0.0}, {6.0, 0.0}},
         {{7.0, 0.0}, {8.0, 0.0}}
     });
@@ -84,7 +84,7 @@ TEST_F(MatrixTest, Addition) {
 
 // 测试标量乘法
 TEST_F(MatrixTest, ScalarMultiplication) {
-    Matrix m({
+    Matrix m(std::vector<std::vector<Complex>>{
         {{1.0, 0.0}, {2.0, 0.0}},
         {{3.0, 0.0}, {4.0, 0.0}}
     });
@@ -99,7 +99,7 @@ TEST_F(MatrixTest, ScalarMultiplication) {
 
 // 测试共轭转置
 TEST_F(MatrixTest, ConjugateTranspose) {
-    Matrix m({
+    Matrix m(std::vector<std::vector<Complex>>{
         {{1.0, 2.0}, {3.0, 4.0}},
         {{5.0, 6.0}, {7.0, 8.0}}
     });
@@ -122,14 +122,14 @@ TEST_F(MatrixTest, Unitarity) {
     EXPECT_TRUE(id.is_unitary());
 
     // 测试 Hadamard 门（是酉矩阵）
-    Matrix h_gate({
+    Matrix h_gate(std::vector<std::vector<Complex>>{
         {{1.0/sqrt(2), 0.0}, {1.0/sqrt(2), 0.0}},
         {{1.0/sqrt(2), 0.0}, {-1.0/sqrt(2), 0.0}}
     });
     EXPECT_TRUE(h_gate.is_unitary());
 
     // 测试非酉矩阵
-    Matrix non_unitary({
+    Matrix non_unitary(std::vector<std::vector<Complex>>{
         {{1.0, 0.0}, {2.0, 0.0}},
         {{3.0, 0.0}, {4.0, 0.0}}
     });

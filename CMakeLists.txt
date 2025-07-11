@@ -5,6 +5,11 @@ project(sabre LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# 使用旧的 ABI 以兼容较旧的 libstdc++
+# 限制 GLIBCXX 版本
+add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
+
 
 if(NOT CMAKE_BUILD_TYPE)
   message(STATUS "Build type not set - defaulting to Release")
@@ -20,7 +25,6 @@ if (MSVC)
 endif()
 
 # Find Boost
-cmake_policy(SET CMP0167 NEW)
 find_package(Boost REQUIRED)
 if(Boost_FOUND)
   if(NOT TARGET Boost::headers)
@@ -36,41 +40,9 @@ if(Boost_FOUND)
 endif()
 
 
-# FetchContent for dependencies
-include(FetchContent)
-
-# Eigen3
-message(STATUS "正在配置 Eigen3 依赖...")
-set(EIGEN_BUILD_DOC OFF CACHE BOOL "Disable Eigen documentation")
-set(EIGEN_BUILD_UNSUPPORTED OFF CACHE BOOL "Disable Eigen unsupported module")
-set(EIGEN_BUILD_PKGCONFIG OFF CACHE BOOL "Disable Eigen pkgconfig")
-set(EIGEN_BUILD_BENCHMARKS OFF CACHE BOOL "Disable Eigen benchmarks")
+# 外部依赖管理
+include(cmake/Dependencies.cmake)
 set(BUILD_TESTING OFF CACHE BOOL "Disable all testing")
-FetchContent_Declare(
-    Eigen3
-    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-    GIT_TAG 3.4.0
-    GIT_PROGRESS TRUE
-    GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(Eigen3)
-message(STATUS "Eigen3 依赖配置完成")
-
-# Autodiff
-message(STATUS "使用 autodiff 进行符号计算和自动微分")
-set(AUTODIFF_BUILD_TESTS OFF CACHE BOOL "Disable autodiff tests")
-set(AUTODIFF_BUILD_PYTHON OFF CACHE BOOL "Disable autodiff Python bindings")
-set(AUTODIFF_BUILD_EXAMPLES OFF CACHE BOOL "Disable autodiff examples")
-FetchContent_Declare(
-    autodiff
-    GIT_REPOSITORY https://github.com/autodiff/autodiff.git
-    GIT_TAG v1.1.2
-    GIT_PROGRESS TRUE
-    GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(autodiff)
-message(STATUS "autodiff 依赖配置完成")
-
 
 
 # Find Graphviz
@@ -230,6 +202,7 @@ pybind11_add_module(
     ${GATES_SOURCES}
     "${QSTEED_CPP_DIR}/binding.cpp"
     "${QSTEED_CPP_DIR}/gate_bindings.cpp"
+    "${QSTEED_CPP_DIR}/circuit_bindings.cpp"
 )
 target_include_directories(
   ${target}
