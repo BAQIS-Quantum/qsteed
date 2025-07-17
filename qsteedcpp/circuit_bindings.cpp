@@ -29,20 +29,21 @@ void bind_quantum_circuit(py::module& m) {
         .def("num_qubits", &QuantumCircuit::num_qubits)
         .def("num_gates", &QuantumCircuit::num_gates)
         
-        // 单量子比特门方法
         .def("h", &QuantumCircuit::h, py::arg("qubit"))
         .def("x", &QuantumCircuit::x, py::arg("qubit"))
         .def("y", &QuantumCircuit::y, py::arg("qubit"))
         .def("z", &QuantumCircuit::z, py::arg("qubit"))
         
-        // 参数化旋转门方法
         .def("rx", &QuantumCircuit::rx, py::arg("theta"), py::arg("qubit"))
         .def("ry", &QuantumCircuit::ry, py::arg("phi"), py::arg("qubit"))
         .def("rz", &QuantumCircuit::rz, py::arg("lambda"), py::arg("qubit"))
+        .def("rxx", &QuantumCircuit::rxx, py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
+        .def("ryy", &QuantumCircuit::ryy, py::arg("phi"), py::arg("qubit1"), py::arg("qubit2"))
+        .def("rzz", &QuantumCircuit::rzz, py::arg("lambda"), py::arg("qubit1"), py::arg("qubit2"))
         
-        // 两量子比特门方法
         .def("cnot", &QuantumCircuit::cnot, py::arg("control"), py::arg("target"))
         
+
         // 通用门添加方法
         .def("add_gate", [](QuantumCircuit& circuit, Gate& gate, const std::vector<int>& qubits) {
             std::unique_ptr<Gate> gate_copy;
@@ -64,6 +65,12 @@ void bind_quantum_circuit(py::module& m) {
                 gate_copy = std::make_unique<RZGate>(gate.get_parameter(0));
             } else if (gate.get_name() == "CNOT") {
                 gate_copy = std::make_unique<CNOTGate>();
+            } else if (gate.get_name() == "RXX") {
+                gate_copy = std::make_unique<RXXGate>(gate.get_parameter(0));
+            } else if (gate.get_name() == "RYY") {
+                gate_copy = std::make_unique<RYYGate>(gate.get_parameter(0));
+            } else if (gate.get_name() == "RZZ") {
+                gate_copy = std::make_unique<RZZGate>(gate.get_parameter(0));
             } else {
                 throw std::runtime_error("Unknown gate type: " + gate.get_name());
             }
@@ -71,7 +78,6 @@ void bind_quantum_circuit(py::module& m) {
             circuit.add_gate(std::move(gate_copy), qubits);
         }, py::arg("gate"), py::arg("qubits"))
         
-        // 获取参数列表
         .def("get_parameters", &QuantumCircuit::get_parameters)
         
         // 参数梯度相关方法

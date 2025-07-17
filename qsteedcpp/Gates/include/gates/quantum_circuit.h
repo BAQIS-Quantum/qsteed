@@ -12,25 +12,25 @@
 
 namespace qsteedcpp {
 
-// 参数梯度信息的数据结构
 struct ParameterGradInfo {
-    size_t gate_index;    // 门在电路中的索引
-    size_t param_index;   // 参数在该门中的索引
-    double grad_value;    // 梯度值
+    size_t gate_index;
+    size_t param_index;
+    double grad_value;
     
     ParameterGradInfo(size_t gi, size_t pi, double gv) 
         : gate_index(gi), param_index(pi), grad_value(gv) {}
 };
 
-// parameter_grads 的类型定义
 using ParameterGrads = std::map<std::string, std::vector<ParameterGradInfo>>;
+
+
 
 class QuantumCircuit {
 private:
     int num_qubits_;
     std::vector<std::pair<std::unique_ptr<Gate>, std::vector<int>>> instructions_;
     
-    // 参数梯度相关的私有成员
+    // Grad
     mutable ParameterGrads parameter_grads_;
     mutable std::vector<std::string> variables_;
     mutable bool grads_computed_;
@@ -101,7 +101,36 @@ public:
         instructions_.emplace_back(std::make_unique<CNOTGate>(), std::vector<int>{control, target});
     }
     
-
+    void rxx(const Parameter& theta, int qubit1, int qubit2) {
+        if (qubit1 >= num_qubits_ || qubit2 >= num_qubits_) {
+            throw std::out_of_range("Qubit index out of range");
+        }
+        if (qubit1 == qubit2) {
+            throw std::invalid_argument("Both qubits cannot be the same");
+        }
+        instructions_.emplace_back(std::make_unique<RXXGate>(theta), std::vector<int>{qubit1, qubit2});
+    }
+    
+    void ryy(const Parameter& theta, int qubit1, int qubit2) {
+        if (qubit1 >= num_qubits_ || qubit2 >= num_qubits_) {
+            throw std::out_of_range("Qubit index out of range");
+        }
+        if (qubit1 == qubit2) {
+            throw std::invalid_argument("Both qubits cannot be the same");
+        }
+        instructions_.emplace_back(std::make_unique<RYYGate>(theta), std::vector<int>{qubit1, qubit2});
+    }
+    
+    void rzz(const Parameter& theta, int qubit1, int qubit2) {
+        if (qubit1 >= num_qubits_ || qubit2 >= num_qubits_) {
+            throw std::out_of_range("Qubit index out of range");
+        }
+        if (qubit1 == qubit2) {
+            throw std::invalid_argument("Both qubits cannot be the same");
+        }
+        instructions_.emplace_back(std::make_unique<RZZGate>(theta), std::vector<int>{qubit1, qubit2});
+    }
+    
     void add_gate(std::unique_ptr<Gate> gate, const std::vector<int>& qubits) {
         if (static_cast<int>(qubits.size()) != gate->get_qubit_count()) {
             throw std::invalid_argument("Number of qubits doesn't match gate requirement");

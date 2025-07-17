@@ -282,7 +282,6 @@ public:
     std::map<std::string, double> compute_gradients(const std::map<std::string, double>& param_values) const {
         std::map<std::string, double> gradients;
         
-        // 获取所有参数
         auto params = get_parameters();
         
         for (const auto& param_name : params) {
@@ -292,7 +291,6 @@ public:
                 
                 // 创建 autodiff 函数：将表达式转换为 autodiff 函数
                 auto f = [this, &param_values, &param_name](var x) -> var {
-                    // 重新构建表达式，将目标参数替换为 autodiff 变量
                     return this->evaluate_with_autodiff(param_values, param_name, x);
                 };
                 

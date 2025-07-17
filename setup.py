@@ -81,7 +81,7 @@ setup(
             'qsteed-build_db = qsteed.first_build_db:first_build_db',
         ],
     },
-    cmake_install_dir="qsteed/passes/mapping/cpp_utils",
+    cmake_install_dir="qsteed",
     cmake_args=[
         '-DBUILD_WITH_GRAPHVIZ=OFF',
         # Set the hint path to the Graphviz root directory.

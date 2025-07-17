@@ -105,7 +105,6 @@ public:
     }
 };
 
-// 两量子比特门
 class CNOTGate : public Gate {
 public:
     CNOTGate() : Gate("CNOT", 2) {}
@@ -120,7 +119,62 @@ public:
     }
 };
 
-// 便捷的工厂函数
+class RXXGate : public Gate {
+public:
+    RXXGate(const Parameter& theta) : Gate("RXX", 2, {theta}) {}
+    
+    Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
+        double theta_val = get_parameter(0).value(param_map);
+        double cos_val = std::cos(theta_val / 2.0);
+        double sin_val = std::sin(theta_val / 2.0);
+        
+        return Matrix(std::vector<std::vector<Complex>>{
+            {Complex(cos_val, 0), Complex(0, 0), Complex(0, 0), Complex(0, -sin_val)},
+            {Complex(0, 0), Complex(cos_val, 0), Complex(0, -sin_val), Complex(0, 0)},
+            {Complex(0, 0), Complex(0, -sin_val), Complex(cos_val, 0), Complex(0, 0)},
+            {Complex(0, -sin_val), Complex(0, 0), Complex(0, 0), Complex(cos_val, 0)}
+        });
+    }
+};
+
+class RYYGate : public Gate {
+public:
+    RYYGate(const Parameter& theta) : Gate("RYY", 2, {theta}) {}
+    
+    Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
+        double theta_val = get_parameter(0).value(param_map);
+        double cos_val = std::cos(theta_val / 2.0);
+        double sin_val = std::sin(theta_val / 2.0);
+        
+        return Matrix(std::vector<std::vector<Complex>>{
+            {Complex(cos_val, 0), Complex(0, 0), Complex(0, 0), Complex(0, sin_val)},
+            {Complex(0, 0), Complex(cos_val, 0), Complex(0, -sin_val), Complex(0, 0)},
+            {Complex(0, 0), Complex(0, -sin_val), Complex(cos_val, 0), Complex(0, 0)},
+            {Complex(0, sin_val), Complex(0, 0), Complex(0, 0), Complex(cos_val, 0)}
+        });
+    }
+};
+
+class RZZGate : public Gate {
+public:
+    RZZGate(const Parameter& theta) : Gate("RZZ", 2, {theta}) {}
+    
+    Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
+        double theta_val = get_parameter(0).value(param_map);
+        double cos_val = std::cos(theta_val / 2.0);
+        double sin_val = std::sin(theta_val / 2.0);
+        
+        return Matrix(std::vector<std::vector<Complex>>{
+            {Complex(cos_val, -sin_val), Complex(0, 0), Complex(0, 0), Complex(0, 0)},
+            {Complex(0, 0), Complex(cos_val, sin_val), Complex(0, 0), Complex(0, 0)},
+            {Complex(0, 0), Complex(0, 0), Complex(cos_val, sin_val), Complex(0, 0)},
+            {Complex(0, 0), Complex(0, 0), Complex(0, 0), Complex(cos_val, -sin_val)}
+        });
+    }
+};
+
+
+
 inline HGate H() { return HGate(); }
 inline XGate X() { return XGate(); }
 inline YGate Y() { return YGate(); }
@@ -129,5 +183,8 @@ inline RXGate RX(const Parameter& theta) { return RXGate(theta); }
 inline RYGate RY(const Parameter& phi) { return RYGate(phi); }
 inline RZGate RZ(const Parameter& lambda) { return RZGate(lambda); }
 inline CNOTGate CNOT() { return CNOTGate(); }
+inline RXXGate RXX(const Parameter& theta) { return RXXGate(theta); }
+inline RYYGate RYY(const Parameter& theta) { return RYYGate(theta); }
+inline RZZGate RZZ(const Parameter& theta) { return RZZGate(theta); }
 
 } // namespace qsteedcpp 

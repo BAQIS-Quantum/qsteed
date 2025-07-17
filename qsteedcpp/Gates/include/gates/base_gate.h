@@ -8,7 +8,7 @@
 
 namespace qsteedcpp {
 
-// 门的基类
+
 class Gate {
 private:
     std::string name_;
@@ -43,7 +43,6 @@ public:
         return values;
     }
     
-    // 更新参数值
     void update_parameters(const std::map<std::string, double>& param_values) {
         for (auto& param : parameters_) {
             // 对于每个参数，如果它是一个简单的变量且在param_values中，则更新它
@@ -55,13 +54,12 @@ public:
     }
     
         
+    // Matrix
     Matrix apply(const Matrix& state, const std::map<std::string, double>& param_map = {}) const {
         return get_matrix(param_map) * state;
     }
 
-    // 获取矩阵（纯虚函数，子类必须实现）
     virtual Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const = 0;
-
 };
 
 } // namespace qsteedcpp

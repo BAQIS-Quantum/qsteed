@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build", "setuptools>=42", "wheel", "pybind11", "cmake"]
+requires = ["scikit-build", "setuptools>=42", "wheel", "pybind11", "cmake", "pybind11-stubgen>=2.5"]
 build-backend = "setuptools.build_meta"
 
 [project]

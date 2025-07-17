@@ -225,7 +225,22 @@ if (BUILD_WITH_GRAPHVIZ)
   target_link_libraries(${target} PRIVATE gvc cgraph)
 endif()
 
-install(TARGETS ${target} LIBRARY DESTINATION .)
+install(TARGETS ${target} LIBRARY DESTINATION passes/mapping/cpp_utils)
+
+# 自动生成stub文件
+if(SKBUILD)
+    add_custom_command(
+        TARGET ${target} POST_BUILD
+        COMMAND ${PYTHON_EXECUTABLE} -m pybind11_stubgen ${target} --output-dir ${CMAKE_CURRENT_BINARY_DIR}/stubs
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating type stubs for ${target} module"
+        VERBATIM
+    )
+    
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stubs/${target}/__init__.pyi 
+            DESTINATION passes/mapping/cpp_utils/${target}
+            OPTIONAL)
+endif()
 
 
 ## -- Module Testing -- ##
@@ -235,7 +250,6 @@ message(STATUS "BUILD_TESTS is set to ${BUILD_TESTS}")
 if(BUILD_TESTS)
     enable_testing()
     
-    # 使用 FetchContent 管理 Google Test
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
