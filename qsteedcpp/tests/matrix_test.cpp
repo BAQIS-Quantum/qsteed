@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <cmath>
-#include "Gates/include/matrix.h"
+#include "QuantumCircuit/include/matrix.h"
 
 namespace qsteedcpp {
 namespace Test {

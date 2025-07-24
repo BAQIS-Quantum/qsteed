@@ -72,26 +72,26 @@ set(QSTEED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qsteedcpp")
 set(QARSER_DIR "${QSTEED_CPP_DIR}/Qarser")
 set(SABRE_DIR "${QSTEED_CPP_DIR}/SABRE")
 set(DAG_DIR "${QSTEED_CPP_DIR}/DAG")
-set(GATES_DIR "${QSTEED_CPP_DIR}/Gates")
+set(QUANTUM_CIRCUIT_DIR "${QSTEED_CPP_DIR}/QuantumCircuit")
 
 file(GLOB_RECURSE QARSER_SOURCES "${QARSER_DIR}/*.cpp")
 file(GLOB_RECURSE SABRE_SOURCES "${SABRE_DIR}/*.cpp")
 file(GLOB_RECURSE DAG_SOURCES "${DAG_DIR}/*.cpp")
-file(GLOB_RECURSE GATES_SOURCES "${GATES_DIR}/*.cpp")
+file(GLOB_RECURSE QUANTUM_CIRCUIT_SOURCES "${QUANTUM_CIRCUIT_DIR}/*.cpp")
 
 include_directories(
   "${QSTEED_CPP_DIR}"
 )
 
-# 0. Build Gates module)
-add_library(gates_lib INTERFACE)
+# 0. Build QuantumCircuit module)
+add_library(quantum_circuit_lib INTERFACE)
 target_include_directories(
-  gates_lib
+  quantum_circuit_lib
   INTERFACE
-    "${GATES_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
 )
 target_link_libraries(
-  gates_lib
+  quantum_circuit_lib
   INTERFACE
     Boost::headers
     Eigen3::Eigen
@@ -105,12 +105,12 @@ target_include_directories(
   PUBLIC
     "${DAG_DIR}/include"
     "${SABRE_DIR}/include"
-    "${GATES_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
 )
 target_link_libraries(
   dag_lib
   PUBLIC
-    gates_lib
+    quantum_circuit_lib
     Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
@@ -127,13 +127,13 @@ target_include_directories(
     "${QARSER_DIR}/include"
     "${DAG_DIR}/include"
     "${SABRE_DIR}/include" 
-    "${GATES_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
 )
 target_link_libraries(
   qarser_lib
   PUBLIC
     dag_lib
-    gates_lib
+    quantum_circuit_lib
     Boost::headers
 )
 
@@ -144,13 +144,13 @@ target_include_directories(
   PUBLIC 
     "${SABRE_DIR}/include"
     "${DAG_DIR}/include"
-    "${GATES_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
 )    
 target_link_libraries(
   sabre_lib
   PUBLIC
     dag_lib
-    gates_lib
+    quantum_circuit_lib
     Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
@@ -183,7 +183,7 @@ else()
   )
   target_link_libraries(
     qsteedcpp_test PRIVATE
-      gates_lib
+      quantum_circuit_lib
       dag_lib
       qarser_lib
       sabre_lib
@@ -199,7 +199,7 @@ pybind11_add_module(
   ${target}
     ${QARSER_SOURCES}
     ${SABRE_SOURCES}
-    ${GATES_SOURCES}
+    ${QUANTUM_CIRCUIT_SOURCES}
     "${QSTEED_CPP_DIR}/binding.cpp"
     "${QSTEED_CPP_DIR}/gate_bindings.cpp"
     "${QSTEED_CPP_DIR}/circuit_bindings.cpp"
@@ -210,12 +210,12 @@ target_include_directories(
     "${QARSER_DIR}/include"
     "${SABRE_DIR}/include"
     "${DAG_DIR}/include"
-    "${GATES_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
 )
 target_link_libraries(
   ${target} 
   PRIVATE 
-    gates_lib
+    quantum_circuit_lib
     dag_lib
     sabre_lib 
     qarser_lib
@@ -227,7 +227,7 @@ endif()
 
 install(TARGETS ${target} LIBRARY DESTINATION passes/mapping/cpp_utils)
 
-# 自动生成stub文件
+# Generate Stub
 if(SKBUILD)
     add_custom_command(
         TARGET ${target} POST_BUILD

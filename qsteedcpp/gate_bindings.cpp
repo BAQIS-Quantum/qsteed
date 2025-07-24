@@ -3,10 +3,10 @@
 #include <pybind11/operators.h>
 #include <pybind11/complex.h>
 #include "gate_bindings.h"
-#include "Gates/include/gates/base_gate.h"
-#include "Gates/include/gates/standard_gates.h"
-#include "Gates/include/gates/parameter.h"
-#include "Gates/include/matrix.h"
+#include "QuantumCircuit/include/circuit/base_gate.h"
+#include "QuantumCircuit/include/circuit/standard_gates.h"
+#include "QuantumCircuit/include/circuit/parameter.h"
+#include "QuantumCircuit/include/matrix.h"
 
 namespace py = pybind11;
 using namespace qsteedcpp;

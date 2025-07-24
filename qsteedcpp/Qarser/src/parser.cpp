@@ -1,5 +1,8 @@
 #include <iostream>
 #include <cmath>
+#include <fstream>
+#include <sstream>
+#include <filesystem>
 #include "parser.h"
 #include "AST/ast.hpp"
 
@@ -10,16 +13,22 @@ namespace qarser {
     Parser::Parser(const std::string& source) 
         : lexer(source) {
         advance();
+        
+        include_paths_.push_back(std::filesystem::current_path());
+        include_paths_.push_back(std::filesystem::current_path() / "include");
     }
 
     std::unique_ptr<Program> Parser::parse() {
         auto program = std::make_unique<Program>();
+
+        preprocess_statements(program->statements);
 
         parse_version(program);
 
         while (!match(TokenType::EOF_TOKEN)) {
             program->statements.push_back(parse_statement());
         }
+        
 
         return program;
     }
@@ -339,6 +348,86 @@ namespace qarser {
         consume(TokenType::SEMICOLON, "Parsing barrier, Expect ';'!");
 
         return std::make_unique<Barrier>(previous.line, qubits);
+    }
+
+    std::optional<std::filesystem::path> Parser::find_include_file(const std::string& filename) {
+        if (!current_file_path_.empty()) {
+            auto dir = current_file_path_.parent_path();
+            auto file_path = dir / filename;
+            if (std::filesystem::exists(file_path)) {
+                return file_path;
+            }
+        }
+        
+        // 然后搜索include路径
+        for (const auto& path : include_paths_) {
+            auto file_path = path / filename;
+            if (std::filesystem::exists(file_path)) {
+                return file_path;
+            }
+        }
+        
+        return std::nullopt;
+    }
+    
+    std::unique_ptr<Program> Parser::expand_include(const std::string& filename) {
+        // qelib1.inc 不展开，留给SA处理
+        if (filename == "qelib1.inc") {
+            return nullptr;
+        }
+        
+        auto file_path = find_include_file(filename);
+        if (!file_path) {
+            // 文件不存在，返回nullptr
+            return nullptr;
+        }
+        
+        // 读取文件内容
+        std::ifstream file(*file_path);
+        if (!file.is_open()) {
+            return nullptr;
+        }
+        
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string content = buffer.str();
+        
+        Parser include_parser(content);
+        include_parser.include_paths_ = this->include_paths_;
+        include_parser.current_file_path_ = *file_path;
+        
+        try {
+            return include_parser.parse();
+        } catch (...) {
+            return nullptr;
+        }
+    }
+    
+    void Parser::preprocess_statements(std::vector<std::unique_ptr<Statement>>& statements) {
+        std::vector<std::unique_ptr<Statement>> processed;
+        
+        for (auto& stmt : statements) {
+            if (stmt->kind() == Statement::Kind::INCLUDE) {
+                auto* include_stmt = static_cast<Include*>(stmt.get());
+                
+                if (include_stmt->filename == "qelib1.inc") {
+                    processed.push_back(std::move(stmt));
+                } else {
+                    auto expanded = expand_include(include_stmt->filename);
+                    if (expanded) {
+                        for (auto& expanded_stmt : expanded->statements) {
+                            processed.push_back(std::move(expanded_stmt));
+                        }
+                    } else {
+                        processed.push_back(std::move(stmt));
+                    }
+                }
+            } else {
+                processed.push_back(std::move(stmt));
+            }
+        }
+        
+        statements = std::move(processed);
     }
 
 } // namespace qarser

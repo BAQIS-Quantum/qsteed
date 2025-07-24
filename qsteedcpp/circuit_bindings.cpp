@@ -2,9 +2,9 @@
 #include <pybind11/stl.h>
 #include <pybind11/complex.h>
 #include "circuit_bindings.h"
-#include "Gates/include/gates/quantum_circuit.h"
-#include "Gates/include/gates/parameter.h"
-#include "Gates/include/gates/standard_gates.h"
+#include "QuantumCircuit/include/circuit/quantum_circuit.h"
+#include "QuantumCircuit/include/circuit/parameter.h"
+#include "QuantumCircuit/include/circuit/standard_gates.h"
 
 namespace py = pybind11;
 using namespace qsteedcpp;

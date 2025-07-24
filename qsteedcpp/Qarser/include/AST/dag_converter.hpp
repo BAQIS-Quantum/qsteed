@@ -5,7 +5,7 @@
 #include "parser.h"
 #include "dag.h"
 #include <unordered_set>
-#include "gates/standard_gates.h"
+#include "circuit/standard_gates.h"
 
 namespace qarser {
 
@@ -15,56 +15,9 @@ namespace qarser {
         std::unordered_map<std::string, int> qreg;
         std::unordered_map<std::string, int> creg;
 
-        // 支持的门
         bool check_supported_gate = false;
         static inline const std::unordered_set<std::string> supported_gates = []() {
             std::unordered_set<std::string> gates;
-            
-            // 添加所有标准门
-            // gates.insert(::qsteedcpp::IdGate::NAME);        // "ID"
-            // gates.insert(::qsteedcpp::PauliXGate::NAME);    // "X"
-            // gates.insert(::qsteedcpp::PauliYGate::NAME);    // "Y"
-            // gates.insert(::qsteedcpp::PauliZGate::NAME);    // "Z"
-            // gates.insert(::qsteedcpp::HadamardGate::NAME);  // "H"
-            // gates.insert(::qsteedcpp::SGate::NAME);         // "S"
-            // gates.insert(::qsteedcpp::SdgGate::NAME);       // "Sdg"
-            // gates.insert(::qsteedcpp::TGate::NAME);         // "T"
-            // gates.insert(::qsteedcpp::TdgGate::NAME);       // "Tdg"
-            // gates.insert(::qsteedcpp::SXGate::NAME);        // "SX"
-            // gates.insert(::qsteedcpp::SXdgGate::NAME);      // "SXdg"
-            // gates.insert(::qsteedcpp::SYGate::NAME);        // "SY"
-            // gates.insert(::qsteedcpp::SYdgGate::NAME);      // "SYdg"
-            // gates.insert(::qsteedcpp::WGate::NAME);         // "W"
-            // gates.insert(::qsteedcpp::SWGate::NAME);        // "SW"
-            // gates.insert(::qsteedcpp::SWdgGate::NAME);      // "SWdg"
-            // gates.insert(::qsteedcpp::CNOTGate::NAME);      // "CNOT"
-            // gates.insert(::qsteedcpp::CZGate::NAME);        // "CZ"
-            // gates.insert(::qsteedcpp::SWAPGate::NAME);      // "SWAP"
-            // gates.insert(::qsteedcpp::ISwapGate::NAME);     // "ISWAP"
-            // gates.insert(::qsteedcpp::ToffoliGate::NAME);   // "CCNOT"
-            
-            // 添加参数化门
-            // gates.insert(::qsteedcpp::RXGate::NAME);        // "RX"
-            // gates.insert(::qsteedcpp::RYGate::NAME);        // "RY"
-            // gates.insert(::qsteedcpp::RZGate::NAME);        // "RZ"
-            // gates.insert(::qsteedcpp::U3Gate::NAME);        // "U3"
-            // gates.insert(::qsteedcpp::PhaseGate::NAME);     // "P"
-            // gates.insert(::qsteedcpp::RXXGate::NAME);       // "RXX"
-            // gates.insert(::qsteedcpp::RYYGate::NAME);       // "RYY"
-            // gates.insert(::qsteedcpp::RZZGate::NAME);       // "RZZ"
-            
-            // // 添加新的受控门
-            // gates.insert(::qsteedcpp::CYGate::NAME);        // "CY"
-            // gates.insert(::qsteedcpp::CSGate::NAME);        // "CS"
-            // gates.insert(::qsteedcpp::CTGate::NAME);        // "CT"
-            // gates.insert(::qsteedcpp::CRXGate::NAME);       // "CRX"
-            // gates.insert(::qsteedcpp::CRYGate::NAME);       // "CRY"
-            // gates.insert(::qsteedcpp::CRZGate::NAME);       // "CRZ"
-            
-            // // 添加多控制门
-            // gates.insert(::qsteedcpp::MCXGate::NAME);       // "MCX"
-            // gates.insert(::qsteedcpp::MCYGate::NAME);       // "MCY"
-            // gates.insert(::qsteedcpp::MCZGate::NAME);       // "MCZ"
             
             return gates;
         }();
@@ -88,7 +41,6 @@ namespace qarser {
         }
 
         void visit(Gate& gate) {
-            // 检查门是否被支持
             if (check_supported_gate) {
                 if (supported_gates.find(gate.name) == supported_gates.end()) {
                     std::string error_msg = "Unsupported gate: " + gate.name + "\nSupported gates are:\n";

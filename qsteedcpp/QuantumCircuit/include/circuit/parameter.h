@@ -11,7 +11,6 @@ namespace qsteedcpp {
 using namespace autodiff;
 
 
-// 表达式节点基类
 class ExpressionNode {
 public:
     virtual ~ExpressionNode() = default;
@@ -24,7 +23,6 @@ public:
                                  var target_value) const = 0;
 };
 
-// 常量节点
 class ConstantNode : public ExpressionNode {
 private:
     double value_;
@@ -54,7 +52,7 @@ public:
     }
 };
 
-// 变量节点
+
 class VariableNode : public ExpressionNode {
 private:
     std::string name_;
@@ -96,7 +94,6 @@ public:
     }
 };
 
-// 二元运算节点
 class BinaryOpNode : public ExpressionNode {
 private:
     std::unique_ptr<ExpressionNode> left_;
@@ -137,7 +134,6 @@ public:
         var left_val = left_->evaluate_autodiff(params, target_param, target_value);
         var right_val = right_->evaluate_autodiff(params, target_param, target_value);
         
-        // 根据运算符类型执行相应的 autodiff 运算
         if (op_symbol_ == "+") {
             return left_val + right_val;
         } else if (op_symbol_ == "-") {
@@ -147,13 +143,12 @@ public:
         } else if (op_symbol_ == "/") {
             return left_val / right_val;
         } else {
-            // 默认返回加法
             return left_val + right_val;
         }
     }
 };
 
-// 一元运算节点
+
 class UnaryOpNode : public ExpressionNode {
 private:
     std::unique_ptr<ExpressionNode> operand_;
@@ -187,7 +182,6 @@ public:
                          var target_value) const override {
         var operand_val = operand_->evaluate_autodiff(params, target_param, target_value);
         
-        // 根据函数类型执行相应的 autodiff 运算
         if (op_symbol_.find("sin") == 0) {
             return sin(operand_val);
         } else if (op_symbol_.find("cos") == 0) {
@@ -209,7 +203,6 @@ public:
         } else if (op_symbol_ == "-") {
             return -operand_val;
         } else {
-            // 默认返回原值
             return operand_val;
         }
     }
@@ -231,11 +224,9 @@ public:
     explicit Parameter(std::unique_ptr<ExpressionNode> expr, const std::string& name = "") 
         : expression_(std::move(expr)), name_(name) {}
 
-    // 拷贝构造函数
     Parameter(const Parameter& other) 
         : expression_(other.expression_->clone()), name_(other.name_) {}
 
-    // 拷贝赋值运算符
     Parameter& operator=(const Parameter& other) {
         if (this != &other) {
             expression_ = other.expression_->clone();
@@ -244,11 +235,9 @@ public:
         return *this;
     }
 
-    // 移动构造函数
     Parameter(Parameter&& other) noexcept
         : expression_(std::move(other.expression_)), name_(std::move(other.name_)) {}
 
-    // 移动赋值运算符
     Parameter& operator=(Parameter&& other) noexcept {
         if (this != &other) {
             expression_ = std::move(other.expression_);
@@ -257,7 +246,6 @@ public:
         return *this;
     }
 
-    // 获取当前值
     double value(const std::map<std::string, double>& param_map = {}) const {
         return expression_->evaluate(param_map);
     }
@@ -278,7 +266,6 @@ public:
         return expression_->get_parameters();
     }
 
-    // 计算梯度（使用 autodiff）
     std::map<std::string, double> compute_gradients(const std::map<std::string, double>& param_values) const {
         std::map<std::string, double> gradients;
         
@@ -294,7 +281,6 @@ public:
                     return this->evaluate_with_autodiff(param_values, param_name, x);
                 };
                 
-                // 计算梯度
                 var y = f(x);
                 gradients[param_name] = derivatives(y, wrt(x))[0];
             } else {
@@ -402,7 +388,6 @@ public:
             [](double a, double b) { return a / b; }, "/"));
     }
 
-    // 负号
     Parameter operator-() const {
         auto operand = expression_->clone();
         return Parameter(std::make_unique<UnaryOpNode>(
@@ -410,7 +395,6 @@ public:
             [](double x) { return -x; }, "-"));
     }
 
-    // 数学函数
     friend Parameter sin(const Parameter& p) {
         auto operand = p.expression_->clone();
         return Parameter(std::make_unique<UnaryOpNode>(
@@ -461,12 +445,10 @@ public:
             "pow(" + std::to_string(exponent) + ")"));
     }
 
-    // 打印表达式
     std::string to_string() const {
         return expression_->to_string();
     }
 
-    // 静态方法：创建变量
     static Parameter variable(const std::string& name) {
         return Parameter(std::make_unique<VariableNode>(name), name);
     }

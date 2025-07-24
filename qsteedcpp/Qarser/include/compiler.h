@@ -84,14 +84,7 @@ namespace qarser {
             }
             return converter.dag;
         } 
-
-
-
     };
-
-
-
-
 
     inline DAGCircuit qasm_to_dag(const std::string& source, bool from_file = false) {
         QasmCompiler qcompiler(source, from_file);
@@ -100,6 +93,5 @@ namespace qarser {
                     .convert_to_dag()
                     .get_dag();
     }
-
 
 };

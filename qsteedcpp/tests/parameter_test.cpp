@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "gates/parameter.h"
+#include "circuit/parameter.h"
 #include <iostream>
 #include <cmath>
 
