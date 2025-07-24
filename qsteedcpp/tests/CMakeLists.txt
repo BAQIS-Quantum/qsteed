@@ -1,23 +1,77 @@
-add_executable(
-    quantum_circuit_test
-        matrix_test.cpp
-        parameter_test.cpp
-        gates_test.cpp
+# Circuit tests
+add_executable(circuit_test
+    circuit/matrix_test.cpp
+    circuit/gates_test.cpp
 )
 
-target_link_libraries(quantum_circuit_test
+target_link_libraries(circuit_test
     PRIVATE
     GTest::gtest_main
     Eigen3::Eigen
     autodiff::autodiff
 )
 
-target_include_directories(quantum_circuit_test
+target_include_directories(circuit_test
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/../DAG/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/../SABRE/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit/include
 )
 
+# Parameter tests
+add_executable(parameter_test
+    common/parameter_test.cpp
+)
 
-add_test(NAME quantum_circuit_test COMMAND quantum_circuit_test) 
+target_link_libraries(parameter_test
+    PRIVATE
+    GTest::gtest_main
+    autodiff::autodiff
+)
+
+target_include_directories(parameter_test
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit/include
+)
+
+# DAG/SABRE tests
+add_executable(sabre_test
+    dag/sabre_test.cpp
+)
+
+target_link_libraries(sabre_test
+    PRIVATE
+    GTest::gtest_main
+    dag_lib
+    sabre_lib
+    Boost::boost
+)
+
+target_include_directories(sabre_test
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../DAG/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SABRE/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Model/include
+)
+
+# Qarser tests
+add_executable(qarser_test
+    qarser/qarser_test.cpp
+)
+
+target_link_libraries(qarser_test
+    PRIVATE
+    GTest::gtest_main
+    qarser_lib
+    dag_lib
+)
+
+target_include_directories(qarser_test
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Qarser/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../DAG/include
+)
+
+# Add all tests to CTest
+add_test(NAME circuit_test COMMAND circuit_test)
+add_test(NAME parameter_test COMMAND parameter_test)
+add_test(NAME sabre_test COMMAND sabre_test)
+add_test(NAME qarser_test COMMAND qarser_test)

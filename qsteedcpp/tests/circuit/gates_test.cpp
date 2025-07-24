@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "circuit/standard_gates.h"
-#include "circuit/parameter.h"
-#include "matrix.h"
 #include <iostream>
 #include <cmath>
+#include "gates/standard_gates.h"
+#include "circuit/parameter.h"
+#include "gates/matrix.h"
 
 using namespace qsteedcpp;
 

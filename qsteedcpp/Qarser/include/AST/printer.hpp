@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "ast.hpp"
+#include "gate.hpp"
 
 namespace qarser {
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "base_gate.h"
+#include "../gates/base_gate.h"
 #include <memory>
 #include <vector>
 #include <optional>

@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "parameter.h"
-#include "../matrix.h"
+#include "circuit/parameter.h"
+#include "matrix.h"
 
 namespace qsteedcpp {
 

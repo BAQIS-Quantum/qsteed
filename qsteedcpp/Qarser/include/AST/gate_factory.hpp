@@ -4,7 +4,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
-#include "QuantumCircuit/include/circuit/standard_gates.h"
+#include "QuantumCircuit/include/gates/standard_gates.h"
 #include "QuantumCircuit/include/circuit/parameter.h"
 
 namespace qsteedcpp {

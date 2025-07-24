@@ -2,7 +2,6 @@
 #include <pybind11/stl.h>
 #include <pybind11/complex.h>
 #include "../QuantumCircuit/include/circuit/quantum_circuit.h"
-#include "../QuantumCircuit/include/circuit/standard_gates.h"
 
 namespace py = pybind11;
 using namespace qsteedcpp;
@@ -41,43 +40,8 @@ void bind_quantum_circuit(py::module& m) {
         .def("cnot", &QuantumCircuit::cnot, py::arg("control"), py::arg("target"))
         
 
-        // 通用门添加方法
-        .def("add_gate", [](QuantumCircuit& circuit, Gate& gate, const std::vector<int>& qubits) {
-            std::unique_ptr<Gate> gate_copy;
-            
-            // 根据门的类型创建副本
-            if (gate.get_name() == "H") {
-                gate_copy = std::make_unique<HGate>();
-            } else if (gate.get_name() == "X") {
-                gate_copy = std::make_unique<XGate>();
-            } else if (gate.get_name() == "Y") {
-                gate_copy = std::make_unique<YGate>();
-            } else if (gate.get_name() == "Z") {
-                gate_copy = std::make_unique<ZGate>();
-            } else if (gate.get_name() == "RX") {
-                gate_copy = std::make_unique<RXGate>(gate.get_parameter(0));
-            } else if (gate.get_name() == "RY") {
-                gate_copy = std::make_unique<RYGate>(gate.get_parameter(0));
-            } else if (gate.get_name() == "RZ") {
-                gate_copy = std::make_unique<RZGate>(gate.get_parameter(0));
-            } else if (gate.get_name() == "CNOT") {
-                gate_copy = std::make_unique<CNOTGate>();
-            } else if (gate.get_name() == "RXX") {
-                gate_copy = std::make_unique<RXXGate>(gate.get_parameter(0));
-            } else if (gate.get_name() == "RYY") {
-                gate_copy = std::make_unique<RYYGate>(gate.get_parameter(0));
-            } else if (gate.get_name() == "RZZ") {
-                gate_copy = std::make_unique<RZZGate>(gate.get_parameter(0));
-            } else {
-                throw std::runtime_error("Unknown gate type: " + gate.get_name());
-            }
-            
-            circuit.add_gate(std::move(gate_copy), qubits);
-        }, py::arg("gate"), py::arg("qubits"))
-        
+        // Parameter related methods
         .def("get_parameters", &QuantumCircuit::get_parameters)
-        
-        // 参数梯度相关方法
         .def("get_parameter_grads", &QuantumCircuit::get_parameter_grads,
              "Get parameter gradients information",
              py::return_value_policy::reference_internal)
@@ -93,7 +57,7 @@ void bind_quantum_circuit(py::module& m) {
         .def("print_parameter_grads", &QuantumCircuit::print_parameter_grads,
              "Print parameter gradients information for debugging")
         
-        // 便利方法：以Python友好的格式返回参数梯度
+        // Convenient method: Return parameter gradients in a Python-friendly format
         .def("get_parameter_grads_dict", [](const QuantumCircuit& circuit) {
             const auto& grads = circuit.get_parameter_grads();
             py::dict result;

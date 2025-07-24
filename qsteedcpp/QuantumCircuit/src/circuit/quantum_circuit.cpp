@@ -1,7 +1,7 @@
 #include <set>
 #include <iostream>
 #include "circuit/quantum_circuit.h"
-#include "circuit/standard_gates.h"
+#include "gates/standard_gates.h"
 
 namespace qsteedcpp {
 

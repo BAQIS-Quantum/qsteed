@@ -156,9 +156,9 @@ target_link_libraries(
 if (BUILD_WITH_GRAPHVIZ)
     target_link_libraries(sabre_lib PRIVATE gvc cgraph)
 endif()
-# target_compile_definitions(sabre_test PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
 
 
+# Find python and pybind11
 if(SKBUILD)
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" -c
@@ -171,27 +171,12 @@ if(SKBUILD)
   set(PYBIND11_FINDPYTHON ON)
   find_package(pybind11 REQUIRED CONFIG)
 else()
-  ## --  Build Testing -- ##
   set(PYBIND11_FINDPYTHON ON)
   add_subdirectory(extern/pybind11)
-
-  add_executable(
-    qsteedcpp_test
-      # "${QSTEED_CPP_DIR}/test.cpp"
-      "${QARSER_DIR}/src/test.cpp"
-
-  )
-  target_link_libraries(
-    qsteedcpp_test PRIVATE
-      quantum_circuit_lib
-      dag_lib
-      qarser_lib
-      sabre_lib
-  )
 endif()
 
-# message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
-# message(STATUS "Python Version: ${Python_VERSION}")
+message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
+message(STATUS "Python Version: ${Python_VERSION}")
 
 
 set(target qsteedcpp)
@@ -259,7 +244,4 @@ if(BUILD_TESTS)
     
     # Test Modules
     add_subdirectory(qsteedcpp/tests)
-    # add_subdirectory(Qarser/tests)
-    # add_subdirectory(DAG/tests)
-    # add_subdirectory(SABRE/tests)
 endif()
