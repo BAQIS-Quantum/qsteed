@@ -8,15 +8,16 @@
 #include "sabre_routing.h"
 #include "dag.h"
 #include "parameter.h"
-#include "visualization.h"
 #include "parser.h"
-#include "AST/dag_converter.hpp"
 #include "compiler.h"
-#include "gate_bindings.h"
-#include "circuit_bindings.h"
 
 namespace py = pybind11;
 using namespace sabre;
+
+
+void bind_quantum_circuit(py::module& m);
+void bind_gates(py::module& m);
+
 
 PYBIND11_MODULE(qsteedcpp, m) {
     m.doc() = "QSteed C++ Extensions";

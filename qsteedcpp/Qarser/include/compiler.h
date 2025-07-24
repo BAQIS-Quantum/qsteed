@@ -1,10 +1,10 @@
 #pragma once
+#include <fstream>
+#include <sstream>
 #include "preprocess.hpp"
 #include "parser.h"
 #include "SA/analyzer.hpp"
-
-#include <fstream>
-#include <sstream>
+#include "AST/dag_converter.hpp"
 
 namespace qarser {
     inline std::string load_qasm_from_file(const std::string& filepath) {

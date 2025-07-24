@@ -1,16 +1,13 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/complex.h>
-#include "circuit_bindings.h"
-#include "QuantumCircuit/include/circuit/quantum_circuit.h"
-#include "QuantumCircuit/include/circuit/parameter.h"
-#include "QuantumCircuit/include/circuit/standard_gates.h"
+#include "../QuantumCircuit/include/circuit/quantum_circuit.h"
+#include "../QuantumCircuit/include/circuit/standard_gates.h"
 
 namespace py = pybind11;
 using namespace qsteedcpp;
 
 void bind_quantum_circuit(py::module& m) {
-    // 绑定 ParameterGradInfo 结构体
     py::class_<ParameterGradInfo>(m, "ParameterGradInfo")
         .def(py::init<size_t, size_t, double>(), 
              py::arg("gate_index"), py::arg("param_index"), py::arg("grad_value"))
@@ -23,7 +20,7 @@ void bind_quantum_circuit(py::module& m) {
                    ", grad_value=" + std::to_string(info.grad_value) + ")";
         });
 
-    // 绑定 QuantumCircuit 类
+
     py::class_<QuantumCircuit>(m, "QuantumCircuit")
         .def(py::init<int>(), py::arg("num_qubits"))
         .def("num_qubits", &QuantumCircuit::num_qubits)
@@ -118,12 +115,11 @@ void bind_quantum_circuit(py::module& m) {
             return result;
         }, "Get parameter gradients as Python dictionary")
         
-        // 便利方法：检查电路是否有参数
+
         .def("has_parameters", [](const QuantumCircuit& circuit) {
             return !circuit.get_variables().empty();
         }, "Check if the circuit has parameters")
         
-        // 打印电路
         .def("print", &QuantumCircuit::print)
         
         .def("__repr__", [](const QuantumCircuit& circuit) {
@@ -131,6 +127,5 @@ void bind_quantum_circuit(py::module& m) {
                    " qubits, " + std::to_string(circuit.num_gates()) + " gates)";
         })
         
-        // 支持 len() 函数
         .def("__len__", &QuantumCircuit::num_gates);
 }

@@ -7,7 +7,6 @@
 
 namespace qsteedcpp {
 
-// 操作类型
 class Measurement {
 public:
     int qubit_index;

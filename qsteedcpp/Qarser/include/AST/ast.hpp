@@ -1,8 +1,8 @@
 #pragma once
+#include <memory>
 #include <vector>
 #include <string>
 #include "visitor.hpp"
-#include "SA/context/symbol.hpp"
 
 
 namespace qarser {

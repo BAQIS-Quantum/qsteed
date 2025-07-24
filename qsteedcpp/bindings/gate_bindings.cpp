@@ -2,7 +2,6 @@
 #include <pybind11/stl.h>
 #include <pybind11/operators.h>
 #include <pybind11/complex.h>
-#include "gate_bindings.h"
 #include "QuantumCircuit/include/circuit/base_gate.h"
 #include "QuantumCircuit/include/circuit/standard_gates.h"
 #include "QuantumCircuit/include/circuit/parameter.h"

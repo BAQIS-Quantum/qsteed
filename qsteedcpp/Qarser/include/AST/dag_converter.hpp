@@ -1,11 +1,9 @@
 #pragma once
 #include "AST/ast.hpp"
+#include "AST/gate.hpp"
 #include "AST/visitor.hpp"
-#include "SA/analyzer.hpp"
-#include "parser.h"
 #include "dag.h"
 #include <unordered_set>
-#include "circuit/standard_gates.h"
 
 namespace qarser {
 

@@ -1,8 +1,8 @@
 add_executable(
     quantum_circuit_test
-    matrix_test.cpp
-    parameter_test.cpp
-    gates_test.cpp
+        matrix_test.cpp
+        parameter_test.cpp
+        gates_test.cpp
 )
 
 target_link_libraries(quantum_circuit_test

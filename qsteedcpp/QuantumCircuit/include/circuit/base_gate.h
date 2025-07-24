@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../matrix.h"
-#include "parameter.h"
 #include <string>
 #include <vector>
 #include <map>
+#include "parameter.h"
+#include "../matrix.h"
 
 namespace qsteedcpp {
 

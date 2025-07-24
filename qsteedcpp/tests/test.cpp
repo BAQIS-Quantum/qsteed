@@ -2,13 +2,8 @@
 #include "sabre_layout.h"
 #include "dag.h"
 #include "Model/coupling.h"
-#include "Model/layout.h"
-#include "visualization.h"
-
 #include <boost/graph/graph_utility.hpp>
-#include <iomanip>
 
-#include "vendor/prettyprint.hpp"
 
 
 DAGCircuit test_dag() {

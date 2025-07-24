@@ -84,15 +84,15 @@ include_directories(
 )
 
 # 0. Build QuantumCircuit module)
-add_library(quantum_circuit_lib INTERFACE)
+add_library(quantum_circuit_lib STATIC ${QUANTUM_CIRCUIT_SOURCES})
 target_include_directories(
   quantum_circuit_lib
-  INTERFACE
+  PUBLIC
     "${QUANTUM_CIRCUIT_DIR}/include"
 )
 target_link_libraries(
   quantum_circuit_lib
-  INTERFACE
+  PUBLIC
     Boost::headers
     Eigen3::Eigen
     autodiff::autodiff
@@ -200,9 +200,9 @@ pybind11_add_module(
     ${QARSER_SOURCES}
     ${SABRE_SOURCES}
     ${QUANTUM_CIRCUIT_SOURCES}
-    "${QSTEED_CPP_DIR}/binding.cpp"
-    "${QSTEED_CPP_DIR}/gate_bindings.cpp"
-    "${QSTEED_CPP_DIR}/circuit_bindings.cpp"
+    "${QSTEED_CPP_DIR}/bindings/binding.cpp"
+    "${QSTEED_CPP_DIR}/bindings/gate_bindings.cpp"
+    "${QSTEED_CPP_DIR}/bindings/circuit_bindings.cpp"
 )
 target_include_directories(
   ${target}
