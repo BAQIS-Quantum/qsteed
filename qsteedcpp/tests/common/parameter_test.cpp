@@ -116,14 +116,14 @@ TEST_F(ParameterTest, ParameterExtraction) {
     
     // 简单表达式
     Parameter expr1 = a + b;
-    auto params1 = expr1.get_parameters();
+    auto params1 = expr1.get_variables();
     EXPECT_EQ(params1.size(), 2);
     EXPECT_TRUE(std::find(params1.begin(), params1.end(), "a") != params1.end());
     EXPECT_TRUE(std::find(params1.begin(), params1.end(), "b") != params1.end());
     
     // 复杂表达式
     Parameter expr2 = sin(a) * cos(b) + c * 2.0;
-    auto params2 = expr2.get_parameters();
+    auto params2 = expr2.get_variables();
     EXPECT_EQ(params2.size(), 3);
     EXPECT_TRUE(std::find(params2.begin(), params2.end(), "a") != params2.end());
     EXPECT_TRUE(std::find(params2.begin(), params2.end(), "b") != params2.end());
@@ -131,7 +131,7 @@ TEST_F(ParameterTest, ParameterExtraction) {
     
     // 常量表达式
     Parameter expr3 = Parameter(3.14) + Parameter(2.0);
-    auto params3 = expr3.get_parameters();
+    auto params3 = expr3.get_variables();
     EXPECT_EQ(params3.size(), 0);
 }
 

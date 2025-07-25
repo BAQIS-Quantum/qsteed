@@ -78,6 +78,8 @@ public:
     
     // Circuit operations
     void measure(int qubit, int clbit);
+    void measure(const std::vector<int>& qubits, const std::vector<int>& clbits);
+    void measure_all();  // 测量所有量子比特到对应的经典比特
     void barrier(const std::vector<int>& qubits = {});
     void reset(int qubit);
     void append_c_if(std::unique_ptr<Gate> gate, const std::vector<int>& qubits, int clbit, int value);
@@ -86,13 +88,7 @@ public:
     const std::vector<CircuitInstruction>& get_instructions() const {
         return instructions_;
     }
-    
-    // Gate addition helper
     void add_gate(std::unique_ptr<Gate> gate, const std::vector<int>& qubits);
-    
-
-    // Display methods
-    void print() const;
     
     // Parameter handling
     std::vector<std::string> get_parameters() const;
@@ -107,10 +103,15 @@ public:
         const std::map<std::string, double>& param_values) const;
     
     void print_parameter_grads() const;
+    void print() const;
+    void print_enhanced() const;  // 使用增强版 FTXUI 绘制
+    void print_canvas() const;    // 使用 Canvas 绘制
+    void print_interactive() const; // 交互式显示，支持滚动和缩放
 
 private:
     void validate_qubit_index(int qubit) const;
     void validate_clbit_index(int clbit) const;
+    void validate_gate_qubits(const std::vector<int>& qubits, const std::string& gate_name);
 
     void compute_parameter_grads() const;
 };

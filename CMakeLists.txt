@@ -44,6 +44,17 @@ endif()
 include(cmake/Dependencies.cmake)
 set(BUILD_TESTING OFF CACHE BOOL "Disable all testing")
 
+# 确保 FTXUI 目标被正确创建
+if(NOT TARGET screen)
+  message(WARNING "FTXUI screen target not found")
+endif()
+if(NOT TARGET dom)
+  message(WARNING "FTXUI dom target not found")
+endif()
+if(NOT TARGET component)
+  message(WARNING "FTXUI component target not found")
+endif()
+
 
 # Find Graphviz
 # option(BUILD_WITH_GRAPHVIZ "Build with Graphviz support" OFF)
@@ -96,6 +107,9 @@ target_link_libraries(
     Boost::headers
     Eigen3::Eigen
     autodiff::autodiff
+    component
+    dom
+    screen
 )
 
 # 1. Build DAG module

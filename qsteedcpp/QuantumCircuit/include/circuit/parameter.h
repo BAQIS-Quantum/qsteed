@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include <autodiff/reverse/var.hpp>
+#include "circuit/uuid_generator.h"
 
 namespace qsteedcpp {
 
@@ -14,13 +15,18 @@ using namespace autodiff;
 class ExpressionNode {
 public:
     virtual ~ExpressionNode() = default;
-    virtual double evaluate(const std::map<std::string, double>& params) const = 0;
-    virtual std::vector<std::string> get_parameters() const = 0;
+    virtual double evaluate(const std::map<std::string, double>& variable_values) const = 0;
+    virtual std::vector<std::string> get_variables() const = 0;
     virtual std::unique_ptr<ExpressionNode> clone() const = 0;
     virtual std::string to_string() const = 0;
-    virtual var evaluate_autodiff(const std::map<std::string, double>& params,
-                                 const std::string& target_param,
+    virtual var evaluate_autodiff(const std::map<std::string, double>& variable_values,
+                                 const std::string& target_variable,
                                  var target_value) const = 0;
+    
+    // 获取参数UUID到变量名的映射
+    virtual std::map<std::string, std::string> get_parameter_map() const {
+        return {};
+    }
 };
 
 class ConstantNode : public ExpressionNode {
@@ -29,11 +35,11 @@ private:
 public:
     explicit ConstantNode(double value) : value_(value) {}
     
-    double evaluate(const std::map<std::string, double>& params) const override {
+    double evaluate(const std::map<std::string, double>& variable_values) const override {
         return value_;
     }
     
-    std::vector<std::string> get_parameters() const override {
+    std::vector<std::string> get_variables() const override {
         return {};
     }
     
@@ -45,8 +51,8 @@ public:
         return std::to_string(value_);
     }
 
-    var evaluate_autodiff(const std::map<std::string, double>& params,
-                         const std::string& target_param,
+    var evaluate_autodiff(const std::map<std::string, double>& variable_values,
+                         const std::string& target_variable,
                          var target_value) const override {
         return value_;
     }
@@ -56,37 +62,56 @@ public:
 class VariableNode : public ExpressionNode {
 private:
     std::string name_;
+    std::string uuid_;  // 参数的唯一标识（如果是参数变量）
+    
 public:
+    // 普通变量构造函数（没有关联的 Parameter）
     explicit VariableNode(const std::string& name) : name_(name) {}
     
-    double evaluate(const std::map<std::string, double>& params) const override {
-        auto it = params.find(name_);
-        if (it != params.end()) {
+    // 参数变量构造函数（有关联的 Parameter）
+    VariableNode(const std::string& name, const std::string& uuid) 
+        : name_(name), uuid_(uuid) {}
+    
+    double evaluate(const std::map<std::string, double>& variable_values) const override {
+        auto it = variable_values.find(name_);
+        if (it != variable_values.end()) {
             return it->second;
         }
         return 0.0; // 默认值
     }
     
-    std::vector<std::string> get_parameters() const override {
+    std::vector<std::string> get_variables() const override {
         return {name_};
     }
     
     std::unique_ptr<ExpressionNode> clone() const override {
-        return std::make_unique<VariableNode>(name_);
+        if (uuid_.empty()) {
+            return std::make_unique<VariableNode>(name_);
+        } else {
+            return std::make_unique<VariableNode>(name_, uuid_);
+        }
+    }
+    
+    std::map<std::string, std::string> get_parameter_map() const override {
+        std::map<std::string, std::string> map;
+        if (!uuid_.empty()) {
+            map[uuid_] = name_;  // UUID -> 变量名的映射
+        }
+        return map;
     }
     
     std::string to_string() const override {
         return name_;
     }
 
-    var evaluate_autodiff(const std::map<std::string, double>& params,
-                         const std::string& target_param,
+    var evaluate_autodiff(const std::map<std::string, double>& variable_values,
+                         const std::string& target_variable,
                          var target_value) const override {
-        if (name_ == target_param) {
+        if (name_ == target_variable) {
             return target_value;
         } else {
-            auto it = params.find(name_);
-            if (it != params.end()) {
+            auto it = variable_values.find(name_);
+            if (it != variable_values.end()) {
                 return it->second;
             }
             return 0.0;
@@ -109,15 +134,15 @@ public:
         : left_(std::move(left)), right_(std::move(right)), 
           op_(op), op_symbol_(op_symbol) {}
     
-    double evaluate(const std::map<std::string, double>& params) const override {
-        return op_(left_->evaluate(params), right_->evaluate(params));
+    double evaluate(const std::map<std::string, double>& variable_values) const override {
+        return op_(left_->evaluate(variable_values), right_->evaluate(variable_values));
     }
     
-    std::vector<std::string> get_parameters() const override {
-        auto left_params = left_->get_parameters();
-        auto right_params = right_->get_parameters();
-        left_params.insert(left_params.end(), right_params.begin(), right_params.end());
-        return left_params;
+    std::vector<std::string> get_variables() const override {
+        auto left_vars = left_->get_variables();
+        auto right_vars = right_->get_variables();
+        left_vars.insert(left_vars.end(), right_vars.begin(), right_vars.end());
+        return left_vars;
     }
     
     std::unique_ptr<ExpressionNode> clone() const override {
@@ -127,12 +152,20 @@ public:
     std::string to_string() const override {
         return "(" + left_->to_string() + " " + op_symbol_ + " " + right_->to_string() + ")";
     }
+    
+    std::map<std::string, std::string> get_parameter_map() const override {
+        auto left_map = left_->get_parameter_map();
+        auto right_map = right_->get_parameter_map();
+        // 合并两个映射
+        left_map.insert(right_map.begin(), right_map.end());
+        return left_map;
+    }
 
-    var evaluate_autodiff(const std::map<std::string, double>& params,
-                         const std::string& target_param,
+    var evaluate_autodiff(const std::map<std::string, double>& variable_values,
+                         const std::string& target_variable,
                          var target_value) const override {
-        var left_val = left_->evaluate_autodiff(params, target_param, target_value);
-        var right_val = right_->evaluate_autodiff(params, target_param, target_value);
+        var left_val = left_->evaluate_autodiff(variable_values, target_variable, target_value);
+        var right_val = right_->evaluate_autodiff(variable_values, target_variable, target_value);
         
         if (op_symbol_ == "+") {
             return left_val + right_val;
@@ -161,12 +194,12 @@ public:
                 const std::string& op_symbol)
         : operand_(std::move(operand)), op_(op), op_symbol_(op_symbol) {}
     
-    double evaluate(const std::map<std::string, double>& params) const override {
-        return op_(operand_->evaluate(params));
+    double evaluate(const std::map<std::string, double>& variable_values) const override {
+        return op_(operand_->evaluate(variable_values));
     }
     
-    std::vector<std::string> get_parameters() const override {
-        return operand_->get_parameters();
+    std::vector<std::string> get_variables() const override {
+        return operand_->get_variables();
     }
     
     std::unique_ptr<ExpressionNode> clone() const override {
@@ -176,11 +209,15 @@ public:
     std::string to_string() const override {
         return op_symbol_ + "(" + operand_->to_string() + ")";
     }
+    
+    std::map<std::string, std::string> get_parameter_map() const override {
+        return operand_->get_parameter_map();
+    }
 
-    var evaluate_autodiff(const std::map<std::string, double>& params,
-                         const std::string& target_param,
+    var evaluate_autodiff(const std::map<std::string, double>& variable_values,
+                         const std::string& target_variable,
                          var target_value) const override {
-        var operand_val = operand_->evaluate_autodiff(params, target_param, target_value);
+        var operand_val = operand_->evaluate_autodiff(variable_values, target_variable, target_value);
         
         if (op_symbol_.find("sin") == 0) {
             return sin(operand_val);
@@ -212,42 +249,56 @@ class Parameter {
 private:
     std::unique_ptr<ExpressionNode> expression_;
     std::string name_;
+    std::string uuid_;
 
 public:
-    // 构造函数
-    explicit Parameter(const std::string& name = "") 
-        : expression_(std::make_unique<ConstantNode>(0.0)), name_(name) {}
-    
-    explicit Parameter(double val, const std::string& name = "") 
-        : expression_(std::make_unique<ConstantNode>(val)), name_(name) {}
-    
-    explicit Parameter(std::unique_ptr<ExpressionNode> expr, const std::string& name = "") 
-        : expression_(std::move(expr)), name_(name) {}
+    // 创建常数参数（允许隐式转换）
+    Parameter(double val) 
+        : expression_(std::make_unique<ConstantNode>(val)), 
+          uuid_(UUIDGenerator::generate()) {}
+
+    // 创建变量参数
+    explicit Parameter(const std::string& name) 
+        : name_(name),
+          uuid_(UUIDGenerator::generate()) {
+        expression_ = std::make_unique<VariableNode>(name, uuid_);
+    }
+
+    // 从表达式创建参数（内部使用）
+    Parameter(std::unique_ptr<ExpressionNode> expr) 
+        : expression_(std::move(expr)), 
+          uuid_(UUIDGenerator::generate()) {}
 
     Parameter(const Parameter& other) 
-        : expression_(other.expression_->clone()), name_(other.name_) {}
+        : expression_(other.expression_->clone()), 
+          name_(other.name_),
+          uuid_(other.uuid_) {}  // 拷贝时保持相同的 UUID
 
     Parameter& operator=(const Parameter& other) {
         if (this != &other) {
             expression_ = other.expression_->clone();
             name_ = other.name_;
+            uuid_ = other.uuid_;
         }
         return *this;
     }
 
     Parameter(Parameter&& other) noexcept
-        : expression_(std::move(other.expression_)), name_(std::move(other.name_)) {}
+        : expression_(std::move(other.expression_)), 
+          name_(std::move(other.name_)),
+          uuid_(std::move(other.uuid_)) {}
 
     Parameter& operator=(Parameter&& other) noexcept {
         if (this != &other) {
             expression_ = std::move(other.expression_);
             name_ = std::move(other.name_);
+            uuid_ = std::move(other.uuid_);
         }
         return *this;
     }
 
-    double value(const std::map<std::string, double>& param_map = {}) const {
-        return expression_->evaluate(param_map);
+    double value(const std::map<std::string, double>& variable_values = {}) const {
+        return expression_->evaluate(variable_values);
     }
 
     void set_value(double val) {
@@ -261,30 +312,39 @@ public:
     std::string get_name() const {
         return name_;
     }
-
-    std::vector<std::string> get_parameters() const {
-        return expression_->get_parameters();
+    
+    std::string get_uuid() const {
+        return uuid_;
     }
 
-    std::map<std::string, double> compute_gradients(const std::map<std::string, double>& param_values) const {
+    std::vector<std::string> get_variables() const {
+        return expression_->get_variables();
+    }
+    
+    // 获取参数映射表
+    std::map<std::string, std::string> get_parameter_map() const {
+        return expression_->get_parameter_map();
+    }
+
+    std::map<std::string, double> compute_gradients(const std::map<std::string, double>& variable_values) const {
         std::map<std::string, double> gradients;
         
-        auto params = get_parameters();
+        auto variables = get_variables();
         
-        for (const auto& param_name : params) {
-            auto it = param_values.find(param_name);
-            if (it != param_values.end()) {
+        for (const auto& var_name : variables) {
+            auto it = variable_values.find(var_name);
+            if (it != variable_values.end()) {
                 var x = it->second;
                 
                 // 创建 autodiff 函数：将表达式转换为 autodiff 函数
-                auto f = [this, &param_values, &param_name](var x) -> var {
-                    return this->evaluate_with_autodiff(param_values, param_name, x);
+                auto f = [this, &variable_values, &var_name](var x) -> var {
+                    return this->evaluate_with_autodiff(variable_values, var_name, x);
                 };
                 
                 var y = f(x);
-                gradients[param_name] = derivatives(y, wrt(x))[0];
+                gradients[var_name] = derivatives(y, wrt(x))[0];
             } else {
-                gradients[param_name] = 0.0;
+                gradients[var_name] = 0.0;
             }
         }
         
@@ -450,16 +510,36 @@ public:
     }
 
     static Parameter variable(const std::string& name) {
-        return Parameter(std::make_unique<VariableNode>(name), name);
+        return Parameter(name);  // 直接使用变量参数构造函数
     }
+    
+    // 比较操作符 - 基于 UUID
+    bool operator==(const Parameter& other) const {
+        return uuid_ == other.uuid_;
+    }
+    
+    bool operator!=(const Parameter& other) const {
+        return !(*this == other);
+    }
+    
+    bool operator<(const Parameter& other) const {
+        return uuid_ < other.uuid_;
+    }
+    
+    // 哈希支持
+    struct Hash {
+        std::size_t operator()(const Parameter& param) const {
+            return std::hash<std::string>{}(param.uuid_);
+        }
+    };
 
 private:
     // 辅助方法：使用 autodiff 重新求值表达式
-    var evaluate_with_autodiff(const std::map<std::string, double>& param_values, 
-                              const std::string& target_param, 
+    var evaluate_with_autodiff(const std::map<std::string, double>& variable_values, 
+                              const std::string& target_variable, 
                               var target_value) const {
         // 递归构建 autodiff 表达式
-        return expression_->evaluate_autodiff(param_values, target_param, target_value);
+        return expression_->evaluate_autodiff(variable_values, target_variable, target_value);
     }
 };
 

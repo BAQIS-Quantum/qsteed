@@ -9,10 +9,23 @@ namespace qsteedcpp {
 
 class Measurement {
 public:
-    int qubit_index;
-    int clbit_index;
+    std::vector<int> qubit_indices;
+    std::vector<int> clbit_indices;
     
-    Measurement(int q, int c) : qubit_index(q), clbit_index(c) {}
+    Measurement(int q, int c) 
+        : qubit_indices{q}, clbit_indices{c} {}
+    
+    Measurement(const std::vector<int>& qubits, const std::vector<int>& clbits) 
+        : qubit_indices(qubits), clbit_indices(clbits) {
+        if (qubits.size() != clbits.size()) {
+            throw std::invalid_argument("Number of qubits and clbits must match in measurement");
+        }
+    }
+    
+    int qubit_index() const { return qubit_indices.empty() ? -1 : qubit_indices[0]; }
+    int clbit_index() const { return clbit_indices.empty() ? -1 : clbit_indices[0]; }
+    
+    size_t size() const { return qubit_indices.size(); }
 };
 
 class Barrier {
@@ -48,7 +61,7 @@ public:
         : operation(std::move(gate)), qubits(q) {}
     
     CircuitInstruction(const Measurement& meas)
-        : operation(meas), qubits{meas.qubit_index}, clbits{meas.clbit_index} {}
+        : operation(meas), qubits(meas.qubit_indices), clbits(meas.clbit_indices) {}
     
     CircuitInstruction(const Barrier& barrier)
         : operation(barrier), qubits(barrier.qubits) {}

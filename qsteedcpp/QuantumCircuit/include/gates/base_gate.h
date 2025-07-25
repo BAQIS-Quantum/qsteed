@@ -46,7 +46,7 @@ public:
     void update_parameters(const std::map<std::string, double>& param_values) {
         for (auto& param : parameters_) {
             // 对于每个参数，如果它是一个简单的变量且在param_values中，则更新它
-            auto param_vars = param.get_parameters();
+            auto param_vars = param.get_variables();
             if (param_vars.size() == 1 && param_values.find(param_vars[0]) != param_values.end()) {
                 param.set_value(param_values.at(param_vars[0]));
             }

@@ -2,10 +2,10 @@
 #include <pybind11/stl.h>
 #include <pybind11/operators.h>
 #include <pybind11/complex.h>
-#include "../QuantumCircuit/include/gates/base_gate.h"
-#include "../QuantumCircuit/include/gates/standard_gates.h"
-#include "../QuantumCircuit/include/circuit/parameter.h"
-#include "../QuantumCircuit/include/gates/matrix.h"
+#include "gates/base_gate.h"
+#include "gates/standard_gates.h"
+#include "circuit/parameter.h"
+#include "gates/matrix.h"
 
 namespace py = pybind11;
 using namespace qsteedcpp;
@@ -66,14 +66,13 @@ void bind_gates(py::module& m) {
 
     // 绑定 Parameter 相关类
     py::class_<Parameter>(m, "GateParameter")
-        .def(py::init<>())
         .def(py::init<double>())
-        .def(py::init<double, const std::string&>())
+        .def(py::init<const std::string&>())
         .def_static("variable", &Parameter::variable)
         .def("value", &Parameter::value)
         .def("set_value", &Parameter::set_value)
         .def("get_name", &Parameter::get_name)
-        .def("get_parameters", &Parameter::get_parameters)
+        .def("get_variables", &Parameter::get_variables)
         .def("to_string", &Parameter::to_string)
         .def("compute_gradients", &Parameter::compute_gradients)
         // 运算符重载

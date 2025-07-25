@@ -2,6 +2,7 @@
 add_executable(circuit_test
     circuit/matrix_test.cpp
     circuit/gates_test.cpp
+    circuit/test_circuit_drawer.cpp
 )
 
 target_link_libraries(circuit_test
@@ -9,6 +10,7 @@ target_link_libraries(circuit_test
     GTest::gtest_main
     Eigen3::Eigen
     autodiff::autodiff
+    quantum_circuit_lib
 )
 
 target_include_directories(circuit_test

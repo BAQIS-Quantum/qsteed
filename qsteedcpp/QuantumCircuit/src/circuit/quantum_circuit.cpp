@@ -2,6 +2,9 @@
 #include <iostream>
 #include "circuit/quantum_circuit.h"
 #include "gates/standard_gates.h"
+#include "circuit/circuit_drawer.h"
+#include "circuit/ftxui_circuit_drawer.h"
+#include "circuit/ftxui_interactive_drawer.h"
 
 namespace qsteedcpp {
 
@@ -14,6 +17,24 @@ void QuantumCircuit::validate_qubit_index(int qubit) const {
 void QuantumCircuit::validate_clbit_index(int clbit) const {
     if (clbit < 0 || clbit >= num_clbits_) {
         throw std::out_of_range("Classical bit index " + std::to_string(clbit) + " out of range [0, " + std::to_string(num_clbits_) + ")");
+    }
+}
+
+void QuantumCircuit::validate_gate_qubits(const std::vector<int>& qubits, const std::string& gate_name) {
+    for (int qubit : qubits) {
+        validate_qubit_index(qubit);
+    }
+    
+    if (qubits.size() > 1) {
+        if (qubits.size() == 2 && qubits[0] == qubits[1]) {
+            throw std::invalid_argument(gate_name + " requires different qubits");
+        }
+        else if (qubits.size() > 2) {
+            std::set<int> unique_qubits(qubits.begin(), qubits.end());
+            if (unique_qubits.size() != qubits.size()) {
+                throw std::invalid_argument(gate_name + " cannot operate on duplicate qubits");
+            }
+        }
     }
 }
 
@@ -48,30 +69,18 @@ void QuantumCircuit::rz(const Parameter& lambda, int qubit) {
 }
 
 void QuantumCircuit::cnot(int control, int target) {
-    if (control == target) {
-        throw std::invalid_argument("Control and target qubits cannot be the same");
-    }
     add_gate(std::make_unique<CNOTGate>(), {control, target});
 }
 
 void QuantumCircuit::rxx(const Parameter& theta, int qubit1, int qubit2) {
-    if (qubit1 == qubit2) {
-        throw std::invalid_argument("Both qubits cannot be the same");
-    }
     add_gate(std::make_unique<RXXGate>(theta), {qubit1, qubit2});
 }
 
 void QuantumCircuit::ryy(const Parameter& theta, int qubit1, int qubit2) {
-    if (qubit1 == qubit2) {
-        throw std::invalid_argument("Both qubits cannot be the same");
-    }
     add_gate(std::make_unique<RYYGate>(theta), {qubit1, qubit2});
 }
 
 void QuantumCircuit::rzz(const Parameter& theta, int qubit1, int qubit2) {
-    if (qubit1 == qubit2) {
-        throw std::invalid_argument("Both qubits cannot be the same");
-    }
     add_gate(std::make_unique<RZZGate>(theta), {qubit1, qubit2});
 }
 
@@ -92,30 +101,18 @@ void QuantumCircuit::tdg(int qubit) {
 }
 
 void QuantumCircuit::cz(int control, int target) {
-    if (control == target) {
-        throw std::invalid_argument("Control and target qubits cannot be the same");
-    }
     add_gate(std::make_unique<CZGate>(), {control, target});
 }
 
 void QuantumCircuit::swap(int qubit1, int qubit2) {
-    if (qubit1 == qubit2) {
-        throw std::invalid_argument("Cannot swap a qubit with itself");
-    }
     add_gate(std::make_unique<SwapGate>(), {qubit1, qubit2});
 }
 
 void QuantumCircuit::iswap(int qubit1, int qubit2) {
-    if (qubit1 == qubit2) {
-        throw std::invalid_argument("Cannot iswap a qubit with itself");
-    }
     add_gate(std::make_unique<iSwapGate>(), {qubit1, qubit2});
 }
 
 void QuantumCircuit::ccx(int control1, int control2, int target) {
-    if (control1 == control2 || control1 == target || control2 == target) {
-        throw std::invalid_argument("Control and target qubits must be different");
-    }
     add_gate(std::make_unique<ToffoliGate>(), {control1, control2, target});
 }
 
@@ -136,6 +133,39 @@ void QuantumCircuit::measure(int qubit, int clbit) {
     validate_qubit_index(qubit);
     validate_clbit_index(clbit);
     instructions_.emplace_back(Measurement(qubit, clbit));
+}
+
+void QuantumCircuit::measure(const std::vector<int>& qubits, const std::vector<int>& clbits) {
+    if (qubits.size() != clbits.size()) {
+        throw std::invalid_argument("Number of qubits and clbits must match in measurement");
+    }
+    
+    // 验证所有索引
+    for (int qubit : qubits) {
+        validate_qubit_index(qubit);
+    }
+    for (int clbit : clbits) {
+        validate_clbit_index(clbit);
+    }
+    
+    // 创建批量测量
+    instructions_.emplace_back(Measurement(qubits, clbits));
+}
+
+void QuantumCircuit::measure_all() {
+    if (num_qubits_ > num_clbits_) {
+        throw std::invalid_argument("Not enough classical bits to measure all qubits");
+    }
+    
+    std::vector<int> qubits(num_qubits_);
+    std::vector<int> clbits(num_qubits_);
+    
+    for (int i = 0; i < num_qubits_; ++i) {
+        qubits[i] = i;
+        clbits[i] = i;
+    }
+    
+    measure(qubits, clbits);
 }
 
 void QuantumCircuit::barrier(const std::vector<int>& qubits) {
@@ -169,57 +199,31 @@ void QuantumCircuit::add_gate(std::unique_ptr<Gate> gate, const std::vector<int>
         throw std::invalid_argument("Number of qubits doesn't match gate requirement");
     }
     
-    for (int qubit : qubits) {
-        validate_qubit_index(qubit);
-    }
-    
+    validate_gate_qubits(qubits, gate->get_name());
     instructions_.emplace_back(std::move(gate), qubits);
 }
 
 // Print method
 void QuantumCircuit::print() const {
-    std::cout << "QuantumCircuit with " << num_qubits_ << " qubits";
-    if (num_clbits_ > 0) {
-        std::cout << " and " << num_clbits_ << " classical bits";
-    }
-    std::cout << ":" << std::endl;
-    
-    for (size_t i = 0; i < instructions_.size(); ++i) {
-        const auto& inst = instructions_[i];
-        std::cout << "[" << i << "] " << inst.name();
-        
-        if (!inst.qubits.empty()) {
-            std::cout << " q[";
-            for (size_t j = 0; j < inst.qubits.size(); ++j) {
-                if (j > 0) std::cout << ",";
-                std::cout << inst.qubits[j];
-            }
-            std::cout << "]";
-        }
-        
-        // 打印clbit索引
-        if (!inst.clbits.empty()) {
-            std::cout << " c[";
-            for (size_t j = 0; j < inst.clbits.size(); ++j) {
-                if (j > 0) std::cout << ",";
-                std::cout << inst.clbits[j];
-            }
-            std::cout << "]";
-        }
-        
-        if (inst.condition.has_value()) {
-            std::cout << " if(c[" << inst.condition->clbit_index << "]==" << inst.condition->value << ")";
-        }
-        
-        if (inst.is_gate()) {
-            const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
-            if (gate->has_parameters()) {
-                std::cout << " [" << gate->parameter_count() << " params]";
-            }
-        }
-        
-        std::cout << std::endl;
-    }
+    // 使用 FTXUI drawer
+    FTXUICircuitDrawer drawer(instructions_, num_qubits_, num_clbits_);
+    std::cout << drawer.draw() << std::endl;
+}
+
+// Enhanced print method (deprecated - use print() instead)
+void QuantumCircuit::print_enhanced() const {
+    print();
+}
+
+// Canvas print method (deprecated - use print() instead)
+void QuantumCircuit::print_canvas() const {
+    print();
+}
+
+// Interactive print method with scrolling and zoom
+void QuantumCircuit::print_interactive() const {
+    FTXUIInteractiveDrawer drawer(instructions_, num_qubits_, num_clbits_);
+    drawer.run();
 }
 
 // Parameter-related methods
@@ -230,7 +234,7 @@ std::vector<std::string> QuantumCircuit::get_parameters() const {
             const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
             if (gate->has_parameters()) {
                 for (size_t i = 0; i < gate->parameter_count(); ++i) {
-                    auto param_names = gate->get_parameter(i).get_parameters();
+                    auto param_names = gate->get_parameter(i).get_variables();
                     all_params.insert(all_params.end(), param_names.begin(), param_names.end());
                 }
             }
@@ -325,7 +329,7 @@ void QuantumCircuit::compute_parameter_grads() const {
                 const Parameter& param = gate->get_parameter(param_idx);
                 
                 // 获取这个参数中包含的所有变量名
-                auto param_variables = param.get_parameters();
+                auto param_variables = param.get_variables();
                 
                 for (const auto& var_name : param_variables) {
                     if (!var_name.empty()) {
