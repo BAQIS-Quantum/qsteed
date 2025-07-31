@@ -25,19 +25,17 @@ private:
 public:
     void register_rule(const std::string& gate_name, const DecompositionRule& rule);
     
-    std::optional<DecompositionRule> select_rule(
-        const std::string& gate_name,
-        const std::set<std::string>& basis_gates) const;
+    // 返回最高优先级的规则（不再检查 basis_gates）
+    std::optional<DecompositionRule> select_rule(const std::string& gate_name) const;
     
+    // 获取某个门的所有规则
     std::vector<DecompositionRule> get_rules(const std::string& gate_name) const;
     
+    // 检查是否有某个门的规则
     bool has_rule(const std::string& gate_name) const;
 
+    // 清空所有规则
     void clear();
-
-private:
-    bool is_compatible(const DecompositionRule& rule,
-                      const std::set<std::string>& basis_gates) const;
 };
 
 } // namespace qsteedcpp

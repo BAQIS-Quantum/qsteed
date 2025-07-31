@@ -125,7 +125,7 @@ void CircuitDrawer::draw_instruction(const CircuitInstruction& inst) {
         draw_barrier(inst.qubits);
     } else if (inst.is_gate()) {
         const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
-        std::string gate_name = gate->get_name();
+        std::string gate_name = gate->name();
         
         if (inst.qubits.size() == 1) {
             draw_single_qubit_gate(gate_name, inst.qubits[0]);
@@ -666,30 +666,31 @@ std::string CircuitDrawer::format_gate_name(const std::string& name, int width) 
 
 std::string CircuitDrawer::get_gate_symbol(const std::string& gate_name) const {
     static const std::map<std::string, std::string> gate_symbols = {
-        {"I", "I"},
-        {"X", "X"},
-        {"Y", "Y"}, 
-        {"Z", "Z"},
-        {"H", "H"},
-        {"S", "S"},
-        {"T", "T"},
-        {"RX", "RX"},
-        {"RY", "RY"},
-        {"RZ", "RZ"},
-        {"CNOT", "X"},
-        {"CZ", "Z"},
-        {"SWAP", "×"},
-        {"CCX", "X"},
-        {"Toffoli", "X"},
-        {"Sdg", "S†"},
-        {"Tdg", "T†"},
-        {"iSWAP", "iS"},
-        {"P", "P"},
-        {"U3", "U3"},
+        {"i", "I"},
+        {"x", "X"},
+        {"y", "Y"}, 
+        {"z", "Z"},
+        {"h", "H"},
+        {"s", "S"},
+        {"t", "T"},
+        {"rx", "RX"},
+        {"ry", "RY"},
+        {"rz", "RZ"},
+        {"cnot", "X"},
+        {"cx", "X"},
+        {"cz", "Z"},
+        {"swap", "×"},
+        {"ccx", "X"},
+        {"toffoli", "X"},
+        {"sdg", "S†"},
+        {"tdg", "T†"},
+        {"iswap", "iS"},
+        {"p", "P"},
+        {"u3", "U3"},
         // 参数化两量子比特门
-        {"RZZ", "RZZ"},
-        {"RXX", "RXX"},
-        {"RYY", "RYY"}
+        {"rzz", "RZZ"},
+        {"rxx", "RXX"},
+        {"ryy", "RYY"}
     };
     
     auto it = gate_symbols.find(gate_name);

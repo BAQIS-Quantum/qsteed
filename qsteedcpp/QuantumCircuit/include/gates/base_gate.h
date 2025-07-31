@@ -11,20 +11,21 @@ namespace qsteedcpp {
 
 class Gate {
 private:
-    std::string name_;
     int qubit_count_;
     std::vector<Parameter> parameters_;
     
 public:
-    Gate(const std::string& name, int qubit_count) 
-        : name_(name), qubit_count_(qubit_count) {}
+    Gate(int qubit_count) 
+        : qubit_count_(qubit_count) {}
     
-    Gate(const std::string& name, int qubit_count, const std::vector<Parameter>& params)
-        : name_(name), qubit_count_(qubit_count), parameters_(params) {}
+    Gate(int qubit_count, const std::vector<Parameter>& params)
+        : qubit_count_(qubit_count), parameters_(params) {}
     
     virtual ~Gate() = default;
     
-    std::string get_name() const { return name_; }
+    // 纯虚函数，每个派生类必须提供自己的静态名称
+    virtual const char* name() const = 0;
+    
     int get_qubit_count() const { return qubit_count_; }
     
     bool has_parameters() const { return !parameters_.empty(); }
@@ -60,6 +61,19 @@ public:
     }
 
     virtual Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const = 0;
+    
+    virtual std::unique_ptr<Gate> clone() const = 0;
+};
+
+
+template<typename Derived>
+class ClonableGate : public Gate {
+public:
+    using Gate::Gate;
+    
+    std::unique_ptr<Gate> clone() const override {
+        return std::make_unique<Derived>(static_cast<const Derived&>(*this));
+    }
 };
 
 } // namespace qsteedcpp

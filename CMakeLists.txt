@@ -84,11 +84,13 @@ set(QARSER_DIR "${QSTEED_CPP_DIR}/Qarser")
 set(SABRE_DIR "${QSTEED_CPP_DIR}/SABRE")
 set(DAG_DIR "${QSTEED_CPP_DIR}/DAG")
 set(QUANTUM_CIRCUIT_DIR "${QSTEED_CPP_DIR}/QuantumCircuit")
+set(PASSES_DIR "${QSTEED_CPP_DIR}/passes")
 
 file(GLOB_RECURSE QARSER_SOURCES "${QARSER_DIR}/*.cpp")
 file(GLOB_RECURSE SABRE_SOURCES "${SABRE_DIR}/*.cpp")
 file(GLOB_RECURSE DAG_SOURCES "${DAG_DIR}/*.cpp")
 file(GLOB_RECURSE QUANTUM_CIRCUIT_SOURCES "${QUANTUM_CIRCUIT_DIR}/*.cpp")
+file(GLOB_RECURSE PASSES_SOURCES "${PASSES_DIR}/*.cpp")
 
 include_directories(
   "${QSTEED_CPP_DIR}"
@@ -171,6 +173,21 @@ if (BUILD_WITH_GRAPHVIZ)
     target_link_libraries(sabre_lib PRIVATE gvc cgraph)
 endif()
 
+# 4. Build Passes module
+add_library(passes_lib STATIC ${PASSES_SOURCES})
+target_include_directories(
+  passes_lib
+  PUBLIC
+    "${PASSES_DIR}"
+    "${QUANTUM_CIRCUIT_DIR}/include"
+)
+target_link_libraries(
+  passes_lib
+  PUBLIC
+    quantum_circuit_lib
+    Boost::headers
+)
+
 
 # Find python and pybind11
 if(SKBUILD)
@@ -199,9 +216,11 @@ pybind11_add_module(
     ${QARSER_SOURCES}
     ${SABRE_SOURCES}
     ${QUANTUM_CIRCUIT_SOURCES}
+    ${PASSES_SOURCES}
     "${QSTEED_CPP_DIR}/bindings/binding.cpp"
     "${QSTEED_CPP_DIR}/bindings/gate_bindings.cpp"
     "${QSTEED_CPP_DIR}/bindings/circuit_bindings.cpp"
+    "${QSTEED_CPP_DIR}/bindings/pass_bindings.cpp"
 )
 target_include_directories(
   ${target}
@@ -210,6 +229,7 @@ target_include_directories(
     "${SABRE_DIR}/include"
     "${DAG_DIR}/include"
     "${QUANTUM_CIRCUIT_DIR}/include"
+    "${PASSES_DIR}"
 )
 target_link_libraries(
   ${target} 
@@ -218,6 +238,7 @@ target_link_libraries(
     dag_lib
     sabre_lib 
     qarser_lib
+    passes_lib
     pybind11::headers
 )
 if (BUILD_WITH_GRAPHVIZ)

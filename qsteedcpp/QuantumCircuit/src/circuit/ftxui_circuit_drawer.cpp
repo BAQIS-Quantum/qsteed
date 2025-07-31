@@ -102,7 +102,7 @@ static Element ClassicalCross() {
 static int calculate_column_width(const CircuitInstruction& inst) {
     if (inst.is_gate()) {
         const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
-        std::string gate_name = gate->get_name();
+        std::string gate_name = gate->name();
         
         // 计算参数化门的标签
         if (gate->has_parameters() && gate->parameter_count() > 0) {
@@ -130,6 +130,9 @@ static int calculate_column_width(const CircuitInstruction& inst) {
         
         if (inst.qubits.size() == 1) {
             return std::max(5, static_cast<int>(gate_name.length()) + 4);
+        } else if (inst.qubits.size() >= 2) {
+            // 多量子比特门默认返回5
+            return 5;
         }
     }
     
@@ -164,7 +167,7 @@ static std::vector<Element> build_column_for_instruction(
     // 根据指令类型修改对应的行
     if (inst.is_gate()) {
         const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
-        std::string gate_name = gate->get_name();
+        std::string gate_name = gate->name();
         
         // 计算参数化门的标签
         std::string gate_label = gate_name;
@@ -197,7 +200,7 @@ static std::vector<Element> build_column_for_instruction(
             int min_q = std::min(q0, q1);
             int max_q = std::max(q0, q1);
             
-            if (gate_name == "CX" || gate_name == "CNOT") {
+            if (gate_name == "cx" || gate_name == "cnot") {
                 column[q0 * 2] = ControlElement();
                 column[q1 * 2] = TargetElement("X");
                 
@@ -210,7 +213,7 @@ static std::vector<Element> build_column_for_instruction(
                         column[i * 2 + 1] = VerticalLine();
                     }
                 }
-            } else if (gate_name == "SWAP") {
+            } else if (gate_name == "swap") {
                 column[q0 * 2] = SwapElement();
                 column[q1 * 2] = SwapElement();
                 
@@ -273,6 +276,63 @@ static std::vector<Element> build_column_for_instruction(
                         if (i < max_q && i * 2 + 1 < column.size()) {
                             column[i * 2 + 1] = VerticalLine();
                         }
+                    }
+                }
+            }
+        } else if (inst.qubits.size() == 3) {
+            // 三量子比特门
+            int q0 = inst.qubits[0];
+            int q1 = inst.qubits[1];
+            int q2 = inst.qubits[2];
+            int min_q = std::min({q0, q1, q2});
+            int max_q = std::max({q0, q1, q2});
+            
+            if (gate_name == "ccx" || gate_name == "toffoli") {
+                // CCX/Toffoli 门：两个控制点，一个目标点
+                column[q0 * 2] = ControlElement();
+                column[q1 * 2] = ControlElement();
+                column[q2 * 2] = TargetElement("X");
+                
+                // 连接线
+                for (int i = min_q; i < max_q; ++i) {
+                    // 中间经过的量子比特（不是门的一部分）
+                    bool is_gate_qubit = (i == q0 || i == q1 || i == q2);
+                    if (i > min_q && i < max_q && !is_gate_qubit) {
+                        column[i * 2] = CrossLine();
+                    }
+                    if (i < max_q && i * 2 + 1 < column.size()) {
+                        column[i * 2 + 1] = VerticalLine();
+                    }
+                }
+            } else {
+                // 其他三量子比特门（通用处理）
+                bool has_label = (gate_label != gate_name);
+                
+                // 三个连接点
+                column[q0 * 2] = ControlElement();
+                column[q1 * 2] = ControlElement();
+                column[q2 * 2] = ControlElement();
+                
+                // 连接线
+                for (int i = min_q; i < max_q; ++i) {
+                    bool is_gate_qubit = (i == q0 || i == q1 || i == q2);
+                    if (i > min_q && i < max_q && !is_gate_qubit) {
+                        column[i * 2] = CrossLine();
+                    }
+                    if (i < max_q && i * 2 + 1 < column.size()) {
+                        column[i * 2 + 1] = VerticalLine();
+                    }
+                }
+                
+                // 门标签（如果有参数）
+                if (has_label && max_q - min_q > 0) {
+                    int label_row = (min_q + max_q) / 2;
+                    if (label_row * 2 + 1 < column.size()) {
+                        std::string label_line = "  │" + gate_label;
+                        while (label_line.length() < col_width) {
+                            label_line += " ";
+                        }
+                        column[label_row * 2 + 1] = text(label_line);
                     }
                 }
             }

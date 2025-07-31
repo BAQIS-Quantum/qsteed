@@ -17,6 +17,7 @@ using namespace sabre;
 
 void bind_quantum_circuit(py::module& m);
 void bind_gates(py::module& m);
+void bind_passes(py::module& m);
 
 
 PYBIND11_MODULE(qsteedcpp, m) {
@@ -25,6 +26,8 @@ PYBIND11_MODULE(qsteedcpp, m) {
     bind_gates(m);
     
     bind_quantum_circuit(m);
+    
+    bind_passes(m);
 
     py::class_<SabreLayout>(m, "SabreLayout")
         .def(py::init<const CouplingCircuit&>())

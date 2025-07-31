@@ -52,7 +52,6 @@ void bind_gates(py::module& m) {
         .def("is_hermitian", &Matrix::is_hermitian)
         .def("is_diagonal", &Matrix::is_diagonal)
         .def("print", &Matrix::print)
-        .def("print_matlab", &Matrix::print_matlab)
         .def_static("identity", &Matrix::identity)
         .def_static("zeros", &Matrix::zeros)
         .def_static("random", &Matrix::random)
@@ -71,7 +70,7 @@ void bind_gates(py::module& m) {
         .def_static("variable", &Parameter::variable)
         .def("value", &Parameter::value)
         .def("set_value", &Parameter::set_value)
-        .def("get_name", &Parameter::get_name)
+        .def("name", &Parameter::name)
         .def("get_variables", &Parameter::get_variables)
         .def("to_string", &Parameter::to_string)
         .def("compute_gradients", &Parameter::compute_gradients)
@@ -104,7 +103,7 @@ void bind_gates(py::module& m) {
 
     // 绑定 Gate 基类
     py::class_<Gate>(m, "Gate")
-        .def("get_name", &Gate::get_name)
+        .def("name", &Gate::name)
         .def("get_qubit_count", &Gate::get_qubit_count)
         .def("has_parameters", &Gate::has_parameters)
         .def("parameter_count", &Gate::parameter_count)
@@ -114,7 +113,7 @@ void bind_gates(py::module& m) {
         .def("get_matrix", &Gate::get_matrix)
         .def("apply", &Gate::apply)
         .def("__repr__", [](const Gate& g) {
-            return g.get_name() + "Gate(" + std::to_string(g.get_qubit_count()) + " qubits)";
+            return std::string(g.name()) + "Gate(" + std::to_string(g.get_qubit_count()) + " qubits)";
         });
 
     // 绑定具体的门类

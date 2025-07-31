@@ -2,9 +2,7 @@
 #include <iostream>
 #include "circuit/quantum_circuit.h"
 #include "gates/standard_gates.h"
-#include "circuit/circuit_drawer.h"
 #include "circuit/ftxui_circuit_drawer.h"
-#include "circuit/ftxui_interactive_drawer.h"
 
 namespace qsteedcpp {
 
@@ -199,32 +197,15 @@ void QuantumCircuit::add_gate(std::unique_ptr<Gate> gate, const std::vector<int>
         throw std::invalid_argument("Number of qubits doesn't match gate requirement");
     }
     
-    validate_gate_qubits(qubits, gate->get_name());
+    validate_gate_qubits(qubits, gate->name());
     instructions_.emplace_back(std::move(gate), qubits);
 }
 
-// Print method
 void QuantumCircuit::print() const {
-    // 使用 FTXUI drawer
     FTXUICircuitDrawer drawer(instructions_, num_qubits_, num_clbits_);
     std::cout << drawer.draw() << std::endl;
 }
 
-// Enhanced print method (deprecated - use print() instead)
-void QuantumCircuit::print_enhanced() const {
-    print();
-}
-
-// Canvas print method (deprecated - use print() instead)
-void QuantumCircuit::print_canvas() const {
-    print();
-}
-
-// Interactive print method with scrolling and zoom
-void QuantumCircuit::print_interactive() const {
-    FTXUIInteractiveDrawer drawer(instructions_, num_qubits_, num_clbits_);
-    drawer.run();
-}
 
 // Parameter-related methods
 std::vector<std::string> QuantumCircuit::get_parameters() const {

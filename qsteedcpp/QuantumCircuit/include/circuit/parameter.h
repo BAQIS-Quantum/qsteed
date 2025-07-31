@@ -5,7 +5,7 @@
 #include <vector>
 #include <functional>
 #include <autodiff/reverse/var.hpp>
-#include "circuit/uuid_generator.h"
+#include "uuid_generator.h"
 
 namespace qsteedcpp {
 
@@ -309,7 +309,7 @@ public:
         return expression_.get();
     }
 
-    std::string get_name() const {
+    std::string name() const {
         return name_;
     }
     

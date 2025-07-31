@@ -18,6 +18,26 @@ target_include_directories(circuit_test
     ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit/include
 )
 
+
+# Unroll tests
+add_executable(unroll_test
+    unroll/unroll_test.cpp
+)
+
+target_link_libraries(unroll_test
+    PRIVATE
+    GTest::gtest_main
+    quantum_circuit_lib
+    passes_lib
+)
+
+target_include_directories(unroll_test
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/../passes
+)
+
+
 # Parameter tests
 add_executable(parameter_test
     common/parameter_test.cpp
@@ -77,3 +97,4 @@ add_test(NAME circuit_test COMMAND circuit_test)
 add_test(NAME parameter_test COMMAND parameter_test)
 add_test(NAME sabre_test COMMAND sabre_test)
 add_test(NAME qarser_test COMMAND qarser_test)
+add_test(NAME unroll_test COMMAND unroll_test)

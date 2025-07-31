@@ -7,9 +7,11 @@
 namespace qsteedcpp {
 
 // 无参数门
-class HGate : public Gate {
+class HGate : public ClonableGate<HGate> {
 public:
-    HGate() : Gate("H", 1) {}
+    HGate() : ClonableGate(1) {}
+    
+    const char* name() const override { return "h"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         const double h = 1.0 / std::sqrt(2.0);
@@ -20,9 +22,11 @@ public:
     }
 };
 
-class XGate : public Gate {
+class XGate : public ClonableGate<XGate> {
 public:
-    XGate() : Gate("X", 1) {}
+    XGate() : ClonableGate(1) {}
+    
+    const char* name() const override { return "x"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         return Matrix(std::vector<std::vector<Complex>>{
@@ -32,9 +36,11 @@ public:
     }
 };
 
-class YGate : public Gate {
+class YGate : public ClonableGate<YGate> {
 public:
-    YGate() : Gate("Y", 1) {}
+    YGate() : ClonableGate(1) {}
+    
+    const char* name() const override { return "y"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         return Matrix(std::vector<std::vector<Complex>>{
@@ -44,9 +50,11 @@ public:
     }
 };
 
-class ZGate : public Gate {
+class ZGate : public ClonableGate<ZGate> {
 public:
-    ZGate() : Gate("Z", 1) {}
+    ZGate() : ClonableGate(1) {}
+    
+    const char* name() const override { return "z"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         return Matrix(std::vector<std::vector<Complex>>{
@@ -57,9 +65,11 @@ public:
 };
 
 
-class RXGate : public Gate {
+class RXGate : public ClonableGate<RXGate> {
 public:
-    RXGate(const Parameter& theta) : Gate("RX", 1, {theta}) {}
+    RXGate(const Parameter& theta) : ClonableGate(1, {theta}) {}
+    
+    const char* name() const override { return "rx"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double theta_val = get_parameter(0).value(param_map);
@@ -73,9 +83,11 @@ public:
     }
 };
 
-class RYGate : public Gate {
+class RYGate : public ClonableGate<RYGate> {
 public:
-    RYGate(const Parameter& phi) : Gate("RY", 1, {phi}) {}
+    RYGate(const Parameter& phi) : ClonableGate(1, {phi}) {}
+    
+    const char* name() const override { return "ry"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double phi_val = get_parameter(0).value(param_map);
@@ -89,9 +101,11 @@ public:
     }
 };
 
-class RZGate : public Gate {
+class RZGate : public ClonableGate<RZGate> {
 public:
-    RZGate(const Parameter& lambda) : Gate("RZ", 1, {lambda}) {}
+    RZGate(const Parameter& lambda) : ClonableGate(1, {lambda}) {}
+    
+    const char* name() const override { return "rz"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double lambda_val = get_parameter(0).value(param_map);
@@ -105,9 +119,11 @@ public:
     }
 };
 
-class CNOTGate : public Gate {
+class CNOTGate : public ClonableGate<CNOTGate> {
 public:
-    CNOTGate() : Gate("CNOT", 2) {}
+    CNOTGate() : ClonableGate(2) {}
+    
+    const char* name() const override { return "cnot"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         return Matrix(std::vector<std::vector<Complex>>{
@@ -119,9 +135,11 @@ public:
     }
 };
 
-class RXXGate : public Gate {
+class RXXGate : public ClonableGate<RXXGate> {
 public:
-    RXXGate(const Parameter& theta) : Gate("RXX", 2, {theta}) {}
+    RXXGate(const Parameter& theta) : ClonableGate(2, {theta}) {}
+    
+    const char* name() const override { return "rxx"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double theta_val = get_parameter(0).value(param_map);
@@ -137,9 +155,11 @@ public:
     }
 };
 
-class RYYGate : public Gate {
+class RYYGate : public ClonableGate<RYYGate> {
 public:
-    RYYGate(const Parameter& theta) : Gate("RYY", 2, {theta}) {}
+    RYYGate(const Parameter& theta) : ClonableGate(2, {theta}) {}
+    
+    const char* name() const override { return "ryy"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double theta_val = get_parameter(0).value(param_map);
@@ -155,9 +175,11 @@ public:
     }
 };
 
-class RZZGate : public Gate {
+class RZZGate : public ClonableGate<RZZGate> {
 public:
-    RZZGate(const Parameter& theta) : Gate("RZZ", 2, {theta}) {}
+    RZZGate(const Parameter& theta) : ClonableGate(2, {theta}) {}
+    
+    const char* name() const override { return "rzz"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double theta_val = get_parameter(0).value(param_map);
@@ -174,9 +196,11 @@ public:
 };
 
 // S 门（相位门 π/2）
-class SGate : public Gate {
+class SGate : public ClonableGate<SGate> {
 public:
-    SGate() : Gate("S", 1) {}
+    SGate() : ClonableGate(1) {}
+    
+    const char* name() const override { return "s"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         return Matrix(std::vector<std::vector<Complex>>{
@@ -187,9 +211,11 @@ public:
 };
 
 // S† 门（S 门的共轭）
-class SdgGate : public Gate {
+class SdgGate : public ClonableGate<SdgGate> {
 public:
-    SdgGate() : Gate("Sdg", 1) {}
+    SdgGate() : ClonableGate(1) {}
+    
+    const char* name() const override { return "sdg"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         return Matrix(std::vector<std::vector<Complex>>{
@@ -200,9 +226,11 @@ public:
 };
 
 // T 门（相位门 π/4）
-class TGate : public Gate {
+class TGate : public ClonableGate<TGate> {
 public:
-    TGate() : Gate("T", 1) {}
+    TGate() : ClonableGate(1) {}
+    
+    const char* name() const override { return "t"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double val = M_PI / 4.0;
@@ -214,9 +242,11 @@ public:
 };
 
 
-class TdgGate : public Gate {
+class TdgGate : public ClonableGate<TdgGate> {
 public:
-    TdgGate() : Gate("Tdg", 1) {}
+    TdgGate() : ClonableGate(1) {}
+    
+    const char* name() const override { return "tdg"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double val = -M_PI / 4.0;
@@ -227,9 +257,11 @@ public:
     }
 };
 
-class CZGate : public Gate {
+class CZGate : public ClonableGate<CZGate> {
 public:
-    CZGate() : Gate("CZ", 2) {}
+    CZGate() : ClonableGate(2) {}
+    
+    const char* name() const override { return "cz"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         return Matrix(std::vector<std::vector<Complex>>{
@@ -241,9 +273,11 @@ public:
     }
 };
 
-class SwapGate : public Gate {
+class SwapGate : public ClonableGate<SwapGate> {
 public:
-    SwapGate() : Gate("SWAP", 2) {}
+    SwapGate() : ClonableGate(2) {}
+    
+    const char* name() const override { return "swap"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         return Matrix(std::vector<std::vector<Complex>>{
@@ -255,9 +289,11 @@ public:
     }
 };
 
-class iSwapGate : public Gate {
+class iSwapGate : public ClonableGate<iSwapGate> {
 public:
-    iSwapGate() : Gate("iSWAP", 2) {}
+    iSwapGate() : ClonableGate(2) {}
+    
+    const char* name() const override { return "iswap"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         return Matrix(std::vector<std::vector<Complex>>{
@@ -269,9 +305,11 @@ public:
     }
 };
 
-class ToffoliGate : public Gate {
+class ToffoliGate : public ClonableGate<ToffoliGate> {
 public:
-    ToffoliGate() : Gate("CCX", 3) {}
+    ToffoliGate() : ClonableGate(3) {}
+    
+    const char* name() const override { return "ccx"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         Matrix result = Matrix::identity(8);
@@ -283,9 +321,11 @@ public:
     }
 };
 
-class PhaseGate : public Gate {
+class PhaseGate : public ClonableGate<PhaseGate> {
 public:
-    PhaseGate(const Parameter& lambda) : Gate("P", 1, {lambda}) {}
+    PhaseGate(const Parameter& lambda) : ClonableGate(1, {lambda}) {}
+    
+    const char* name() const override { return "p"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double lambda_val = get_parameter(0).value(param_map);
@@ -296,10 +336,12 @@ public:
     }
 };
 
-class U3Gate : public Gate {
+class U3Gate : public ClonableGate<U3Gate> {
 public:
     U3Gate(const Parameter& theta, const Parameter& phi, const Parameter& lambda) 
-        : Gate("U3", 1, {theta, phi, lambda}) {}
+        : ClonableGate(1, {theta, phi, lambda}) {}
+    
+    const char* name() const override { return "u3"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         double theta_val = get_parameter(0).value(param_map);
@@ -347,5 +389,10 @@ inline PhaseGate P(const Parameter& lambda) { return PhaseGate(lambda); }
 inline U3Gate U3(const Parameter& theta, const Parameter& phi, const Parameter& lambda) { 
     return U3Gate(theta, phi, lambda); 
 }
+
+// 别名
+using CCXGate = ToffoliGate;
+using ISwapGate = iSwapGate;
+using PGate = PhaseGate;
 
 } // namespace qsteedcpp 

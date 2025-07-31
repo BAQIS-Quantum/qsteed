@@ -92,7 +92,7 @@ public:
     
     std::string name() const {
         if (is_gate()) {
-            return std::get<std::unique_ptr<Gate>>(operation)->get_name();
+            return std::get<std::unique_ptr<Gate>>(operation)->name();
         } else if (is_measurement()) {
             return "measure";
         } else if (is_barrier()) {
@@ -101,6 +101,29 @@ public:
             return "reset";
         }
         return "unknown";
+    }
+    
+    // 克隆方法，创建一个深拷贝
+    CircuitInstruction clone() const {
+        CircuitInstruction cloned = std::visit([this](auto&& arg) -> CircuitInstruction {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, std::unique_ptr<Gate>>) {
+                // 对于 Gate，使用虚拟 clone 方法
+                return CircuitInstruction(arg->clone(), this->qubits);
+            } else if constexpr (std::is_same_v<T, Measurement>) {
+                return CircuitInstruction(arg);
+            } else if constexpr (std::is_same_v<T, Barrier>) {
+                return CircuitInstruction(arg);
+            } else if constexpr (std::is_same_v<T, Reset>) {
+                return CircuitInstruction(arg);
+            }
+        }, operation);
+        
+        // 复制其他成员
+        cloned.clbits = this->clbits;
+        cloned.condition = this->condition;
+        
+        return cloned;
     }
 };
 
