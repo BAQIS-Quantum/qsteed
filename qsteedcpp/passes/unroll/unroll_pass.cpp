@@ -23,10 +23,9 @@ void UnrollPass::add_rule(const std::string& gate_name,
 
 void UnrollPass::run(QuantumCircuit& circuit) {
     if (!should_run(circuit)) {
-        return; // 已经全部是基础门
+        return;
     }
     
-    // 先尝试分解到临时电路
     QuantumCircuit temp_circuit(circuit.num_qubits(), circuit.num_clbits());
     bool fully_decomposed = true;
     
@@ -52,7 +51,6 @@ void UnrollPass::run(QuantumCircuit& circuit) {
         } else {
             auto decomposed = decompose_instruction(inst);
             if (decomposed.empty()) {
-                // 无法分解到基础门
                 std::cerr << "Warning: UnrollPass failed - Gate '" << gate_name 
                          << "' cannot be decomposed to basis gates. Circuit unchanged." << std::endl;
                 fully_decomposed = false;
@@ -74,10 +72,9 @@ void UnrollPass::run(QuantumCircuit& circuit) {
                 }
                 
                 if (!fully_decomposed) {
-                    break; // 停止处理
+                    break;
                 }
                 
-                // 添加分解后的指令
                 for (auto& decomp_inst : decomposed) {
                     if (decomp_inst.is_gate()) {
                         auto& gate = std::get<std::unique_ptr<Gate>>(decomp_inst.operation);
@@ -88,7 +85,6 @@ void UnrollPass::run(QuantumCircuit& circuit) {
         }
     }
     
-    // 只有完全成功分解才修改原电路
     if (fully_decomposed) {
         circuit = std::move(temp_circuit);
     }
@@ -96,7 +92,7 @@ void UnrollPass::run(QuantumCircuit& circuit) {
 
 bool UnrollPass::try_run(QuantumCircuit& circuit) {
     if (!should_run(circuit)) {
-        return true; // 已经全部是基础门
+        return true;
     }
     
     QuantumCircuit new_circuit(circuit.num_qubits(), circuit.num_clbits());
@@ -185,7 +181,7 @@ std::vector<CircuitInstruction> UnrollPass::decompose_instruction(
             result.push_back(std::move(current));
         } else {
             // 尝试分解
-            auto rule = rule_manager_.select_rule(gate_name);
+            auto rule = rule_manager_.select_rule(gate_name, basis_gates_);
             
             if (rule.has_value()) {
                 // 执行分解

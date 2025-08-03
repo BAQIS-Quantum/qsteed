@@ -36,8 +36,23 @@ namespace rules {
     // CZ -> CNOT + H 分解
     std::vector<CircuitInstruction> cz_to_cnot(const CircuitInstruction& inst);
 
-    // Toffoli -> CNOT + T + H 分解
+    // cxx(Toffoli) -> CNOT + T + H 分解
     std::vector<CircuitInstruction> toffoli_to_cnot(const CircuitInstruction& inst);
+    
+    // Sdg -> RZ 分解
+    std::vector<CircuitInstruction> sdg_to_rz(const CircuitInstruction& inst);
+    
+    // Tdg -> RZ 分解
+    std::vector<CircuitInstruction> tdg_to_rz(const CircuitInstruction& inst);
+    
+    // RXX -> CNOT + H + RZ 分解
+    std::vector<CircuitInstruction> rxx_to_cnot(const CircuitInstruction& inst);
+    
+    // RYY -> CNOT + RX + RZ 分解
+    std::vector<CircuitInstruction> ryy_to_cnot(const CircuitInstruction& inst);
+    
+    // RZZ -> CNOT + RZ 分解
+    std::vector<CircuitInstruction> rzz_to_cnot(const CircuitInstruction& inst);
 
 } // namespace rules
 

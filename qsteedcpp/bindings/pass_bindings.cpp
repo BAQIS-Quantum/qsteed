@@ -54,15 +54,30 @@ void bind_passes(py::module& m) {
         .def_readwrite("global_phase", &RuleManager::DecompositionRule::global_phase)
         .def_readwrite("priority", &RuleManager::DecompositionRule::priority)
         .def("__repr__", [](const RuleManager::DecompositionRule& rule) {
-            return "<DecompositionRule name='" + rule.name + "'>";
+            std::string target_str = "{";
+            bool first = true;
+            for (const auto& gate : rule.target_gates) {
+                if (!first) target_str += ", ";
+                target_str += "'" + gate + "'";
+                first = false;
+            }
+            target_str += "}";
+            return "<DecompositionRule name='" + rule.name + 
+                   "' targets=" + target_str + 
+                   " priority=" + std::to_string(rule.priority) + ">";
         });
     
     // Bind RuleManager
     py::class_<RuleManager, std::shared_ptr<RuleManager>>(passes, "RuleManager")
         .def(py::init<>())
-        .def("register_rule", &RuleManager::register_rule,
+        .def("register_rule", 
+             static_cast<void (RuleManager::*)(const std::string&, const RuleManager::DecompositionRule&)>(&RuleManager::register_rule),
              py::arg("gate_name"), py::arg("rule"),
              "Register a decomposition rule for a gate")
+        .def("register_rule", 
+             static_cast<void (RuleManager::*)(const std::vector<std::string>&, const RuleManager::DecompositionRule&)>(&RuleManager::register_rule),
+             py::arg("gate_names"), py::arg("rule"),
+             "Register a decomposition rule for multiple gate names (aliases)")
         .def("get_rules", &RuleManager::get_rules,
              py::arg("gate_name"),
              "Get all rules registered for a gate")
@@ -120,5 +135,21 @@ void bind_passes(py::module& m) {
         Note: 
         - run(): All-or-nothing - only modifies circuit if ALL gates can be decomposed
         - try_run(): Best-effort - decomposes what it can, keeps the rest
+        
+        Context-aware rule selection:
+        The UnrollPass now intelligently selects decomposition rules based on your
+        basis gates. For example, if 'cz' is in your basis_gates, it will prefer
+        rules that decompose directly to CZ instead of going through CX first.
+        
+        >>> # Example: Context-aware decomposition
+        >>> # With CZ in basis
+        >>> basis_with_cz = {'cz', 'h', 'rx', 'ry', 'rz'}
+        >>> pass_cz = qsteedcpp.passes.UnrollPass(basis_with_cz)
+        >>> # CNOT will be decomposed as: H(target) · CZ · H(target)
+        >>> 
+        >>> # Without CZ in basis
+        >>> basis_no_cz = {'cx', 'rx', 'ry', 'rz'}
+        >>> pass_cx = qsteedcpp.passes.UnrollPass(basis_no_cz)
+        >>> # CZ will be decomposed as: H(target) · CNOT · H(target)
     )pbdoc";
 }
