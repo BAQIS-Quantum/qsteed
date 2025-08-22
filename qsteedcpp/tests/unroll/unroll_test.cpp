@@ -19,9 +19,9 @@ TEST_F(UnrollTest, Swap) {
     QuantumCircuit circuit(3);
     circuit.swap(0, 1);
 
-    circuit.print();
+    // circuit.print();
     pass_->run(circuit);
-    circuit.print();
+    // circuit.print();
 
     EXPECT_EQ(circuit.size(), 3);
     for (const auto& inst : circuit.get_instructions()) {

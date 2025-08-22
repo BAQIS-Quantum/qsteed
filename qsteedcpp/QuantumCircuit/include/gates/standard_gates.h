@@ -126,11 +126,12 @@ public:
     const char* name() const override { return "cnot"; }
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
+        // Correct matrix for CNOT(0,1) assuming |q1q0> state vector
         return Matrix(std::vector<std::vector<Complex>>{
             {Complex(1, 0), Complex(0, 0), Complex(0, 0), Complex(0, 0)},
-            {Complex(0, 0), Complex(1, 0), Complex(0, 0), Complex(0, 0)},
             {Complex(0, 0), Complex(0, 0), Complex(0, 0), Complex(1, 0)},
-            {Complex(0, 0), Complex(0, 0), Complex(1, 0), Complex(0, 0)}
+            {Complex(0, 0), Complex(0, 0), Complex(1, 0), Complex(0, 0)},
+            {Complex(0, 0), Complex(1, 0), Complex(0, 0), Complex(0, 0)}
         });
     }
 };
@@ -336,6 +337,21 @@ public:
     }
 };
 
+class CPGate : public ClonableGate<CPGate> {
+public:
+    CPGate(const Parameter& theta) : ClonableGate(2, {theta}) {}
+    
+    const char* name() const override { return "cp"; }
+    
+    Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
+        double theta_val = get_parameter(0).value(param_map);
+        Matrix m = Matrix::identity(4);
+        m.set_element(3, 3, Complex(std::cos(theta_val), std::sin(theta_val)));
+        return m;
+    }
+};
+
+
 class U3Gate : public ClonableGate<U3Gate> {
 public:
     U3Gate(const Parameter& theta, const Parameter& phi, const Parameter& lambda) 
@@ -386,6 +402,7 @@ inline iSwapGate iSWAP() { return iSwapGate(); }
 inline ToffoliGate CCX() { return ToffoliGate(); }
 inline ToffoliGate Toffoli() { return ToffoliGate(); }
 inline PhaseGate P(const Parameter& lambda) { return PhaseGate(lambda); }
+inline CPGate CP(const Parameter& theta) { return CPGate(theta); }
 inline U3Gate U3(const Parameter& theta, const Parameter& phi, const Parameter& lambda) { 
     return U3Gate(theta, phi, lambda); 
 }

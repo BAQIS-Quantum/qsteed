@@ -277,4 +277,25 @@ namespace qsteedcpp {
         }
     };
 
+    // --- Kronecker Product ---
+    // Computes the tensor product of two matrices A and B.
+    inline Matrix kronecker_product(const Matrix& A, const Matrix& B) {
+        size_t a_rows = A.rows();
+        size_t a_cols = A.cols();
+        size_t b_rows = B.rows();
+        size_t b_cols = B.cols();
+
+        Matrix C(a_rows * b_rows, a_cols * b_cols);
+        const auto& a_eigen = A.eigen_matrix();
+        const auto& b_eigen = B.eigen_matrix();
+        auto& c_eigen = C.eigen_matrix();
+
+        for (size_t i = 0; i < a_rows; ++i) {
+            for (size_t j = 0; j < a_cols; ++j) {
+                c_eigen.block(i * b_rows, j * b_cols, b_rows, b_cols) = a_eigen(i, j) * b_eigen;
+            }
+        }
+        return C;
+    }
+
 } // namespace qsteedcpp

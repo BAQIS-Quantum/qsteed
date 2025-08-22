@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 #include <variant>
+#include <type_traits> // Required for std::decay_t
 
 namespace qsteedcpp {
 
@@ -57,6 +58,7 @@ public:
     std::vector<int> clbits;
     std::optional<Condition> condition;
     
+    // Constructors
     CircuitInstruction(std::unique_ptr<Gate> gate, const std::vector<int>& q)
         : operation(std::move(gate)), qubits(q) {}
     
@@ -68,7 +70,45 @@ public:
     
     CircuitInstruction(const Reset& reset)
         : operation(reset), qubits{reset.qubit_index} {}
-    
+
+    // --- START: Corrected copy constructor and assignment operator ---
+
+    // 1. Copy Constructor
+    CircuitInstruction(const CircuitInstruction& other) :
+        qubits(other.qubits),
+        clbits(other.clbits),
+        condition(other.condition)
+    {
+        operation = std::visit([](const auto& arg) -> decltype(operation) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, std::unique_ptr<Gate>>) {
+                return arg->clone(); // Deep copy the gate
+            } else {
+                return arg; // Copy other variant types
+            }
+        }, other.operation);
+    }
+
+    // 2. Copy Assignment Operator
+    CircuitInstruction& operator=(const CircuitInstruction& other) {
+        if (this != &other) {
+            qubits = other.qubits;
+            clbits = other.clbits;
+            condition = other.condition;
+            operation = std::visit([](const auto& arg) -> decltype(operation) {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, std::unique_ptr<Gate>>) {
+                    return arg->clone();
+                } else {
+                    return arg;
+                }
+            }, other.operation);
+        }
+        return *this;
+    }
+
+    // --- END: Corrected copy constructor and assignment operator ---
+
     CircuitInstruction& c_if(int clbit, int value) {
         condition = Condition{clbit, value};
         return *this;
@@ -103,27 +143,9 @@ public:
         return "unknown";
     }
     
-    // 克隆方法，创建一个深拷贝
+    // clone method for explicit deep copy
     CircuitInstruction clone() const {
-        CircuitInstruction cloned = std::visit([this](auto&& arg) -> CircuitInstruction {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, std::unique_ptr<Gate>>) {
-                // 对于 Gate，使用虚拟 clone 方法
-                return CircuitInstruction(arg->clone(), this->qubits);
-            } else if constexpr (std::is_same_v<T, Measurement>) {
-                return CircuitInstruction(arg);
-            } else if constexpr (std::is_same_v<T, Barrier>) {
-                return CircuitInstruction(arg);
-            } else if constexpr (std::is_same_v<T, Reset>) {
-                return CircuitInstruction(arg);
-            }
-        }, operation);
-        
-        // 复制其他成员
-        cloned.clbits = this->clbits;
-        cloned.condition = this->condition;
-        
-        return cloned;
+        return CircuitInstruction(*this); // Now we can just use the copy constructor
     }
 };
 

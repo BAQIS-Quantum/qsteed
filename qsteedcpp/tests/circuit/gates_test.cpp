@@ -4,6 +4,7 @@
 #include "gates/standard_gates.h"
 #include "circuit/parameter.h"
 #include "gates/matrix.h"
+#include "circuit/quantum_circuit.h"
 
 using namespace qsteedcpp;
 
@@ -63,4 +64,38 @@ TEST_F(GateTest, ParameterDerivativeTest) {
     auto grad2 = expr.compute_gradients(params);
     std::cout << "∂/∂x = " << grad2["x"] << std::endl;
     std::cout << "∂/∂y = " << grad2["y"] << std::endl;
+}
+
+TEST_F(GateTest, CircuitUnitaryMatrix) {
+    std::cout << "=== Circuit Unitary Matrix Test ===" << std::endl;
+
+    // 1. Create a simple 2-qubit circuit to generate a Bell state
+    QuantumCircuit qc(2);
+    qc.h(0);
+    qc.cnot(0, 1);
+
+    // 2. Calculate the unitary matrix of the circuit
+    Matrix result_matrix = qc.get_unitary_matrix();
+    std::cout << "Result matrix:" << std::endl;
+    result_matrix.print();
+
+    // 3. Define the expected theoretical matrix for CNOT(0,1) * H(0)
+    // Note: Qubit order is q1, q0. H(0) is I ⊗ H.
+    double inv_sqrt2 = 1.0 / std::sqrt(2.0);
+    Matrix expected_matrix(4, 4);
+    expected_matrix(0, 0) = {inv_sqrt2, 0};
+    expected_matrix(0, 1) = {inv_sqrt2, 0};
+    expected_matrix(1, 2) = {inv_sqrt2, 0};
+    expected_matrix(1, 3) = {-inv_sqrt2, 0};
+    expected_matrix(2, 2) = {inv_sqrt2, 0};
+    expected_matrix(2, 3) = {inv_sqrt2, 0};
+    expected_matrix(3, 0) = {inv_sqrt2, 0};
+    expected_matrix(3, 1) = {-inv_sqrt2, 0};
+
+    std::cout << "Expected matrix:" << std::endl;
+    expected_matrix.print();
+
+    // 4. Compare the result with the expected matrix
+    Matrix diff = result_matrix - expected_matrix;
+    EXPECT_NEAR(diff.norm(), 0.0, 1e-9);
 }

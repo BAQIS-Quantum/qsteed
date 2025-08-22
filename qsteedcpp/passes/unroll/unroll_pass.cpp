@@ -54,7 +54,7 @@ void UnrollPass::run(QuantumCircuit& circuit) {
                 std::cerr << "Warning: UnrollPass failed - Gate '" << gate_name 
                          << "' cannot be decomposed to basis gates. Circuit unchanged." << std::endl;
                 fully_decomposed = false;
-                break; // 立即停止，不修改原电路
+                break;
             } else {
                 // 检查分解结果是否都是基础门
                 for (const auto& decomp_inst : decomposed) {
@@ -120,7 +120,6 @@ bool UnrollPass::try_run(QuantumCircuit& circuit) {
         } else {
             auto decomposed = decompose_instruction(inst);
             if (decomposed.empty()) {
-                // 无法分解，保留原门并警告
                 std::cerr << "Warning: Gate '" << gate_name 
                          << "' cannot be decomposed to basis gates. Keeping original gate." << std::endl;
                 const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);

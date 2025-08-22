@@ -10,18 +10,15 @@ namespace py = pybind11;
 using namespace qsteedcpp;
 
 void bind_passes(py::module& m) {
-    // Create a submodule for passes
-    py::module passes = m.def_submodule("passes", "Quantum circuit transformation passes");
-    
     // Bind BasePass (abstract base class)
-    py::class_<BasePass>(passes, "BasePass")
+    py::class_<BasePass>(m, "BasePass")
         .def("run", &BasePass::run, py::arg("circuit"),
              "Run the pass on a quantum circuit")
         .def("name", &BasePass::name,
              "Get the name of the pass");
     
     // Bind UnrollPass
-    py::class_<UnrollPass, BasePass>(passes, "UnrollPass")
+    py::class_<UnrollPass, BasePass>(m, "UnrollPass")
         .def(py::init<const std::set<std::string>&>(), 
              py::arg("basis_gates"),
              "Create an UnrollPass with specified basis gates")
@@ -47,7 +44,7 @@ void bind_passes(py::module& m) {
         });
     
     // Bind DecompositionRule
-    py::class_<RuleManager::DecompositionRule>(passes, "DecompositionRule")
+    py::class_<RuleManager::DecompositionRule>(m, "DecompositionRule")
         .def(py::init<>())
         .def_readwrite("name", &RuleManager::DecompositionRule::name)
         .def_readwrite("target_gates", &RuleManager::DecompositionRule::target_gates)
@@ -68,7 +65,7 @@ void bind_passes(py::module& m) {
         });
     
     // Bind RuleManager
-    py::class_<RuleManager, std::shared_ptr<RuleManager>>(passes, "RuleManager")
+    py::class_<RuleManager, std::shared_ptr<RuleManager>>(m, "RuleManager")
         .def(py::init<>())
         .def("register_rule", 
              static_cast<void (RuleManager::*)(const std::string&, const RuleManager::DecompositionRule&)>(&RuleManager::register_rule),
@@ -88,19 +85,19 @@ void bind_passes(py::module& m) {
              "Clear all registered rules");
     
     // Helper function to create a RuleManager with standard rules
-    passes.def("create_standard_rule_manager", []() {
+    m.def("create_standard_rule_manager", []() {
         auto manager = std::make_shared<RuleManager>();
         initialize_standard_rules(*manager);
         return manager;
     }, "Create a RuleManager with standard decomposition rules");
     
     // Common basis gate sets (as Python sets)
-    passes.attr("IBM_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"u1", "u2", "u3", "cx"}));
-    passes.attr("RIGETTI_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"rx", "rz", "cz"}));
-    passes.attr("DEFAULT_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"rx", "ry", "rz", "cx", "h"}));
+    m.attr("IBM_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"u1", "u2", "u3", "cx"}));
+    m.attr("RIGETTI_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"rx", "rz", "cz"}));
+    m.attr("DEFAULT_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"rx", "ry", "rz", "cx", "h"}));
     
     // Example usage in docstring
-    passes.doc() = R"pbdoc(
+    m.doc() = R"pbdoc(
         Quantum circuit transformation passes
         
         The UnrollPass recursively decomposes quantum gates until all gates 
@@ -116,7 +113,7 @@ void bind_passes(py::module& m) {
         >>> 
         >>> # Create an UnrollPass with basis gates
         >>> basis_gates = {'rx', 'rz', 'cx'}  # Use set instead of list
-        >>> unroll_pass = qsteedcpp.passes.UnrollPass(basis_gates)
+        >>> unroll_pass = qsteedcpp.UnrollPass(basis_gates)
         >>> 
         >>> # Run the pass on the circuit
         >>> # The pass will recursively decompose gates like H and SWAP
@@ -144,12 +141,12 @@ void bind_passes(py::module& m) {
         >>> # Example: Context-aware decomposition
         >>> # With CZ in basis
         >>> basis_with_cz = {'cz', 'h', 'rx', 'ry', 'rz'}
-        >>> pass_cz = qsteedcpp.passes.UnrollPass(basis_with_cz)
+        >>> pass_cz = qsteedcpp.UnrollPass(basis_with_cz)
         >>> # CNOT will be decomposed as: H(target) · CZ · H(target)
         >>> 
         >>> # Without CZ in basis
         >>> basis_no_cz = {'cx', 'rx', 'ry', 'rz'}
-        >>> pass_cx = qsteedcpp.passes.UnrollPass(basis_no_cz)
+        >>> pass_cx = qsteedcpp.UnrollPass(basis_no_cz)
         >>> # CZ will be decomposed as: H(target) · CNOT · H(target)
     )pbdoc";
 }

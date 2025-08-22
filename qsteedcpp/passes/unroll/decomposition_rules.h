@@ -13,7 +13,7 @@ namespace rules {
     std::vector<CircuitInstruction> swap_to_cnot(const CircuitInstruction& inst);
 
     // H -> RZ, RX 分解
-    std::vector<CircuitInstruction> h_to_rzrx(const CircuitInstruction& inst);
+    std::vector<CircuitInstruction> h_to_rz_rx_rz(const CircuitInstruction& inst);
 
     // CNOT -> CZ + H 分解
     std::vector<CircuitInstruction> cnot_to_czh(const CircuitInstruction& inst);
@@ -53,6 +53,54 @@ namespace rules {
     
     // RZZ -> CNOT + RZ 分解
     std::vector<CircuitInstruction> rzz_to_cnot(const CircuitInstruction& inst);
+
+    // P -> RZ 分解
+    std::vector<CircuitInstruction> phase_to_rz(const CircuitInstruction& inst);
+
+    // CY -> CNOT + S 分解
+    std::vector<CircuitInstruction> cy_to_cnot(const CircuitInstruction& inst);
+
+    // CRX -> CNOT + RY + S 分解
+    std::vector<CircuitInstruction> crx_to_cnot(const CircuitInstruction& inst);
+
+    // CRY -> CNOT + RY 分解
+    std::vector<CircuitInstruction> cry_to_cnot(const CircuitInstruction& inst);
+
+    // CRZ -> CNOT + RZ 分解
+    std::vector<CircuitInstruction> crz_to_cnot(const CircuitInstruction& inst);
+
+    // CNOT -> CP + H 分解
+    std::vector<CircuitInstruction> cnot_to_cp(const CircuitInstruction& inst);
+
+    // CP -> CNOT + P 分解
+    std::vector<CircuitInstruction> cp_to_cnot(const CircuitInstruction& inst);
+
+    // Fredkin -> Toffoli + CNOT 分解
+    std::vector<CircuitInstruction> fredkin_to_toffoli(const CircuitInstruction& inst);
+
+    // iSWAP -> CNOT + H + S 分解
+    std::vector<CircuitInstruction> iswap_to_cnot(const CircuitInstruction& inst);
+
+    // RZ -> RX + RY 分解
+    std::vector<CircuitInstruction> rz_to_rxry(const CircuitInstruction& inst);
+
+    // SX -> RX 分解
+    std::vector<CircuitInstruction> sx_to_rx(const CircuitInstruction& inst);
+
+    // SXdg -> RX 分解
+    std::vector<CircuitInstruction> sxdg_to_rx(const CircuitInstruction& inst);
+
+    // SY -> RY 分解
+    std::vector<CircuitInstruction> sy_to_ry(const CircuitInstruction& inst);
+
+    // SYdg -> RY 分解
+    std::vector<CircuitInstruction> sydg_to_ry(const CircuitInstruction& inst);
+
+    // SWAP -> CZ + H 分解
+    std::vector<CircuitInstruction> swap_to_czh(const CircuitInstruction& inst);
+
+    // SWAP -> CZ + RX + RY 分解
+    std::vector<CircuitInstruction> swap_to_czrxry(const CircuitInstruction& inst);
 
 } // namespace rules
 
