@@ -316,126 +316,50 @@ void CircuitDrawer::draw_two_qubit_gate(const std::string& gate_name, const std:
             }
         }
     } else {
-        // 其他两量子比特门（如 RZZ, RXX, RYY 等）
-        std::string gate_label = gate_name;
-        if (gate && gate->has_parameters() && gate->parameter_count() > 0) {
-            const Parameter& param = gate->get_parameter(0);
-            std::stringstream ss;
-            ss << gate_name << "(";
-            
-            // 检查是否有变量
-            auto var_names = param.get_variables();
-            if (!var_names.empty()) {
-                // 有变量，显示 "变量名:值" 格式
-                ss << var_names[0] << ":";
-                ss << std::fixed << std::setprecision(2) << param.value();
-            } else {
-                // 没有变量，只显示数值
-                ss << std::fixed << std::setprecision(2) << param.value();
-            }
-            
-            ss << ")";
-            gate_label = ss.str();
-        }
-        
-        // 计算需要的列数，确保有足够空间显示完整标签
-        int label_width = utf8_display_width(gate_label);
-        int total_cols = std::max(label_width + 4, 5);  // 增加边距
-        
-        // 分配足够的列
-        col = allocate_columns(total_cols);
-        
-        // 两个量子比特上的连接点
+        // Generic two-qubit gate (e.g., RXX, RYY, etc.)
+        // Draw a consistent, aligned box on each qubit line.
+        std::string symbol = get_gate_symbol(gate_name);
+        int width = symbol.length() + 2; // for '[' and ']'
+        int col = allocate_columns(width);
+        int center_offset = width / 2;
+
+        // Draw the gate boxes on the target qubits
         for (int q : {q0, q1}) {
             int row = q * 2;
-            grid_[row][col] = config_.h_wire;
-            grid_[row][col + 1] = config_.h_wire;
-            grid_[row][col + 2] = "●";  // 连接点
-            for (int j = 3; j < total_cols - 2; ++j) {
+            grid_[row][col] = '[';
+            // Center the label inside the box
+            int pad_left = (width - 2 - symbol.length()) / 2;
+            int current_pos = col + 1;
+            for (int k=0; k < pad_left; ++k) grid_[row][current_pos++] = ' ';
+            for (char ch : symbol) grid_[row][current_pos++] = ch;
+            int pad_right = width - 2 - symbol.length() - pad_left;
+            for (int k=0; k < pad_right; ++k) grid_[row][current_pos++] = ' ';
+            grid_[row][col + width - 1] = ']';
+        }
+
+        // Draw vertical lines and crosses, aligned to the center of the column
+        for (int i = min_q; i < max_q; ++i) {
+            // Connecting line in the empty row below the qubit
+            int conn_row = i * 2 + 1;
+            for(int j=0; j < width; ++j) grid_[conn_row][col + j] = " ";
+            grid_[conn_row][col + center_offset] = config_.v_wire;
+        }
+
+        // Fill in wires for all other qubits in this column
+        for (int i = 0; i < num_qubits_; ++i) {
+            bool is_target = (i == q0 || i == q1);
+            if (is_target) continue; // Already drawn
+
+            int row = i * 2;
+            bool is_intermediate = (i > min_q && i < max_q);
+
+            for (int j = 0; j < width; ++j) {
                 grid_[row][col + j] = config_.h_wire;
             }
-            grid_[row][col + total_cols - 2] = config_.h_wire;
-            grid_[row][col + total_cols - 1] = config_.h_wire;
-        }
-        
-        // 为中间经过的量子比特添加交叉点
-        for (int i = min_q + 1; i < max_q; ++i) {
-            if (i != q0 && i != q1) {
-                int row = i * 2;
-                grid_[row][col] = config_.h_wire;
-                grid_[row][col + 1] = config_.h_wire;
-                grid_[row][col + 2] = config_.cross;  // 交叉点
-                for (int j = 3; j < total_cols - 1; ++j) {
-                    grid_[row][col + j] = config_.h_wire;
-                }
-                grid_[row][col + total_cols - 1] = config_.h_wire;
+            if (is_intermediate) {
+                grid_[row][col + center_offset] = config_.cross;
             }
         }
-        
-        // 连接线和门标签
-        int middle_row = (min_q + max_q) / 2;
-        for (int i = min_q; i < max_q; ++i) {
-            int conn_row = i * 2 + 1;
-            
-            if (i == middle_row && max_q - min_q > 0) {
-                // 在中间位置显示门标签，紧贴连接线
-                int start_pos = 3;  // 直接从位置3开始，紧贴连接线
-                
-                // 简单的ASCII字符处理，避免Unicode问题
-                for (int j = 0; j < total_cols; ++j) {
-                    if (j >= start_pos && j - start_pos < static_cast<int>(gate_label.length())) {
-                        // 替换非ASCII字符为 '?'
-                        char c = gate_label[j - start_pos];
-                        if (c < 0 || c > 127) {
-                            grid_[conn_row][col + j] = "?";
-                        } else {
-                            grid_[conn_row][col + j] = std::string(1, c);
-                        }
-                    } else if (j == 2) {
-                        grid_[conn_row][col + j] = config_.v_wire;
-                    } else {
-                        grid_[conn_row][col + j] = " ";
-                    }
-                }
-            } else {
-                // 普通连接线
-                for (int j = 0; j < total_cols; ++j) {
-                    if (j == 2) {
-                        grid_[conn_row][col + j] = config_.v_wire;
-                    } else {
-                        grid_[conn_row][col + j] = " ";
-                    }
-                }
-            }
-        }
-        
-        // 其他线继续（排除已经处理过的中间量子比特）
-        for (int i = 0; i < num_qubits_; ++i) {
-            if (i != q0 && i != q1 && (i < min_q || i > max_q)) {
-                int other_row = i * 2;
-                for (int j = 0; j < total_cols; ++j) {
-                    grid_[other_row][col + j] = config_.h_wire;
-                }
-            }
-            
-            // 不在连接范围内的空行
-            if (i < num_qubits_ - 1 && (i < min_q || i >= max_q)) {
-                for (int j = 0; j < total_cols; ++j) {
-                    grid_[i * 2 + 1][col + j] = " ";
-                }
-            }
-        }
-        
-        // 经典线继续
-        if (num_clbits_ > 0 && config_.show_clbits) {
-            int clbit_start_row = num_qubits_ * 2 - 1;
-            for (int j = 0; j < total_cols; ++j) {
-                grid_[clbit_start_row][col + j] = " ";
-                grid_[clbit_start_row + 1][col + j] = config_.double_h_wire;
-            }
-        }
-        
-        return;  // 提前返回
     }
     
     // 经典线继续

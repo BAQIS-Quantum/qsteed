@@ -18,7 +18,7 @@ public:
         std::vector<std::string> target_gates;
         std::function<std::vector<CircuitInstruction>(const CircuitInstruction&)> decomposer;
         double global_phase = 0.0;
-        int priority = 0;           
+        int priority = 0;
     };
 
 private:
@@ -27,23 +27,20 @@ private:
 public:
     void register_rule(const std::string& gate_name, const DecompositionRule& rule);
     
-    // 支持为多个门名称（别名）注册同一条规则
     void register_rule(const std::vector<std::string>& gate_names, const DecompositionRule& rule);
     
-    // 返回最适合的规则（使用上下文感知的两阶段选择）
+
     // 第一阶段：寻找能一步分解到 basis_gates 的规则
     // 第二阶段：如果没有找到，返回优先级最高的规则（允许多步分解）
     std::optional<DecompositionRule> select_rule(
         const std::string& gate_name,
         const std::set<std::string>& basis_gates) const;
     
-    // 获取某个门的所有规则
     std::vector<DecompositionRule> get_rules(const std::string& gate_name) const;
     
-    // 检查是否有某个门的规则
     bool has_rule(const std::string& gate_name) const;
 
-    // 清空所有规则
+    // clear all rules
     void clear();
 };
 

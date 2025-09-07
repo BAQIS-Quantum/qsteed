@@ -71,8 +71,6 @@ public:
     CircuitInstruction(const Reset& reset)
         : operation(reset), qubits{reset.qubit_index} {}
 
-    // --- START: Corrected copy constructor and assignment operator ---
-
     // 1. Copy Constructor
     CircuitInstruction(const CircuitInstruction& other) :
         qubits(other.qubits),

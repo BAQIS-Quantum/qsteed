@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include <iomanip> // Required for std::setprecision
 
 namespace qsteedcpp {
 
@@ -261,7 +262,27 @@ namespace qsteedcpp {
         }
 
         void print() const {
-            std::cout << data << std::endl;
+            // Save original cout state
+            std::ios_base::fmtflags old_flags = std::cout.flags();
+            std::streamsize old_precision = std::cout.precision();
+
+            std::cout << std::fixed << std::showpos << std::setprecision(2);
+            for (int i = 0; i < data.rows(); ++i) {
+                std::cout << "[";
+                for (int j = 0; j < data.cols(); ++j) {
+                    const auto& val = data(i, j);
+                    // Print real and imaginary parts with sign
+                    std::cout << val.real() << val.imag() << "j";
+                    if (j < data.cols() - 1) {
+                        std::cout << "  "; // Add space between elements
+                    }
+                }
+                std::cout << "]" << std::endl;
+            }
+
+            // Restore original cout state
+            std::cout.flags(old_flags);
+            std::cout.precision(old_precision);
         }
 
 

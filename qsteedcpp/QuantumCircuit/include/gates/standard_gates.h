@@ -314,9 +314,11 @@ public:
     
     Matrix get_matrix(const std::map<std::string, double>& param_map = {}) const override {
         Matrix result = Matrix::identity(8);
-        result.set_element(6, 6, Complex(0, 0));
-        result.set_element(6, 7, Complex(1, 0));
-        result.set_element(7, 6, Complex(1, 0));
+        // Flips target qubit (q2) if control qubits (q0, q1) are 1.
+        // This swaps the basis states |011> (3) and |111> (7).
+        result.set_element(3, 3, Complex(0, 0));
+        result.set_element(3, 7, Complex(1, 0));
+        result.set_element(7, 3, Complex(1, 0));
         result.set_element(7, 7, Complex(0, 0));
         return result;
     }

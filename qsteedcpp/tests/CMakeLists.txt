@@ -22,6 +22,9 @@ target_include_directories(circuit_test
 # Unroll tests
 add_executable(unroll_test
     unroll/unroll_test.cpp
+    ../passes/src/unroll/decomposition_rules.cpp
+    ../passes/src/unroll/rules/controlled_rotation_rules.cpp
+    ../passes/src/unroll/rules/three_qubit_gate_rules.cpp
 )
 
 target_link_libraries(unroll_test

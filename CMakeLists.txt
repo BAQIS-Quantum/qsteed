@@ -178,7 +178,7 @@ add_library(passes_lib STATIC ${PASSES_SOURCES})
 target_include_directories(
   passes_lib
   PUBLIC
-    "${PASSES_DIR}"
+    "${PASSES_DIR}/include"
     "${QUANTUM_CIRCUIT_DIR}/include"
 )
 target_link_libraries(
@@ -249,16 +249,18 @@ install(TARGETS ${target} LIBRARY DESTINATION passes/mapping/cpp_utils)
 
 # Generate Stub
 if(SKBUILD)
+    # Generate a single .pyi file
     add_custom_command(
         TARGET ${target} POST_BUILD
-        COMMAND ${PYTHON_EXECUTABLE} -m pybind11_stubgen ${target} --output-dir ${CMAKE_CURRENT_BINARY_DIR}/stubs
+        COMMAND ${PYTHON_EXECUTABLE} -m pybind11_stubgen ${target} -o ${CMAKE_CURRENT_BINARY_DIR}/stubs/
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating type stubs for ${target} module"
         VERBATIM
     )
     
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stubs/${target}/__init__.pyi 
-            DESTINATION passes/mapping/cpp_utils/${target}
+    # Install the generated .pyi stub file alongside the .so file
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stubs/${target}.pyi 
+            DESTINATION passes/mapping/cpp_utils
             OPTIONAL)
 endif()
 

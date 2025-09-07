@@ -1,24 +1,26 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
-#include "../passes/base_pass.h"
-#include "../passes/unroll/unroll_pass.h"
-#include "../passes/unroll/rule_manager.h"
-#include "../passes/unroll/decomposition_rules.h"
+#include "../passes/include/base_pass.h"
+#include "../passes/include/unroll/unroll_pass.h"
+#include "../passes/include/unroll/rule_manager.h"
+#include "../passes/include/unroll/decomposition_rules.h"
 
 namespace py = pybind11;
 using namespace qsteedcpp;
 
 void bind_passes(py::module& m) {
+    py::module pass_module = m.def_submodule("passes", "Quantum circuit transformation passes");
+
     // Bind BasePass (abstract base class)
-    py::class_<BasePass>(m, "BasePass")
+    py::class_<BasePass>(pass_module, "BasePass")
         .def("run", &BasePass::run, py::arg("circuit"),
              "Run the pass on a quantum circuit")
         .def("name", &BasePass::name,
              "Get the name of the pass");
     
     // Bind UnrollPass
-    py::class_<UnrollPass, BasePass>(m, "UnrollPass")
+    py::class_<UnrollPass, BasePass>(pass_module, "UnrollPass")
         .def(py::init<const std::set<std::string>&>(), 
              py::arg("basis_gates"),
              "Create an UnrollPass with specified basis gates")
@@ -44,7 +46,7 @@ void bind_passes(py::module& m) {
         });
     
     // Bind DecompositionRule
-    py::class_<RuleManager::DecompositionRule>(m, "DecompositionRule")
+    py::class_<RuleManager::DecompositionRule>(pass_module, "DecompositionRule")
         .def(py::init<>())
         .def_readwrite("name", &RuleManager::DecompositionRule::name)
         .def_readwrite("target_gates", &RuleManager::DecompositionRule::target_gates)
@@ -65,7 +67,7 @@ void bind_passes(py::module& m) {
         });
     
     // Bind RuleManager
-    py::class_<RuleManager, std::shared_ptr<RuleManager>>(m, "RuleManager")
+    py::class_<RuleManager, std::shared_ptr<RuleManager>>(pass_module, "RuleManager")
         .def(py::init<>())
         .def("register_rule", 
              static_cast<void (RuleManager::*)(const std::string&, const RuleManager::DecompositionRule&)>(&RuleManager::register_rule),
@@ -85,19 +87,19 @@ void bind_passes(py::module& m) {
              "Clear all registered rules");
     
     // Helper function to create a RuleManager with standard rules
-    m.def("create_standard_rule_manager", []() {
+    pass_module.def("create_standard_rule_manager", []() {
         auto manager = std::make_shared<RuleManager>();
         initialize_standard_rules(*manager);
         return manager;
     }, "Create a RuleManager with standard decomposition rules");
     
     // Common basis gate sets (as Python sets)
-    m.attr("IBM_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"u1", "u2", "u3", "cx"}));
-    m.attr("RIGETTI_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"rx", "rz", "cz"}));
-    m.attr("DEFAULT_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"rx", "ry", "rz", "cx", "h"}));
+    pass_module.attr("IBM_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"u1", "u2", "u3", "cx"}));
+    pass_module.attr("RIGETTI_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"rx", "rz", "cz"}));
+    pass_module.attr("DEFAULT_BASIS_GATES") = py::set(py::cast(std::set<std::string>{"rx", "ry", "rz", "cx", "h"}));
     
     // Example usage in docstring
-    m.doc() = R"pbdoc(
+    pass_module.doc() = R"pbdoc(
         Quantum circuit transformation passes
         
         The UnrollPass recursively decomposes quantum gates until all gates 

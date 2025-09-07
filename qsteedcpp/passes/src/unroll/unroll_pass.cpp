@@ -1,5 +1,5 @@
-#include "unroll_pass.h"
-#include "decomposition_rules.h"
+#include "unroll/unroll_pass.h"
+#include "unroll/decomposition_rules.h"
 #include "circuit/quantum_circuit.h"
 #include <algorithm>
 #include <iostream>
@@ -164,10 +164,7 @@ std::vector<CircuitInstruction> UnrollPass::decompose_instruction(
     std::vector<CircuitInstruction> result;
     std::vector<CircuitInstruction> work_stack;
     
-    // 初始化工作栈
     work_stack.push_back(inst.clone());
-    
-    // 迭代处理，避免递归
     while (!work_stack.empty()) {
         CircuitInstruction current = std::move(work_stack.back());
         work_stack.pop_back();
@@ -176,23 +173,16 @@ std::vector<CircuitInstruction> UnrollPass::decompose_instruction(
         std::transform(gate_name.begin(), gate_name.end(), gate_name.begin(), ::tolower);
         
         if (is_basis_gate(gate_name)) {
-            // 已经是基础门，直接添加到结果
             result.push_back(std::move(current));
         } else {
-            // 尝试分解
             auto rule = rule_manager_.select_rule(gate_name, basis_gates_);
             
             if (rule.has_value()) {
-                // 执行分解
                 auto decomposed = rule->decomposer(current);
-                
-                // 将分解结果逆序加入栈（保持正确的执行顺序）
                 for (auto it = decomposed.rbegin(); it != decomposed.rend(); ++it) {
                     work_stack.push_back(std::move(*it));
                 }
             } else {
-                // 没有分解规则，保持原样
-                // 注意：警告信息已经在 try_run 中打印
                 result.push_back(std::move(current));
             }
         }

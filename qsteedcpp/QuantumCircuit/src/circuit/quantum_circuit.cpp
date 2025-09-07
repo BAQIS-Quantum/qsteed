@@ -2,7 +2,7 @@
 #include <iostream>
 #include "circuit/quantum_circuit.h"
 #include "gates/standard_gates.h"
-#include "circuit/ftxui_circuit_drawer.h"
+#include "circuit/circuit_drawer.h"
 
 namespace qsteedcpp {
 
@@ -202,7 +202,7 @@ void QuantumCircuit::add_gate(std::unique_ptr<Gate> gate, const std::vector<int>
 }
 
 void QuantumCircuit::print() const {
-    FTXUICircuitDrawer drawer(instructions_, num_qubits_, num_clbits_);
+    CircuitDrawer drawer(instructions_, num_qubits_, num_clbits_);
     std::cout << drawer.draw() << std::endl;
 }
 

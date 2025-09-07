@@ -128,11 +128,16 @@ void bind_quantum_circuit(py::module& m) {
         .def("tdg", &QuantumCircuit::tdg, py::arg("qubit"))
         
         // Single-qubit parameterized gates
-        .def("rx", &QuantumCircuit::rx, py::arg("theta"), py::arg("qubit"))
-        .def("ry", &QuantumCircuit::ry, py::arg("phi"), py::arg("qubit"))
-        .def("rz", &QuantumCircuit::rz, py::arg("lambda"), py::arg("qubit"))
-        .def("p", &QuantumCircuit::p, py::arg("lambda"), py::arg("qubit"))
-        .def("u3", &QuantumCircuit::u3, py::arg("theta"), py::arg("phi"), py::arg("lambda"), py::arg("qubit"))
+        .def("rx", py::overload_cast<const Parameter&, int>(&QuantumCircuit::rx), py::arg("theta"), py::arg("qubit"))
+        .def("rx", [](QuantumCircuit &self, double theta, int qubit) { self.rx(Parameter(theta), qubit); }, py::arg("theta"), py::arg("qubit"))
+        .def("ry", py::overload_cast<const Parameter&, int>(&QuantumCircuit::ry), py::arg("phi"), py::arg("qubit"))
+        .def("ry", [](QuantumCircuit &self, double phi, int qubit) { self.ry(Parameter(phi), qubit); }, py::arg("phi"), py::arg("qubit"))
+        .def("rz", py::overload_cast<const Parameter&, int>(&QuantumCircuit::rz), py::arg("lambda"), py::arg("qubit"))
+        .def("rz", [](QuantumCircuit &self, double lambda, int qubit) { self.rz(Parameter(lambda), qubit); }, py::arg("lambda"), py::arg("qubit"))
+        .def("p", py::overload_cast<const Parameter&, int>(&QuantumCircuit::p), py::arg("lambda"), py::arg("qubit"))
+        .def("p", [](QuantumCircuit &self, double lambda, int qubit) { self.p(Parameter(lambda), qubit); }, py::arg("lambda"), py::arg("qubit"))
+        .def("u3", py::overload_cast<const Parameter&, const Parameter&, const Parameter&, int>(&QuantumCircuit::u3), py::arg("theta"), py::arg("phi"), py::arg("lambda"), py::arg("qubit"))
+        .def("u3", [](QuantumCircuit &self, double theta, double phi, double lambda, int qubit) { self.u3(Parameter(theta), Parameter(phi), Parameter(lambda), qubit); }, py::arg("theta"), py::arg("phi"), py::arg("lambda"), py::arg("qubit"))
 
         // Two-qubit gates
         .def("cnot", &QuantumCircuit::cnot, py::arg("control"), py::arg("target"))
@@ -141,9 +146,12 @@ void bind_quantum_circuit(py::module& m) {
         .def("iswap", &QuantumCircuit::iswap, py::arg("qubit1"), py::arg("qubit2"))
 
         // Two-qubit parameterized gates
-        .def("rxx", &QuantumCircuit::rxx, py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
-        .def("ryy", &QuantumCircuit::ryy, py::arg("phi"), py::arg("qubit1"), py::arg("qubit2"))
-        .def("rzz", &QuantumCircuit::rzz, py::arg("lambda"), py::arg("qubit1"), py::arg("qubit2"))
+        .def("rxx", py::overload_cast<const Parameter&, int, int>(&QuantumCircuit::rxx), py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
+        .def("rxx", [](QuantumCircuit &self, double theta, int q1, int q2) { self.rxx(Parameter(theta), q1, q2); }, py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
+        .def("ryy", py::overload_cast<const Parameter&, int, int>(&QuantumCircuit::ryy), py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
+        .def("ryy", [](QuantumCircuit &self, double theta, int q1, int q2) { self.ryy(Parameter(theta), q1, q2); }, py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
+        .def("rzz", py::overload_cast<const Parameter&, int, int>(&QuantumCircuit::rzz), py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
+        .def("rzz", [](QuantumCircuit &self, double theta, int q1, int q2) { self.rzz(Parameter(theta), q1, q2); }, py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
         
         // Three-qubit gates
         .def("ccx", &QuantumCircuit::ccx, py::arg("control1"), py::arg("control2"), py::arg("target"))
