@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include <cmath>
 #include "AST/expression.hpp"
 #include "AST/visitor.hpp"

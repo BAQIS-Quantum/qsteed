@@ -1,7 +1,8 @@
 #pragma once
-#include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <random>
+#include <unordered_set>
 #include "sabre_core.h"
 #include "Model/model.h"
 #include "Model/coupling.h"
@@ -22,6 +23,7 @@ namespace sabre {
         Heuristic heuristic = Heuristic::DISTANCE;
 
     private:
+        mutable std::mt19937 gen;
         const Matrix distance_matrix = c_circuit.get_distance_matrix();
         const std::map<std::pair<int, int>, double> fidelity_dict = c_circuit.get_fidelity_dict();
         std::unordered_map<int, int> qubits_decay = {};
@@ -29,9 +31,9 @@ namespace sabre {
 
     public:
         SabreRouting(const CouplingCircuit& c_circuit) 
-            : c_circuit(c_circuit) {}
+            : c_circuit(c_circuit), gen(std::random_device{}()) {}
         SabreRouting(const CouplingCircuit& c_circuit, const Heuristic& heuristic) 
-            : c_circuit(c_circuit), heuristic(heuristic) {}
+            : c_circuit(c_circuit), heuristic(heuristic), gen(std::random_device{}()) {}
         // SabreRouting() = default;
 
         void set_model(Model& model) { 
@@ -64,33 +66,50 @@ namespace sabre {
         inline double _swap_score(const SwapPos& physical_swap_qubits) const;
 
         std::set<int> _calc_extended_set(const DAGCircuit& dag, 
-                                        const std::vector<int>& front_layer);
+                                        const std::unordered_set<int>& front_layer);
 
-        std::set<SwapPos> _obtain_swaps(const std::vector<int>& front_layer, 
+        std::set<SwapPos> _obtain_swaps(const std::unordered_set<int>& front_layer, 
                                         const Layout& current_layout, 
                                         const DAGCircuit& dag);
 
         SwapPos _get_best_swap( const DAGCircuit& dag,
                                 const std::set<SwapPos>& swap_candidates, 
                                 const Layout& current_layout, 
-                                const std::vector<int>& front_layer, 
+                                const std::unordered_set<int>& front_layer, 
                                 const std::set<int>& extended_set, 
                                 const std::set<std::pair<int, int>>& unavailable_2qubits) const;
 
         double _score_heuristic(const DAGCircuit& dag, 
                                 const Heuristic heuristic,
-                                const std::vector<int>& front_layer, 
+                                const std::unordered_set<int>& front_layer, 
                                 const std::set<int>& extended_set, 
                                 const Layout& current_layout,
                                 const SwapPos& swap_pos) const;
 
+        template <typename LayerType>
         double _compute_distance_cost(  const DAGCircuit& dag, 
-                                        const std::vector<int>& layer,
-                                        const Layout& layout) const;
+                                        const LayerType& layer,
+                                        const Layout& layout) const {
+            double cost = 0;
+            for (auto node_index : layer) 
+                cost += distance_matrix.at(layout[dag.graph[node_index].qubit_pos[0]]).at(layout[dag.graph[node_index].qubit_pos[1]]);
+            return cost;
+        }
 
+        template <typename LayerType>
         double _compute_fidelity_cost(  const DAGCircuit& dag, 
-                                        const std::vector<int>& layer,
-                                        const Layout& layout) const;
+                                        const LayerType& layer,
+                                        const Layout& layout) const {
+            double cost = 0;
+            int p1 = 0;
+            int p2 = 0;
+            for (auto node_index : layer) {
+                p1 = layout[dag.graph[node_index].qubit_pos[0]];
+                p2 = layout[dag.graph[node_index].qubit_pos[1]];
+                cost += 0.5 * (fidelity_dict.at({p1, p2}) + fidelity_dict.at({p2, p1}));
+            }
+            return cost;
+        }
     };
 
 

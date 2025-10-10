@@ -1,6 +1,5 @@
 #include <cmath>
 #include <algorithm>
-#include <iomanip>
 #include <sstream>
 #include "circuit/circuit_drawer.h"
 #include "circuit/circuit_instruction.h"

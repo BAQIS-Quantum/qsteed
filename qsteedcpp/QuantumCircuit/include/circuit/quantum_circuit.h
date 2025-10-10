@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include <map>
-#include <algorithm>
 #include <cmath>
 #include "parameter.h"
 #include "circuit_instruction.h"

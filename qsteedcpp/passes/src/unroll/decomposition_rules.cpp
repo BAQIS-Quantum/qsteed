@@ -15,9 +15,4 @@ namespace qsteedcpp {
         initialize_three_qubit_gate_rules(manager);
     }
 
-    namespace rules {
-        // This namespace is now empty here.
-        // Implementations have been moved to their respective files.
-    } // namespace rules
-
 } // namespace qsteedcpp
