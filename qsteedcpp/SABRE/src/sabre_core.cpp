@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "sabre_core.h"
 
 namespace sabre {

@@ -1,6 +1,6 @@
 [build-system]
-requires = ["scikit-build", "setuptools>=42", "wheel", "pybind11", "cmake", "pybind11-stubgen>=2.5"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core", "cmake", "ninja", "pybind11", "pybind11-stubgen"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "qsteed"
@@ -22,13 +22,14 @@ Documentation = "https://github.com/BAQIS-Quantum/QSteed/wiki"
 Source = "https://github.com/BAQIS-Quantum/QSteed"
 Issues = "https://github.com/BAQIS-Quantum/QSteed/issues"
 
-[tool.setuptools.packages.find]
-include = ["qsteed", "qsteed.*"]
+[project.scripts]
+qsteed-config = "qsteed.qsteed_config:copy_config"
+qsteed-build-db = "qsteed.first_build_db:first_build_db"
 
-[tool.setuptools]
-include-package-data = true
+[tool.skbuild]
+cmake.args = ["-DBUILD_WITH_GRAPHVIZ=OFF"]
 
-[tool.setuptools.dynamic]
+[tool.skbuild.dynamic]
 version = {file = "qsteed/VERSION.txt"}
 readme = {file = "README.md", content-type = "text/markdown"}
 dependencies = {file = "requirements.txt"}
@@ -45,7 +46,3 @@ repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest
 
 [tool.cibuildwheel.windows]
 repair-wheel-command = "cp {wheel} {dest_dir}/."
-
-[project.scripts]
-qsteed-config = "qsteed.qsteed_config:copy_config"
-qsteed-build-db = "qsteed.first_build_db:first_build_db"

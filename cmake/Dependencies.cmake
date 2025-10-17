@@ -120,23 +120,3 @@ if(NOT TARGET autodiff::autodiff)
 endif()
 
 message(STATUS "autodiff 依赖配置完成")
-
-# =============================================================================
-# FTXUI 配置
-# =============================================================================
-message(STATUS "正在配置 FTXUI 依赖...")
-
-# set(FTXUI_BUILD_DOCS OFF CACHE BOOL "Disable FTXUI documentation")
-# set(FTXUI_BUILD_EXAMPLES OFF CACHE BOOL "Disable FTXUI examples")
-# set(FTXUI_BUILD_TESTS OFF CACHE BOOL "Disable FTXUI tests")
-# set(FTXUI_ENABLE_INSTALL OFF CACHE BOOL "Disable FTXUI install")
-
-# 使用标准的 FetchContent 方式
-FetchContent_Declare(
-    ftxui
-    GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
-    GIT_TAG v6.1.9
-)
-FetchContent_MakeAvailable(ftxui)
-
-message(STATUS "FTXUI 依赖配置完成")

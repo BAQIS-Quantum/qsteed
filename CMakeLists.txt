@@ -4,11 +4,7 @@ project(sabre LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# 使用旧的 ABI 以兼容较旧的 libstdc++
-# 限制 GLIBCXX 版本
-add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -43,17 +39,6 @@ endif()
 # 外部依赖管理
 include(cmake/Dependencies.cmake)
 set(BUILD_TESTING OFF CACHE BOOL "Disable all testing")
-
-# 确保 FTXUI 目标被正确创建
-if(NOT TARGET screen)
-  message(WARNING "FTXUI screen target not found")
-endif()
-if(NOT TARGET dom)
-  message(WARNING "FTXUI dom target not found")
-endif()
-if(NOT TARGET component)
-  message(WARNING "FTXUI component target not found")
-endif()
 
 
 # Find Graphviz
@@ -109,9 +94,6 @@ target_link_libraries(
     Boost::headers
     Eigen3::Eigen
     autodiff::autodiff
-    component
-    dom
-    screen
 )
 
 # 1. Build DAG module
@@ -213,11 +195,7 @@ message(STATUS "Python Version: ${Python_VERSION}")
 set(target qsteedcpp)
 pybind11_add_module(
   ${target}
-    ${QARSER_SOURCES}
-    ${SABRE_SOURCES}
-    ${QUANTUM_CIRCUIT_SOURCES}
-    ${PASSES_SOURCES}
-    "${QSTEED_CPP_DIR}/bindings/binding.cpp"
+   "${QSTEED_CPP_DIR}/bindings/binding.cpp"
     "${QSTEED_CPP_DIR}/bindings/gate_bindings.cpp"
     "${QSTEED_CPP_DIR}/bindings/circuit_bindings.cpp"
     "${QSTEED_CPP_DIR}/bindings/pass_bindings.cpp"
@@ -245,7 +223,7 @@ if (BUILD_WITH_GRAPHVIZ)
   target_link_libraries(${target} PRIVATE gvc cgraph)
 endif()
 
-install(TARGETS ${target} LIBRARY DESTINATION passes/mapping/cpp_utils)
+install(TARGETS ${target} LIBRARY DESTINATION qsteed/passes/mapping/cpp_utils)
 
 # Generate Stub
 if(SKBUILD)
@@ -266,10 +244,10 @@ endif()
 
 
 ## -- Module Testing -- ##
-option(BUILD_TESTS "Build test programs" ON)
-message(STATUS "BUILD_TESTS is set to ${BUILD_TESTS}")
+# option(BUILD_TESTS "Build test programs" OFF)
+# message(STATUS "BUILD_TESTS is set to ${BUILD_TESTS}")
 
-if(BUILD_TESTS)
+if(!SKBUILD)
     enable_testing()
     
     FetchContent_Declare(
