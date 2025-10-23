@@ -9,11 +9,12 @@ on:
 
 jobs:
   tests:
-    name: macOS-arm64-tests-Python-${{matrix.python-version}}
-    runs-on: macOS-14
+    name: ${{ matrix.os }}-tests-Python-${{matrix.python-version}}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [macOS-14, ubuntu-latest]
         python-version: ["3.10", "3.11"]
     steps:
     - uses: actions/checkout@v4
@@ -22,12 +23,19 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        architecture: arm64
 
-    - name: C++ dependencies
+    - name: C++ dependencies (macOS)
+      if: runner.os == 'macOS'
       run: |
         brew install boost
         brew install graphviz
+
+    - name: C++ dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libboost-all-dev graphviz libgraphviz-dev
+
 
     - name: Install dependencies
       run: |
@@ -36,7 +44,7 @@ jobs:
         if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
 
     - name: Install qsteed
-      run: pip install -e . -v
+      run: CMAKE_BUILD_PARALLEL_LEVEL=4 pip install -e . -v
 
     - name: Test with pytest
       run: |

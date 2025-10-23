@@ -1,6 +1,6 @@
 ## Project Setting
 cmake_minimum_required(VERSION 3.15...3.29)
-project(sabre LANGUAGES CXX)
+project(qsteed LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -131,7 +131,6 @@ target_link_libraries(
   qarser_lib
   PUBLIC
     dag_lib
-    quantum_circuit_lib
     Boost::headers
 )
 
@@ -148,7 +147,6 @@ target_link_libraries(
   sabre_lib
   PUBLIC
     dag_lib
-    quantum_circuit_lib
     Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)

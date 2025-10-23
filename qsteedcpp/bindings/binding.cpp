@@ -136,10 +136,6 @@ PYBIND11_MODULE(qsteedcpp, m) {
         .def_readwrite("graph", &DAGCircuit::graph)
         .def_readwrite("measure", &DAGCircuit::measure);
 
-    py::enum_<Heuristic>(m, "Heuristic")
-        .value("DISTANCE", Heuristic::DISTANCE)
-        .value("FIDELITY", Heuristic::FIDELITY)
-        .value("MIXTURE", Heuristic::MIXTURE);
     // m.def("reverse_DagGraph", &reverse_DagGraph, "Reverse a DagGraph object");
 
 

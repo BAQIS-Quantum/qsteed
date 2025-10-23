@@ -62,19 +62,19 @@ void bind_gates(py::module& m) {
         .def("__repr__", [](const Matrix& m) {
             std::string result = "Matrix(" + std::to_string(m.rows()) + "x" + std::to_string(m.cols()) + ")";
             return result;
-        })
-        .def("to_numpy", [](const Matrix& m) {
-            const auto& eigen_mat = m.eigen_matrix();
-            auto np_array = py::array_t<Complex>({(py::ssize_t)eigen_mat.rows(), (py::ssize_t)eigen_mat.cols()});
-            auto np_buf = np_array.mutable_unchecked();
+        });
+        // .def("to_numpy", [](const Matrix& m) {
+        //     const auto& eigen_mat = m.eigen_matrix();
+        //     auto np_array = py::array_t<Complex>({(py::ssize_t)eigen_mat.rows(), (py::ssize_t)eigen_mat.cols()});
+        //     auto np_buf = np_array.mutable_unchecked();
 
-            for (py::ssize_t i = 0; i < eigen_mat.rows(); ++i) {
-                for (py::ssize_t j = 0; j < eigen_mat.cols(); ++j) {
-                    np_buf(i, j) = eigen_mat(i, j);
-                }
-            }
-            return np_array;
-        }, "Converts the matrix to a NumPy array.");
+        //     for (py::ssize_t i = 0; i < eigen_mat.rows(); ++i) {
+        //         for (py::ssize_t j = 0; j < eigen_mat.cols(); ++j) {
+        //             np_buf(i, j) = eigen_mat(i, j);
+        //         }
+        //     }
+        //     return np_array;
+        // }, "Converts the matrix to a NumPy array.");
 
     // 绑定 Parameter 相关类
     py::class_<Parameter>(m, "GateParameter")
