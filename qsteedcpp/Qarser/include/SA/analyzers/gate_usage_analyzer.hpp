@@ -1,7 +1,9 @@
 #pragma once    
 #include "base_analyzer.hpp"
+#include "AST/gate.hpp"
 
 
+namespace qsteedcpp {
 namespace qarser {
 
 
@@ -90,4 +92,5 @@ namespace qarser {
 
     };
 
-};
+}; // namespace qarser
+}; // namespace qsteedcpp

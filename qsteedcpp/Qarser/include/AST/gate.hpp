@@ -2,6 +2,7 @@
 #include "ast.hpp"
 #include "expression.hpp"
 
+namespace qsteedcpp {
 namespace qarser {
 
     class RegisterRef {
@@ -124,5 +125,5 @@ namespace qarser {
 
 
 };
-
+};
 

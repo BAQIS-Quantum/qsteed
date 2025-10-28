@@ -41,17 +41,18 @@ def QuantumCircuit_to_cppDag(circuit: QuantumCircuit) -> Cpp_DAGCircuit:
     return dag
 
 
-def cppDag_to_QuantumCircuit(dag: Cpp_DAGCircuit) -> QuantumCircuit:
+def cppDag_to_QuantumCircuit(dag: Cpp_DAGCircuit, num_qubits: int) -> QuantumCircuit:
     """
     Converts a Cpp_DAGCircuit to a QuantumCircuit.
 
     Args:
         dag (Cpp_DAGCircuit): The Cpp_DAGCircuit object to be converted.
+        num_qubits (int): The number of qubits for the output circuit.
 
     Returns:
         QuantumCircuit: The converted QuantumCircuit object.
     """
-    q_circuit = QuantumCircuit(len(dag.get_qubits_used()))
+    q_circuit = QuantumCircuit(num_qubits)
     for vertex in dag.vertices():
         if dag.graph[vertex].name == "start" or dag.graph[vertex].name == "end":
             continue

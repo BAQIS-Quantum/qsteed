@@ -1,15 +1,13 @@
 #pragma once
-#include <vector>
 #include <memory>
 #include "SA/context/analysis_context.hpp"
-#include "AST/ast.hpp"  // 包含 Include 类定义
-#include "AST/gate.hpp"  // 包含 Include 类定义
+#include "AST/ast.hpp"
 #include "analyzers/declaration_analyzer.hpp"
 #include "analyzers/gate_usage_analyzer.hpp"
 #include "analyzers/gate_def_analyzer.hpp"
 
 
-
+namespace qsteedcpp {
 namespace qarser {
 
     // qelib1.inc 标准门定义
@@ -124,3 +122,4 @@ namespace qarser {
         
 
 }; // namespace qarser
+}; // namespace qsteedcpp

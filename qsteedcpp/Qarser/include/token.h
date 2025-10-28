@@ -3,6 +3,8 @@
 #include <iostream>
 #include <iomanip>
 
+namespace qsteedcpp {
+
 namespace qarser {
 
 
@@ -110,3 +112,4 @@ public:
 
 
 }; // namespace qarser
+}; // namespace qsteedcpp

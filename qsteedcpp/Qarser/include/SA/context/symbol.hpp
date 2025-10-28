@@ -2,7 +2,9 @@
 #include <string>
 #include <unordered_map>
 
+namespace qsteedcpp {
 namespace qarser {
+
     enum class SymbolType {
         QREG,
         CREG,
@@ -157,3 +159,4 @@ namespace qarser {
 
 
 }; // namespace qarser
+}; // namespace qsteedcpp

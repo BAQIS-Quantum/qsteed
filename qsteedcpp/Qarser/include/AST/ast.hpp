@@ -4,7 +4,7 @@
 #include <string>
 #include "visitor.hpp"
 
-
+namespace qsteedcpp {
 namespace qarser {
 
     class AstNode {
@@ -142,3 +142,4 @@ namespace qarser {
 
 
 }; // namespace qarser
+}; // namespace qsteedcpp

@@ -1,9 +1,11 @@
 #pragma once
 #include <vector>
+#include <string>
+#include <iostream>
     
+namespace qsteedcpp {
 namespace qarser {
     
-
     class SemanticError {
     public:
         int line;
@@ -56,3 +58,4 @@ namespace qarser {
 
 
 }; // namespace qarser
+}; // namespace qsteedcpp

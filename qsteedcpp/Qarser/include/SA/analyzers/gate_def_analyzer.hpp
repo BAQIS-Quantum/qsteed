@@ -1,8 +1,10 @@
 #pragma once
 #include "base_analyzer.hpp"
 #include "SA/context/gate_def_context.hpp"
+#include "AST/gate.hpp"
 
 
+namespace qsteedcpp {
 namespace qarser {
 
     class ParamExpressionValidator : public BaseVisitor {
@@ -128,9 +130,5 @@ namespace qarser {
 
 
 
-
-
-
-
-
 }; // namespace qarser
+}; // namespace qsteedcpp

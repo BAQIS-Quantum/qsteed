@@ -1,4 +1,5 @@
 #pragma once
+#include <linux/limits.h>
 #include <string>
 #include <memory>
 #include <filesystem>
@@ -6,9 +7,9 @@
 #include <sstream>
 #include <optional>
 #include "AST/ast.hpp"
-#include "AST/gate.hpp"
 #include "parser.h"
 
+namespace qsteedcpp {
 namespace qarser {
 
 class Preprocessor {
@@ -72,14 +73,13 @@ private:
         return std::nullopt;
     }
     
-    // 展开include文件
+
     std::unique_ptr<Program> expand_include(const std::string& filename, int line) {
         auto file_path = find_include_file(filename);
         if (!file_path) {
             return nullptr;
         }
         
-        // 读取文件内容
         std::ifstream file(*file_path);
         if (!file.is_open()) {
             return nullptr;
@@ -89,10 +89,9 @@ private:
         buffer << file.rdbuf();
         std::string content = buffer.str();
         
-        // 解析include的文件
-        Parser parser;
+        Parser parser(content);
         try {
-            auto included_program = parser.parse(content, file_path->string());
+            auto included_program = parser.parse();
             
             // 递归预处理（处理嵌套的include）
             return preprocess(std::move(included_program));
@@ -104,3 +103,4 @@ private:
 };
 
 } // namespace qarser
+} // namespace qsteedcpp

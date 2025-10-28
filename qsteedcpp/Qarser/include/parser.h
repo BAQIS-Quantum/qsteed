@@ -7,6 +7,7 @@
 #include "AST/ast.hpp"
 #include "AST/gate.hpp"
 
+namespace qsteedcpp {
 namespace qarser {
 
 class Parser {
@@ -109,3 +110,4 @@ public:
 
 
 }; // namespace qarser
+}; // namespace qsteedcpp

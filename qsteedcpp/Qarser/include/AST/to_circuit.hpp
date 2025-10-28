@@ -1,14 +1,11 @@
 #pragma once
 #include <map>
 #include <string>
-#include <functional>
 #include <stdexcept>
 #include "AST/visitor.hpp"
-#include "AST/ast.hpp"
 #include "AST/gate.hpp"
 #include "AST/expression.hpp"
 #include "AST/expression_converter.hpp"
-#include "AST/gate_factory.hpp"
 #include "QuantumCircuit/include/circuit/quantum_circuit.h"
 #include "QuantumCircuit/include/circuit/parameter.h"
 

@@ -13,6 +13,7 @@
 
 namespace py = pybind11;
 using namespace sabre;
+using namespace qsteedcpp;
 
 
 void bind_quantum_circuit(py::module& m);

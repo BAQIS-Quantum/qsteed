@@ -5,6 +5,7 @@
 #include "dag.h"
 #include <unordered_set>
 
+namespace qsteedcpp {;
 namespace qarser {
 
     class AstToDagConverter : public BaseVisitor {
@@ -102,4 +103,6 @@ namespace qarser {
         }
     };
 
-} // namespace qarser
+}; // namespace qarser
+}; // namespace qsteedcpp
+

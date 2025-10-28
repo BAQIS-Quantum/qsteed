@@ -19,26 +19,26 @@ public:
     }
     
     // 访问器实现
-    void visit(Number& node) override {
+    void visit(NumberExpr& node) override {
         result = Parameter(node.value);
     }
     
-    void visit(Pi& node) override {
-        result = Parameter(M_PI);
-    }
+    // void visit(Pi& node) override {
+    //     result = Parameter(M_PI);
+    // }
     
-    void visit(Identifier& node) override {
+    void visit(IdentifierExpr& node) override {
         // 标识符作为参数变量
         result = Parameter(node.name);
     }
     
-    void visit(BinaryOp& node) override {
+    void visit(BinaryExpr& node) override {
         ExpressionConverter left_converter, right_converter;
         auto left_param = left_converter.convert(*node.left);
         auto right_param = right_converter.convert(*node.right);
         
         switch (node.op) {
-            case BinaryOp::Op::ADD:
+            case Binary::Op::ADD:
                 result = left_param + right_param;
                 break;
             case BinaryOp::Op::SUB:

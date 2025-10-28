@@ -2,6 +2,7 @@
 #include "AST/visitor.hpp"
 #include "SA/context/analysis_context.hpp"
 
+namespace qsteedcpp {
 namespace qarser {
 
     class BaseAnalyzer : public BaseVisitor {
@@ -14,3 +15,4 @@ namespace qarser {
     };
 
 }; 
+}; // namespace qsteedcpp

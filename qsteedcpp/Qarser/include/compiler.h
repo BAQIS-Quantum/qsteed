@@ -2,10 +2,11 @@
 #include <fstream>
 #include <sstream>
 #include "preprocess.hpp"
-#include "parser.h"
 #include "SA/analyzer.hpp"
 #include "AST/dag_converter.hpp"
+#include "parser.h"
 
+namespace qsteedcpp {
 namespace qarser {
     inline std::string load_qasm_from_file(const std::string& filepath) {
         std::ifstream file(filepath);
@@ -95,3 +96,4 @@ namespace qarser {
     }
 
 };
+}; // namespace qsteedcpp
