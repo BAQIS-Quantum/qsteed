@@ -1,6 +1,7 @@
 #include <cmath>
 #include "parser.h"
 #include <fstream>
+#include <sstream>
 
 namespace qsteedcpp {
 namespace qarser {

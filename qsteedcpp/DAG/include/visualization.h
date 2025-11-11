@@ -1,11 +1,13 @@
 #pragma once
 
+
+#ifdef WITH_GRAPHVIZ
+
 #include <string>
 #include <vector>
 #include "dag.h"
 #include "Model/coupling.h"
 
-#ifdef WITH_GRAPHVIZ
 
     /**
      * @brief Draws a graph using the specified graph object.

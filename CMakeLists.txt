@@ -221,7 +221,8 @@ if (BUILD_WITH_GRAPHVIZ)
   target_link_libraries(${target} PRIVATE gvc cgraph)
 endif()
 
-install(TARGETS ${target} LIBRARY DESTINATION qsteed/passes/mapping/cpp_utils)
+# install(TARGETS ${target} LIBRARY DESTINATION qsteed/passes/mapping/cpp_utils)
+install(TARGETS ${target} LIBRARY DESTINATION qsteed)
 
 # Generate Stub
 if(SKBUILD)
@@ -242,10 +243,16 @@ endif()
 
 
 ## -- Module Testing -- ##
-# option(BUILD_TESTS "Build test programs" OFF)
-# message(STATUS "BUILD_TESTS is set to ${BUILD_TESTS}")
+if(SKBUILD)
+    option(BUILD_CPP_TESTS "Build C++ test programs" OFF)
+else()
+    option(BUILD_CPP_TESTS "Build C++ test programs" ON)
+endif()
 
-if(!SKBUILD)
+message(STATUS "BUILD_CPP_TESTS is set to ${BUILD_CPP_TESTS}")
+
+if(BUILD_CPP_TESTS)
+    message(STATUS "Building C++ tests...")
     enable_testing()
     
     FetchContent_Declare(
@@ -257,4 +264,6 @@ if(!SKBUILD)
     
     # Test Modules
     add_subdirectory(qsteedcpp/tests)
+else()
+    message(STATUS "Skipping C++ tests.")
 endif()

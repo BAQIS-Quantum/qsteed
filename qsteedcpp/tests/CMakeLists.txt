@@ -1,3 +1,5 @@
+message("TESTing")
+
 # Circuit tests
 add_executable(circuit_test
     circuit/matrix_test.cpp
