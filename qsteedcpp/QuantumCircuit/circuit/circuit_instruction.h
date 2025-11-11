@@ -1,10 +1,11 @@
 #pragma once
-#include "../gates/base_gate.h"
-#include <memory>
 #include <vector>
 #include <optional>
 #include <variant>
-#include <type_traits> // Required for std::decay_t
+#include <memory>
+#include <string>
+#include <stdexcept>
+#include "gates/base_gate.h"
 
 namespace qsteedcpp {
 

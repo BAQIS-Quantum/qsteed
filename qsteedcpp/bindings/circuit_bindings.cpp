@@ -5,8 +5,8 @@
 #include <pybind11/stl_bind.h>
 #include <sstream>
 
-#include "../QuantumCircuit/include/circuit/quantum_circuit.h"
-#include "../QuantumCircuit/include/circuit/circuit_instruction.h"
+#include "../QuantumCircuit/circuit/quantum_circuit.h"
+#include "../QuantumCircuit/circuit/circuit_instruction.h"
 
 namespace py = pybind11;
 using namespace qsteedcpp;
@@ -28,18 +28,6 @@ std::string vec_to_string(const std::vector<T>& vec) {
 
 
 void bind_quantum_circuit(py::module& m) {
-    py::class_<ParameterGradInfo>(m, "ParameterGradInfo")
-        .def(py::init<size_t, size_t, double>(), 
-             py::arg("gate_index"), py::arg("param_index"), py::arg("grad_value"))
-        .def_readwrite("gate_index", &ParameterGradInfo::gate_index)
-        .def_readwrite("param_index", &ParameterGradInfo::param_index)
-        .def_readwrite("grad_value", &ParameterGradInfo::grad_value)
-        .def("__repr__", [](const ParameterGradInfo& info) {
-            return "ParameterGradInfo(gate_index=" + std::to_string(info.gate_index) +
-                   ", param_index=" + std::to_string(info.param_index) +
-                   ", grad_value=" + std::to_string(info.grad_value) + ")";
-        });
-
     // Bind instruction components
     py::class_<Measurement>(m, "Measurement")
         .def_readonly("qubits", &Measurement::qubit_indices)
@@ -68,6 +56,7 @@ void bind_quantum_circuit(py::module& m) {
             return "Condition(clbit=" + std::to_string(cond.clbit_index) + 
                    ", value=" + std::to_string(cond.value) + ")";
         });
+
 
     // Bind the main instruction class
     py::class_<CircuitInstruction>(m, "CircuitInstruction")
@@ -108,108 +97,12 @@ void bind_quantum_circuit(py::module& m) {
         .def("size", &QuantumCircuit::size, "Returns the total number of instructions in the circuit.")
 
         // Add the new binding here
-        .def("get_unitary_matrix", &QuantumCircuit::get_unitary_matrix,
-             "Calculates and returns the unitary matrix representation of the circuit.\n\n" 
-             "Warning: This can be very memory-intensive for circuits with a large number of qubits.")
-        
+       
         // Method to get all instructions
         .def("get_instructions", &QuantumCircuit::get_instructions, 
              "Get the list of all instructions in the circuit.",
              py::return_value_policy::reference_internal)
-
-        // Single-qubit gates
-        .def("h", &QuantumCircuit::h, py::arg("qubit"))
-        .def("x", &QuantumCircuit::x, py::arg("qubit"))
-        .def("y", &QuantumCircuit::y, py::arg("qubit"))
-        .def("z", &QuantumCircuit::z, py::arg("qubit"))
-        .def("s", &QuantumCircuit::s, py::arg("qubit"))
-        .def("sdg", &QuantumCircuit::sdg, py::arg("qubit"))
-        .def("t", &QuantumCircuit::t, py::arg("qubit"))
-        .def("tdg", &QuantumCircuit::tdg, py::arg("qubit"))
-        
-        // Single-qubit parameterized gates
-        .def("rx", py::overload_cast<const Parameter&, int>(&QuantumCircuit::rx), py::arg("theta"), py::arg("qubit"))
-        .def("rx", [](QuantumCircuit &self, double theta, int qubit) { self.rx(Parameter(theta), qubit); }, py::arg("theta"), py::arg("qubit"))
-        .def("ry", py::overload_cast<const Parameter&, int>(&QuantumCircuit::ry), py::arg("phi"), py::arg("qubit"))
-        .def("ry", [](QuantumCircuit &self, double phi, int qubit) { self.ry(Parameter(phi), qubit); }, py::arg("phi"), py::arg("qubit"))
-        .def("rz", py::overload_cast<const Parameter&, int>(&QuantumCircuit::rz), py::arg("lambda"), py::arg("qubit"))
-        .def("rz", [](QuantumCircuit &self, double lambda, int qubit) { self.rz(Parameter(lambda), qubit); }, py::arg("lambda"), py::arg("qubit"))
-        .def("p", py::overload_cast<const Parameter&, int>(&QuantumCircuit::p), py::arg("lambda"), py::arg("qubit"))
-        .def("p", [](QuantumCircuit &self, double lambda, int qubit) { self.p(Parameter(lambda), qubit); }, py::arg("lambda"), py::arg("qubit"))
-        .def("u3", py::overload_cast<const Parameter&, const Parameter&, const Parameter&, int>(&QuantumCircuit::u3), py::arg("theta"), py::arg("phi"), py::arg("lambda"), py::arg("qubit"))
-        .def("u3", [](QuantumCircuit &self, double theta, double phi, double lambda, int qubit) { self.u3(Parameter(theta), Parameter(phi), Parameter(lambda), qubit); }, py::arg("theta"), py::arg("phi"), py::arg("lambda"), py::arg("qubit"))
-
-        // Two-qubit gates
-        .def("cnot", &QuantumCircuit::cnot, py::arg("control"), py::arg("target"))
-        .def("cz", &QuantumCircuit::cz, py::arg("control"), py::arg("target"))
-        .def("swap", &QuantumCircuit::swap, py::arg("qubit1"), py::arg("qubit2"))
-        .def("iswap", &QuantumCircuit::iswap, py::arg("qubit1"), py::arg("qubit2"))
-
-        // Two-qubit parameterized gates
-        .def("rxx", py::overload_cast<const Parameter&, int, int>(&QuantumCircuit::rxx), py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
-        .def("rxx", [](QuantumCircuit &self, double theta, int q1, int q2) { self.rxx(Parameter(theta), q1, q2); }, py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
-        .def("ryy", py::overload_cast<const Parameter&, int, int>(&QuantumCircuit::ryy), py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
-        .def("ryy", [](QuantumCircuit &self, double theta, int q1, int q2) { self.ryy(Parameter(theta), q1, q2); }, py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
-        .def("rzz", py::overload_cast<const Parameter&, int, int>(&QuantumCircuit::rzz), py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
-        .def("rzz", [](QuantumCircuit &self, double theta, int q1, int q2) { self.rzz(Parameter(theta), q1, q2); }, py::arg("theta"), py::arg("qubit1"), py::arg("qubit2"))
-        
-        // Three-qubit gates
-        .def("ccx", &QuantumCircuit::ccx, py::arg("control1"), py::arg("control2"), py::arg("target"))
-        .def("toffoli", &QuantumCircuit::toffoli, py::arg("control1"), py::arg("control2"), py::arg("target"))
-
-        // Circuit operations
-        .def("measure", py::overload_cast<int, int>(&QuantumCircuit::measure), 
-             py::arg("qubit"), py::arg("clbit"))
-        .def("measure", py::overload_cast<const std::vector<int>&, const std::vector<int>&>(&QuantumCircuit::measure), 
-             py::arg("qubits"), py::arg("clbits"))
-        .def("measure_all", &QuantumCircuit::measure_all)
-        .def("reset", &QuantumCircuit::reset, py::arg("qubit"))
-        .def("barrier", &QuantumCircuit::barrier, py::arg("qubits") = std::vector<int>{})
-
-        // Parameter related methods
-        .def("get_parameters", &QuantumCircuit::get_parameters)
-        .def("get_parameter_grads", &QuantumCircuit::get_parameter_grads,
-             "Get parameter gradients information",
-             py::return_value_policy::reference_internal)
-        .def("get_variables", &QuantumCircuit::get_variables,
-             "Get all variables (unique parameters) in the circuit",
-             py::return_value_policy::reference_internal)
-        .def("update_parameters", &QuantumCircuit::update_parameters,
-             py::arg("param_values"),
-             "Update parameter values")
-        .def("compute_gradients_for_parameter", &QuantumCircuit::compute_gradients_for_parameter,
-             py::arg("gate_index"), py::arg("param_index"), py::arg("param_values"),
-             "Compute gradients for a specific parameter using autodiff")
-        .def("print_parameter_grads", &QuantumCircuit::print_parameter_grads,
-             "Print parameter gradients information for debugging")
-        
-        // Convenient method: Return parameter gradients in a Python-friendly format
-        .def("get_parameter_grads_dict", [](const QuantumCircuit& circuit) {
-            const auto& grads = circuit.get_parameter_grads();
-            py::dict result;
-            
-            for (const auto& pair : grads) {
-                const std::string& var_name = pair.first;
-                const std::vector<ParameterGradInfo>& grad_infos = pair.second;
-                
-                py::list grad_list;
-                for (const auto& info : grad_infos) {
-                    py::dict grad_dict;
-                    grad_dict["gate_index"] = info.gate_index;
-                    grad_dict["param_index"] = info.param_index;
-                    grad_dict["grad_value"] = info.grad_value;
-                    grad_list.append(grad_dict);
-                }
-                result[var_name.c_str()] = grad_list;
-            }
-            return result;
-        }, "Get parameter gradients as Python dictionary")
-        
-        .def("has_parameters", [](const QuantumCircuit& circuit) {
-            return !circuit.get_variables().empty();
-        }, "Check if the circuit has parameters")
-        
-        .def("print", &QuantumCircuit::print)
+       .def("print", &QuantumCircuit::print)
         
         .def("__repr__", [](const QuantumCircuit& circuit) {
             return "QuantumCircuit(num_qubits=" + std::to_string(circuit.num_qubits()) + 

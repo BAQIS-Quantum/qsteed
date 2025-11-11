@@ -1,8 +1,9 @@
 #include <cmath>
 #include <algorithm>
 #include <sstream>
-#include "circuit/circuit_drawer.h"
-#include "circuit/circuit_instruction.h"
+#include <map>
+#include "circuit_drawer.h"
+#include "circuit_instruction.h"
 #include "gates/base_gate.h"
 
 namespace qsteedcpp {

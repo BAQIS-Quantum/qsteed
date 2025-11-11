@@ -93,14 +93,14 @@ add_library(quantum_circuit_lib STATIC ${QUANTUM_CIRCUIT_SOURCES})
 target_include_directories(
   quantum_circuit_lib
   PUBLIC
-    "${QUANTUM_CIRCUIT_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}"
 )
 target_link_libraries(
   quantum_circuit_lib
   PUBLIC
     Boost::headers
-    Eigen3::Eigen
-    autodiff::autodiff
+    # Eigen3::Eigen
+    # autodiff::autodiff
 )
 
 # 1. Build DAG module
@@ -110,7 +110,7 @@ target_include_directories(
   PUBLIC
     "${DAG_DIR}/include"
     "${SABRE_DIR}/include"
-    "${QUANTUM_CIRCUIT_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}"
 )
 target_link_libraries(
   dag_lib
@@ -132,7 +132,7 @@ target_include_directories(
     "${QARSER_DIR}/include"
     "${DAG_DIR}/include"
     "${SABRE_DIR}/include" 
-    "${QUANTUM_CIRCUIT_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}"
 )
 target_link_libraries(
   qarser_lib
@@ -144,11 +144,11 @@ target_link_libraries(
 # 3. Build SABRE module
 add_library(sabre_lib STATIC ${SABRE_SOURCES})
 target_include_directories(
-  sabre_lib 
-  PUBLIC 
+  sabre_lib
+  PUBLIC
     "${SABRE_DIR}/include"
     "${DAG_DIR}/include"
-    "${QUANTUM_CIRCUIT_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}"
 )    
 target_link_libraries(
   sabre_lib
@@ -166,7 +166,7 @@ target_include_directories(
   passes_lib
   PUBLIC
     "${PASSES_DIR}/include"
-    "${QUANTUM_CIRCUIT_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}"
 )
 target_link_libraries(
   passes_lib
@@ -211,7 +211,7 @@ target_include_directories(
     "${QARSER_DIR}/include"
     "${SABRE_DIR}/include"
     "${DAG_DIR}/include"
-    "${QUANTUM_CIRCUIT_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}"
     "${PASSES_DIR}"
 )
 target_link_libraries(

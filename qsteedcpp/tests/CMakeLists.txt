@@ -2,17 +2,17 @@ message("TESTing")
 
 # Circuit tests
 add_executable(circuit_test
-    circuit/matrix_test.cpp
-    circuit/gates_test.cpp
-    circuit/test_circuit_drawer.cpp
+    "circuit/symbolic_test.cpp"
+    "circuit/test_circuit_drawer.cpp"
 )
 
 target_link_libraries(circuit_test
     PRIVATE
     GTest::gtest_main
-    Eigen3::Eigen
-    autodiff::autodiff
     quantum_circuit_lib
+
+    # Eigen3::Eigen
+    # autodiff::autodiff
 )
 
 target_include_directories(circuit_test
@@ -48,21 +48,6 @@ target_include_directories(unroll_test
 )
 
 
-# Parameter tests
-add_executable(parameter_test
-    common/parameter_test.cpp
-)
-
-target_link_libraries(parameter_test
-    PRIVATE
-    GTest::gtest_main
-    autodiff::autodiff
-)
-
-target_include_directories(parameter_test
-    PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit/include
-)
 
 # DAG/SABRE tests
 add_executable(sabre_test
