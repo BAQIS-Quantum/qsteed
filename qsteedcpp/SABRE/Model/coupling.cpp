@@ -1,8 +1,7 @@
 #include <cmath>
-#include <stdexcept>
 #include <boost/graph/floyd_warshall_shortest.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
-#include "Model/coupling.h"
+#include "coupling.h"
 #include "visualization.h"
 
 

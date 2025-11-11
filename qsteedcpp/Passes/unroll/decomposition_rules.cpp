@@ -1,9 +1,9 @@
-#include "unroll/decomposition_rules.h"
-#include "unroll/rules/swap_rules.h"
-#include "unroll/rules/single_qubit_rules.h"
-#include "unroll/rules/two_qubit_rules.h"
-#include "unroll/rules/controlled_rotation_rules.h"
-#include "unroll/rules/three_qubit_gate_rules.h"
+#include "decomposition_rules.h"
+#include "rules/swap_rules.h"
+#include "rules/single_qubit_rules.h"
+#include "rules/two_qubit_rules.h"
+#include "rules/controlled_rotation_rules.h"
+#include "rules/three_qubit_gate_rules.h"
 
 namespace qsteedcpp {
 

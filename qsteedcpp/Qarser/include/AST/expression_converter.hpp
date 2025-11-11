@@ -2,7 +2,7 @@
 #include <cmath>
 #include "AST/expression.hpp"
 #include "AST/visitor.hpp"
-#include "QuantumCircuit/include/circuit/parameter.h"
+// #include "QuantumCircuit/circuit/parameter.h"
 
 namespace qsteedcpp {
 namespace qarser {

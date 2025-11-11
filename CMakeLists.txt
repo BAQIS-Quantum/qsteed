@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-
 if(NOT CMAKE_BUILD_TYPE)
   message(STATUS "Build type not set - defaulting to Release")
   set(CMAKE_BUILD_TYPE Release)
@@ -15,10 +14,11 @@ endif()
 # Set CMake module path to include custom modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
-# Add conda environment paths for Boost
+# Add conda environment paths
 if(DEFINED ENV{CONDA_PREFIX})
-    list(APPEND CMAKE_PREFIX_PATH $ENV{CONDA_PREFIX})
-    list(APPEND CMAKE_PREFIX_PATH "$ENV{CONDA_PREFIX}/Library")
+  message(STATUS "Detected conda env: $ENV{CONDA_PREFIX}")
+  list(APPEND CMAKE_PREFIX_PATH $ENV{CONDA_PREFIX})
+  list(APPEND CMAKE_PREFIX_PATH "$ENV{CONDA_PREFIX}/Library")
 endif()
 
 if (MSVC)
@@ -72,16 +72,16 @@ endif()
 
 # File filter
 set(QSTEED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qsteedcpp")
+set(QUANTUM_CIRCUIT_DIR "${QSTEED_CPP_DIR}/QuantumCircuit")
 set(QARSER_DIR "${QSTEED_CPP_DIR}/Qarser")
 set(SABRE_DIR "${QSTEED_CPP_DIR}/SABRE")
 set(DAG_DIR "${QSTEED_CPP_DIR}/DAG")
-set(QUANTUM_CIRCUIT_DIR "${QSTEED_CPP_DIR}/QuantumCircuit")
-set(PASSES_DIR "${QSTEED_CPP_DIR}/passes")
+set(PASSES_DIR "${QSTEED_CPP_DIR}/Passes")
 
+file(GLOB_RECURSE QUANTUM_CIRCUIT_SOURCES "${QUANTUM_CIRCUIT_DIR}/*.cpp")
 file(GLOB_RECURSE QARSER_SOURCES "${QARSER_DIR}/*.cpp")
 file(GLOB_RECURSE SABRE_SOURCES "${SABRE_DIR}/*.cpp")
 file(GLOB_RECURSE DAG_SOURCES "${DAG_DIR}/*.cpp")
-file(GLOB_RECURSE QUANTUM_CIRCUIT_SOURCES "${QUANTUM_CIRCUIT_DIR}/*.cpp")
 file(GLOB_RECURSE PASSES_SOURCES "${PASSES_DIR}/*.cpp")
 
 include_directories(
@@ -146,7 +146,7 @@ add_library(sabre_lib STATIC ${SABRE_SOURCES})
 target_include_directories(
   sabre_lib
   PUBLIC
-    "${SABRE_DIR}/include"
+    "${SABRE_DIR}"
     "${DAG_DIR}/include"
     "${QUANTUM_CIRCUIT_DIR}"
 )    
@@ -165,7 +165,7 @@ add_library(passes_lib STATIC ${PASSES_SOURCES})
 target_include_directories(
   passes_lib
   PUBLIC
-    "${PASSES_DIR}/include"
+    "${PASSES_DIR}"
     "${QUANTUM_CIRCUIT_DIR}"
 )
 target_link_libraries(

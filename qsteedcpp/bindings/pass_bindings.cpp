@@ -1,10 +1,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
-#include "../passes/include/base_pass.h"
-#include "../passes/include/unroll/unroll_pass.h"
-#include "../passes/include/unroll/rule_manager.h"
-#include "../passes/include/unroll/decomposition_rules.h"
+#include "Passes/base_pass.h"
+#include "Passes/unroll/unroll_pass.h"
+#include "Passes/unroll/rule_manager.h"
+#include "Passes/unroll/decomposition_rules.h"
 
 namespace py = pybind11;
 using namespace qsteedcpp;

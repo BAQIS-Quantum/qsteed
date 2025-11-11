@@ -6,10 +6,8 @@ namespace sabre {
 
 SabreLayout::SabreLayout(const CouplingCircuit& c_circuit) 
     : c_circuit(c_circuit) {
-    // Initialize the model
     this->model = std::make_shared<Model>();
 
-    // Initialize the sabre_routing
     this->routing = std::make_unique<SabreRouting>(c_circuit);
     this->routing->model = this->model;
 }
@@ -53,7 +51,6 @@ DAGCircuit SabreLayout::run(const DAGCircuit& dag) {
     }
 
     if (model->initial_layout.empty()) {
-        // std::cout << "empty initial layout." << std::endl;
         model->initial_layout = generate_random_layout(qubits_used.size(), c_circuit.num_qubits);
     }
     

@@ -2,7 +2,7 @@
 #include "unroll/rule_manager.h"
 #include "unroll/decomposition_rules.h"
 #include "circuit/circuit_instruction.h"
-#include "QuantumCircuit/include/gates/standard_gates.h"
+#include "QuantumCircuit/gates/standard_gates.h"
 
 namespace qsteedcpp {
 

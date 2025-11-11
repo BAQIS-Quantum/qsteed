@@ -1,10 +1,12 @@
 #include <sabre_routing.h>
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 #include <boost/graph/adjacency_list.hpp>
 #include <vector>
 #include <algorithm>
-#include <random>
+#include <cstdlib>
+#include <ctime>
 #include "Model/layout.h"
 #include "sabre_routing.h"
 
@@ -21,6 +23,12 @@ constexpr double INVALID_SWAP_SCORE = -1000000;
 */
 DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
 
+    // Initialize random seed once
+    static bool rand_initialized = false;
+    if (!rand_initialized) {
+        srand(static_cast<unsigned int>(time(nullptr)));
+        rand_initialized = true;
+    }
 
     // Precheck
     std::set<int> qubits_used = dag.get_qubits_used();
@@ -41,6 +49,18 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
     // Size of lookahead window. Set to number of qubits
     this->extended_set_size = this->c_circuit.num_qubits;
 
+    // Set decay_reset_interval to half of extended_set_size (same as Python version)
+    this->decay_reset_interval = std::round(this->extended_set_size / 2.0);
+
+    // Decay coefficient for penalizing serial swaps. Set to average fidelity (for fidelity heuristic)
+    if (this->heuristic == Heuristic::FIDELITY) {
+        double sum_fidelity = 0.0;
+        for (const auto& [edge, fidelity] : fidelity_dict) {
+            sum_fidelity += fidelity;
+        }
+        this->decay_delta = 1.0 - sum_fidelity / fidelity_dict.size();
+    }
+
 
     // Parameter preparation before iteration.
     DAGCircuit mapped_dag;
@@ -52,7 +72,7 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
     current_layout = model->initial_layout;
 
     std::unordered_map<int, int> pre_executed_counts;
-    std::unordered_set<int> front_layer; 
+    std::unordered_set<int> front_layer;
     Matrix distance_matrix = c_circuit.get_distance_matrix();      
 
     // Initialize the front layer.
@@ -109,7 +129,6 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
                 execute_gate_list.push_back(node_index); // Single-qubit gates, barriers, XY-gates and measures are both executable gates.
         }
 
-
         if ( !execute_gate_list.empty() ) {
             for (const int& node_index : execute_gate_list) {
                 _apply_gate(mapped_dag, dag.graph[node_index], current_layout);
@@ -118,7 +137,7 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
                 for ( int successor : _dag_successors(dag, node_index) ) {
                     pre_executed_counts[successor]++;
                     if (pre_executed_counts[successor] == dag.graph[successor].qubit_pos.size()) {
-                        front_layer.insert(successor);  
+                        front_layer.insert(successor);
                     }
                 }
             }
@@ -182,10 +201,10 @@ std::set<int> SabreRouting::_calc_extended_set(const DAGCircuit& dag, const std:
     }
 
     std::vector<int> queue;
-    queue.reserve(this->extended_set_size * 2);  // 预分配队列容量
+    queue.reserve(this->extended_set_size * 2);
     queue.assign(front_layer.begin(), front_layer.end());
     std::set<int> visited_nodes(front_layer.begin(), front_layer.end());
-    
+
     size_t head = 0;
     while (head < queue.size() && extended_set.size() < this->extended_set_size) {
         int node_index = queue[head++];
@@ -211,8 +230,8 @@ std::set<int> SabreRouting::_calc_extended_set(const DAGCircuit& dag, const std:
 }
 
 
-std::set<SwapPos> SabreRouting::_obtain_swaps(  const std::unordered_set<int>& front_layer, 
-                                                const Layout& current_layout, 
+std::set<SwapPos> SabreRouting::_obtain_swaps(  const std::unordered_set<int>& front_layer,
+                                                const Layout& current_layout,
                                                 const DAGCircuit& dag ) {   
     std::set<SwapPos> candiate_swaps{};
     for ( const auto& node_index : front_layer ) {
@@ -244,10 +263,10 @@ std::set<SwapPos> SabreRouting::_obtain_swaps(  const std::unordered_set<int>& f
  *     best_swap (tuple): the best swap based on different heuristics
  */
 SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
-                                        const std::set<SwapPos>& swap_candidates, 
+                                        const std::set<SwapPos>& swap_candidates,
                                         const Layout& current_layout,
-                                        const std::unordered_set<int>& front_layer, 
-                                        const std::set<int>& extended_set, 
+                                        const std::unordered_set<int>& front_layer,
+                                        const std::set<int>& extended_set,
                                         const std::set<std::pair<int, int>>& unavailable_2qubits) const {
 
     std::unordered_map<SwapPos, double, sabre::SwapPosHash> swap_scores;
@@ -278,14 +297,14 @@ SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
         std::vector<SwapPos> best_swaps;
         best_swaps.reserve(SWAP_CANDIDATES_RESERVE);
         for (const auto& pair : swap_scores) {
-            if (pair.second == best_swap->second) {
+            if (std::abs(pair.second - best_swap->second) < 1e-9) {
                 best_swaps.push_back(pair.first);
             }
         }
 
-        std::uniform_int_distribution<> dis(0, best_swaps.size() - 1);
-
-        return best_swaps[dis(gen)];
+        // Use simple random instead of complex mt19937
+        int random_index = rand() % best_swaps.size();
+        return best_swaps[random_index];
     }
     else if ( this->heuristic == Heuristic::DISTANCE ) {
         for ( const auto& swap : swap_candidates) {
@@ -307,14 +326,12 @@ SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
         std::vector<SwapPos> best_swaps;
         best_swaps.reserve(SWAP_CANDIDATES_RESERVE);
         for (const auto& pair : swap_scores) {
-            if (pair.second == min_score) {
+            if (std::abs(pair.second - min_score) < 1e-9) {
                 best_swaps.push_back(pair.first);
             }
         }
-
-        std::uniform_int_distribution<> dis(0, best_swaps.size() - 1);
-
-        return best_swaps[dis(gen)];
+        int random_index = rand() % best_swaps.size();
+        return best_swaps[random_index];
     }
     else if ( this->heuristic == Heuristic::MIXTURE ) {
         for ( const auto& swap : swap_candidates) {
@@ -336,7 +353,7 @@ SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
         std::vector<SwapPos> distance_tied_swaps;
         distance_tied_swaps.reserve(SWAP_CANDIDATES_RESERVE);  // 预分配容量
         for (const auto& pair : swap_scores) {
-            if (pair.second == min_dist_score) {
+            if (std::abs(pair.second - min_dist_score) < 1e-9) {
                 distance_tied_swaps.push_back(pair.first);
             }
         }
@@ -362,29 +379,31 @@ SwapPos SabreRouting::_get_best_swap(   const DAGCircuit& dag,
                     best_fidelity_score = current_fidelity_score;
                     fidelity_tied_swaps.clear();
                     fidelity_tied_swaps.push_back(swap);
-                } else if (current_fidelity_score == best_fidelity_score) {
+                } else if (std::abs(current_fidelity_score - best_fidelity_score) < 1e-9) {
                     fidelity_tied_swaps.push_back(swap);
                 }
             }
         }
 
         if (!fidelity_tied_swaps.empty()) {
-            std::uniform_int_distribution<> dis(0, fidelity_tied_swaps.size() - 1);
-            return fidelity_tied_swaps[dis(gen)];
+            // Use simple random instead of complex mt19937
+            int random_index = rand() % fidelity_tied_swaps.size();
+            return fidelity_tied_swaps[random_index];
         }
-        
-        std::uniform_int_distribution<> dis(0, distance_tied_swaps.size() - 1);
-        return distance_tied_swaps[dis(gen)];
+
+        // Use simple random instead of complex mt19937
+        int random_index = rand() % distance_tied_swaps.size();
+        return distance_tied_swaps[random_index];
     }
 
     return {0,0};
 }
 
 
-double SabreRouting::_score_heuristic(  const DAGCircuit& dag, 
+double SabreRouting::_score_heuristic(  const DAGCircuit& dag,
                                         const Heuristic heuristic,
-                                        const std::unordered_set<int>& front_layer, 
-                                        const std::set<int>& extended_set, 
+                                        const std::unordered_set<int>& front_layer,
+                                        const std::set<int>& extended_set,
                                         const Layout& current_layout,
                                         const SwapPos& swap_pos
 ) const {

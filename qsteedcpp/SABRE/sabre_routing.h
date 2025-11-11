@@ -1,7 +1,6 @@
 #pragma once
 #include <algorithm>
 #include <cmath>
-#include <random>
 #include <unordered_set>
 #include "sabre_core.h"
 #include "Model/model.h"
@@ -14,7 +13,7 @@ namespace sabre {
     class SabreRouting {
     public:
         bool modify_dag = false;
-        float decay_delta = 0.001;
+        float decay_delta = 0.01;
         int decay_reset_interval = 5;
         int extended_set_size = 20;
         float extended_set_weight = 0.5;
@@ -23,17 +22,16 @@ namespace sabre {
         Heuristic heuristic = Heuristic::DISTANCE;
 
     private:
-        mutable std::mt19937 gen;
         const Matrix distance_matrix = c_circuit.get_distance_matrix();
         const std::map<std::pair<int, int>, double> fidelity_dict = c_circuit.get_fidelity_dict();
-        std::unordered_map<int, int> qubits_decay = {};
+        std::unordered_map<int, double> qubits_decay = {};
         int add_swap_count = 0;
 
     public:
-        SabreRouting(const CouplingCircuit& c_circuit) 
-            : c_circuit(c_circuit), gen(std::random_device{}()) {}
-        SabreRouting(const CouplingCircuit& c_circuit, const Heuristic& heuristic) 
-            : c_circuit(c_circuit), heuristic(heuristic), gen(std::random_device{}()) {}
+        SabreRouting(const CouplingCircuit& c_circuit)
+            : c_circuit(c_circuit) {}
+        SabreRouting(const CouplingCircuit& c_circuit, const Heuristic& heuristic)
+            : c_circuit(c_circuit), heuristic(heuristic) {}
         // SabreRouting() = default;
 
         void set_model(Model& model) { 
@@ -65,24 +63,24 @@ namespace sabre {
 
         inline double _swap_score(const SwapPos& physical_swap_qubits) const;
 
-        std::set<int> _calc_extended_set(const DAGCircuit& dag, 
+        std::set<int> _calc_extended_set(const DAGCircuit& dag,
                                         const std::unordered_set<int>& front_layer);
 
-        std::set<SwapPos> _obtain_swaps(const std::unordered_set<int>& front_layer, 
-                                        const Layout& current_layout, 
+        std::set<SwapPos> _obtain_swaps(const std::unordered_set<int>& front_layer,
+                                        const Layout& current_layout,
                                         const DAGCircuit& dag);
 
         SwapPos _get_best_swap( const DAGCircuit& dag,
-                                const std::set<SwapPos>& swap_candidates, 
-                                const Layout& current_layout, 
-                                const std::unordered_set<int>& front_layer, 
-                                const std::set<int>& extended_set, 
+                                const std::set<SwapPos>& swap_candidates,
+                                const Layout& current_layout,
+                                const std::unordered_set<int>& front_layer,
+                                const std::set<int>& extended_set,
                                 const std::set<std::pair<int, int>>& unavailable_2qubits) const;
 
-        double _score_heuristic(const DAGCircuit& dag, 
+        double _score_heuristic(const DAGCircuit& dag,
                                 const Heuristic heuristic,
-                                const std::unordered_set<int>& front_layer, 
-                                const std::set<int>& extended_set, 
+                                const std::unordered_set<int>& front_layer,
+                                const std::set<int>& extended_set,
                                 const Layout& current_layout,
                                 const SwapPos& swap_pos) const;
 

@@ -2,7 +2,7 @@
 #include "unroll/rule_manager.h"
 #include "unroll/decomposition_rules.h"
 #include "circuit/circuit_instruction.h"
-#include "QuantumCircuit/include/gates/standard_gates.h"
+#include "QuantumCircuit/gates/standard_gates.h"
 
 namespace qsteedcpp {
 
@@ -20,7 +20,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
         result.emplace_back(std::make_unique<HGate>(), std::vector<int>{qubits[1]});
-        result.emplace_back(std::make_unique<CPGate>(Parameter(M_PI)), qubits);
+        result.emplace_back(std::make_unique<CPGate>(Expr(M_PI)), qubits);
         result.emplace_back(std::make_unique<HGate>(), std::vector<int>{qubits[1]});
         apply_condition(inst, result);
         return result;
@@ -39,8 +39,9 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> rxx_to_cnot(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
-        auto params = gate->get_parameter_values();
-        double theta = params.empty() ? 0.0 : params[0];
+        // 获取 Expr 参数
+        const auto& exprs = gate->get_parameter_expressions();
+        const Expr& theta = exprs.empty() ? Expr(0.0) : exprs[0];
         std::vector<CircuitInstruction> result;
         result.emplace_back(std::make_unique<HGate>(), std::vector<int>{qubits[0]});
         result.emplace_back(std::make_unique<HGate>(), std::vector<int>{qubits[1]});
@@ -56,10 +57,11 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> ryy_to_cnot(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
-        auto params = gate->get_parameter_values();
-        double theta = params.empty() ? 0.0 : params[0];
+        // 获取 Expr 参数
+        const auto& exprs = gate->get_parameter_expressions();
+        const Expr& theta = exprs.empty() ? Expr(0.0) : exprs[0];
         std::vector<CircuitInstruction> result;
-        double pi_2 = M_PI / 2.0;
+        Expr pi_2 = Expr(M_PI / 2.0);
         result.emplace_back(std::make_unique<RXGate>(pi_2), std::vector<int>{qubits[0]});
         result.emplace_back(std::make_unique<RXGate>(pi_2), std::vector<int>{qubits[1]});
         result.emplace_back(std::make_unique<CNOTGate>(), std::vector<int>{qubits[0], qubits[1]});
@@ -74,8 +76,9 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> rzz_to_cnot(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
-        auto params = gate->get_parameter_values();
-        double theta = params.empty() ? 0.0 : params[0];
+        // 获取 Expr 参数
+        const auto& exprs = gate->get_parameter_expressions();
+        const Expr& theta = exprs.empty() ? Expr(0.0) : exprs[0];
         std::vector<CircuitInstruction> result;
         result.emplace_back(std::make_unique<CNOTGate>(), std::vector<int>{qubits[0], qubits[1]});
         result.emplace_back(std::make_unique<RZGate>(theta), std::vector<int>{qubits[1]});

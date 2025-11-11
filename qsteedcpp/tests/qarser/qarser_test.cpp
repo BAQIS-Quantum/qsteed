@@ -1,9 +1,12 @@
 #include <gtest/gtest.h>
+#include <string>
 #include "AST/printer.hpp"
 #include "lexer.h"
 #include "parser.h"
 #include "SA/analyzer.hpp"
 #include "AST/dag_converter.hpp"
+
+using namespace qsteedcpp;
 
 class QarserTest : public ::testing::Test {
 protected:

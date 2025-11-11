@@ -2,7 +2,7 @@
 #include "unroll/rule_manager.h"
 #include "unroll/decomposition_rules.h"
 #include "circuit/circuit_instruction.h"
-#include "QuantumCircuit/include/gates/standard_gates.h"
+#include "QuantumCircuit/gates/standard_gates.h"
 
 namespace qsteedcpp {
 
@@ -19,9 +19,9 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> h_to_rz_rx_rz(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RZGate>(Parameter(M_PI / 2.0)), qubits);
-        result.emplace_back(std::make_unique<RXGate>(Parameter(M_PI / 2.0)), qubits);
-        result.emplace_back(std::make_unique<RZGate>(Parameter(M_PI / 2.0)), qubits);
+        result.emplace_back(std::make_unique<RZGate>(Expr(M_PI / 2.0)), qubits);
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI / 2.0)), qubits);
+        result.emplace_back(std::make_unique<RZGate>(Expr(M_PI / 2.0)), qubits);
         apply_condition(inst, result);
         return result;
     }
@@ -29,7 +29,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> x_to_rx(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RXGate>(Parameter(M_PI)), qubits);
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -37,7 +37,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> y_to_ry(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RYGate>(Parameter(M_PI)), qubits);
+        result.emplace_back(std::make_unique<RYGate>(Expr(M_PI)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -45,7 +45,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> z_to_rz(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RZGate>(Parameter(M_PI)), qubits);
+        result.emplace_back(std::make_unique<RZGate>(Expr(M_PI)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -53,7 +53,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> s_to_rz(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RZGate>(Parameter(M_PI/2)), qubits);
+        result.emplace_back(std::make_unique<RZGate>(Expr(M_PI/2)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -61,7 +61,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> t_to_rz(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RZGate>(Parameter(M_PI/4)), qubits);
+        result.emplace_back(std::make_unique<RZGate>(Expr(M_PI/4)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -69,7 +69,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> sdg_to_rz(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RZGate>(Parameter(-M_PI/2)), qubits);
+        result.emplace_back(std::make_unique<RZGate>(Expr(-M_PI/2)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -77,7 +77,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> tdg_to_rz(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RZGate>(Parameter(-M_PI/4)), qubits);
+        result.emplace_back(std::make_unique<RZGate>(Expr(-M_PI/4)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -85,8 +85,9 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> phase_to_rz(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
-        auto params = gate->get_parameter_values();
-        double lambda = params.empty() ? 0.0 : params[0];
+        // 获取 Expr 参数（值语义，自动拷贝）
+        const auto& exprs = gate->get_parameter_expressions();
+        const Expr& lambda = exprs.empty() ? Expr(0.0) : exprs[0];
         std::vector<CircuitInstruction> result;
         result.emplace_back(std::make_unique<RZGate>(lambda), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
@@ -96,12 +97,13 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> rz_to_rxry(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         const auto& gate = std::get<std::unique_ptr<Gate>>(inst.operation);
-        auto params = gate->get_parameter_values();
-        double theta = params.empty() ? 0.0 : params[0];
+        // 获取 Expr 参数
+        const auto& exprs = gate->get_parameter_expressions();
+        const Expr& theta = exprs.empty() ? Expr(0.0) : exprs[0];
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RXGate>(M_PI / 2.0), qubits);
-        result.emplace_back(std::make_unique<RYGate>(-theta), qubits);
-        result.emplace_back(std::make_unique<RXGate>(-M_PI / 2.0), qubits);
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI / 2.0)), qubits);
+        result.emplace_back(std::make_unique<RYGate>(-theta), qubits);  // Expr 支持取负
+        result.emplace_back(std::make_unique<RXGate>(Expr(-M_PI / 2.0)), qubits);
         apply_condition(inst, result);
         return result;
     }
@@ -109,7 +111,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> sx_to_rx(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RXGate>(M_PI / 2.0), qubits);
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI / 2.0)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -117,7 +119,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> sxdg_to_rx(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RXGate>(-M_PI / 2.0), qubits);
+        result.emplace_back(std::make_unique<RXGate>(Expr(-M_PI / 2.0)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -125,7 +127,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> sy_to_ry(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RYGate>(M_PI / 2.0), qubits);
+        result.emplace_back(std::make_unique<RYGate>(Expr(M_PI / 2.0)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }
@@ -133,7 +135,7 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> sydg_to_ry(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RYGate>(-M_PI / 2.0), qubits);
+        result.emplace_back(std::make_unique<RYGate>(Expr(-M_PI / 2.0)), qubits);
         if (inst.condition.has_value()) { result[0].condition = inst.condition; }
         return result;
     }

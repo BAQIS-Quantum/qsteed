@@ -1,7 +1,7 @@
-#include "unroll/rules/swap_rules.h"
+#include "swap_rules.h"
 #include "unroll/rule_manager.h"
 #include "circuit/circuit_instruction.h"
-#include "QuantumCircuit/include/gates/standard_gates.h"
+#include "QuantumCircuit/gates/standard_gates.h"
 
 namespace qsteedcpp {
 
@@ -44,21 +44,21 @@ namespace { // Anonymous namespace for local helpers and rule implementations
     std::vector<CircuitInstruction> swap_to_czrxry(const CircuitInstruction& inst) {
         const auto& qubits = inst.qubits;
         std::vector<CircuitInstruction> result;
-        result.emplace_back(std::make_unique<RYGate>(M_PI / 2.0), std::vector<int>{qubits[0]});
-        result.emplace_back(std::make_unique<RXGate>(M_PI), std::vector<int>{qubits[0]});
+        result.emplace_back(std::make_unique<RYGate>(Expr(M_PI / 2.0)), std::vector<int>{qubits[0]});
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI)), std::vector<int>{qubits[0]});
         result.emplace_back(std::make_unique<CZGate>(), qubits);
-        result.emplace_back(std::make_unique<RYGate>(M_PI / 2.0), std::vector<int>{qubits[0]});
-        result.emplace_back(std::make_unique<RXGate>(M_PI), std::vector<int>{qubits[0]});
-        result.emplace_back(std::make_unique<RYGate>(M_PI / 2.0), std::vector<int>{qubits[1]});
-        result.emplace_back(std::make_unique<RXGate>(M_PI), std::vector<int>{qubits[1]});
+        result.emplace_back(std::make_unique<RYGate>(Expr(M_PI / 2.0)), std::vector<int>{qubits[0]});
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI)), std::vector<int>{qubits[0]});
+        result.emplace_back(std::make_unique<RYGate>(Expr(M_PI / 2.0)), std::vector<int>{qubits[1]});
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI)), std::vector<int>{qubits[1]});
         result.emplace_back(std::make_unique<CZGate>(), qubits);
-        result.emplace_back(std::make_unique<RYGate>(M_PI / 2.0), std::vector<int>{qubits[0]});
-        result.emplace_back(std::make_unique<RXGate>(M_PI), std::vector<int>{qubits[0]});
-        result.emplace_back(std::make_unique<RYGate>(M_PI / 2.0), std::vector<int>{qubits[1]});
-        result.emplace_back(std::make_unique<RXGate>(M_PI), std::vector<int>{qubits[1]});
+        result.emplace_back(std::make_unique<RYGate>(Expr(M_PI / 2.0)), std::vector<int>{qubits[0]});
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI)), std::vector<int>{qubits[0]});
+        result.emplace_back(std::make_unique<RYGate>(Expr(M_PI / 2.0)), std::vector<int>{qubits[1]});
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI)), std::vector<int>{qubits[1]});
         result.emplace_back(std::make_unique<CZGate>(), qubits);
-        result.emplace_back(std::make_unique<RYGate>(M_PI / 2.0), std::vector<int>{qubits[0]});
-        result.emplace_back(std::make_unique<RXGate>(M_PI), std::vector<int>{qubits[0]});
+        result.emplace_back(std::make_unique<RYGate>(Expr(M_PI / 2.0)), std::vector<int>{qubits[0]});
+        result.emplace_back(std::make_unique<RXGate>(Expr(M_PI)), std::vector<int>{qubits[0]});
         apply_condition(inst, result);
         return result;
     }

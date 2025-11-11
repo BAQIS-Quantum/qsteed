@@ -6,32 +6,26 @@ add_executable(circuit_test
     "circuit/test_circuit_drawer.cpp"
 )
 
-target_link_libraries(circuit_test
-    PRIVATE
+target_link_libraries(circuit_test PRIVATE
     GTest::gtest_main
     quantum_circuit_lib
-
-    # Eigen3::Eigen
-    # autodiff::autodiff
 )
 
-target_include_directories(circuit_test
-    PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit/include
+target_include_directories(circuit_test PUBLIC
+    "QuantumCircuit/circuit"
 )
+
 
 
 # Unroll tests
 add_executable(unroll_test
     unroll/unroll_test.cpp
-    unroll/swap_rules_test.cpp
-    unroll/two_qubit_rules_test.cpp
-    ../passes/src/unroll/decomposition_rules.cpp
-    ../passes/src/unroll/rules/controlled_rotation_rules.cpp
-    ../passes/src/unroll/rules/three_qubit_gate_rules.cpp
-    ../passes/src/unroll/rules/swap_rules.cpp
-    ../passes/src/unroll/rules/two_qubit_rules.cpp
-    ../passes/src/unroll/rules/single_qubit_rules.cpp
+    ${QSTEED_CPP_DIR}/Passes/unroll/decomposition_rules.cpp
+    ${QSTEED_CPP_DIR}/Passes/unroll/rules/controlled_rotation_rules.cpp
+    ${QSTEED_CPP_DIR}/Passes/unroll/rules/three_qubit_gate_rules.cpp
+    ${QSTEED_CPP_DIR}/Passes/unroll/rules/swap_rules.cpp
+    ${QSTEED_CPP_DIR}/Passes/unroll/rules/two_qubit_rules.cpp
+    ${QSTEED_CPP_DIR}/Passes/unroll/rules/single_qubit_rules.cpp
 )
 
 target_link_libraries(unroll_test
@@ -41,29 +35,26 @@ target_link_libraries(unroll_test
     passes_lib
 )
 
-target_include_directories(unroll_test
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/../passes
+target_include_directories(unroll_test PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit/
+    ${QSTEED_CPP_DIR}/Passes
 )
 
 
 
 # DAG/SABRE tests
 add_executable(sabre_test
-    dag/sabre_test.cpp
+    "dag/sabre_test.cpp"
 )
 
-target_link_libraries(sabre_test
-    PRIVATE
+target_link_libraries(sabre_test PRIVATE
     GTest::gtest_main
     dag_lib
     sabre_lib
     Boost::boost
 )
 
-target_include_directories(sabre_test
-    PUBLIC
+target_include_directories(sabre_test PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../DAG/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../SABRE/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../Model/include
@@ -74,8 +65,7 @@ add_executable(qarser_test
     qarser/qarser_test.cpp
 )
 
-target_link_libraries(qarser_test
-    PRIVATE
+target_link_libraries(qarser_test PRIVATE
     GTest::gtest_main
     qarser_lib
     dag_lib

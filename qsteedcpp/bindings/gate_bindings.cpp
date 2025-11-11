@@ -5,126 +5,17 @@
 #include <pybind11/numpy.h>
 #include "gates/base_gate.h"
 #include "gates/standard_gates.h"
-#include "circuit/parameter.h"
-#include "gates/matrix.h"
+
 
 namespace py = pybind11;
 using namespace qsteedcpp;
 
 void bind_gates(py::module& m) {
-    // 绑定 std::complex<double> 作为 Complex
-    py::class_<std::complex<double>>(m, "Complex")
-        .def(py::init<double, double>())
-        .def(py::init<double>())
-        .def_property("real", 
-                     [](const std::complex<double>& c) { return c.real(); },
-                     [](std::complex<double>& c, double r) { c = std::complex<double>(r, c.imag()); })
-        .def_property("imag", 
-                     [](const std::complex<double>& c) { return c.imag(); },
-                     [](std::complex<double>& c, double i) { c = std::complex<double>(c.real(), i); })
-        .def("__repr__", [](const std::complex<double>& c) {
-            return "Complex(" + std::to_string(c.real()) + ", " + std::to_string(c.imag()) + ")";
-        });
-
-    // 绑定 Matrix 类
-    py::class_<Matrix>(m, "Matrix")
-        .def(py::init<>())
-        .def(py::init<size_t, size_t>())
-        .def(py::init<const std::vector<std::vector<Complex>>&>())
-        .def("get_element", &Matrix::get_element)
-        .def("set_element", &Matrix::set_element)
-        .def("rows", &Matrix::rows)
-        .def("cols", &Matrix::cols)
-        .def("get_rows", &Matrix::get_rows)
-        .def("get_cols", &Matrix::get_cols)
-        .def("get_data", &Matrix::get_data)
-        .def("transpose", &Matrix::transpose)
-        .def("dagger", &Matrix::dagger)
-        .def("conjugate_transpose", &Matrix::conjugate_transpose)
-        .def("conjugate", &Matrix::conjugate)
-        .def("determinant", &Matrix::determinant)
-        .def("trace", &Matrix::trace)
-        .def("norm", &Matrix::norm)
-        .def("frobenius_norm", &Matrix::frobenius_norm)
-        .def("inverse", &Matrix::inverse)
-        .def("exp", &Matrix::exp)
-        .def("log", &Matrix::log)
-        .def("is_unitary", &Matrix::is_unitary)
-        .def("is_hermitian", &Matrix::is_hermitian)
-        .def("is_diagonal", &Matrix::is_diagonal)
-        .def("print", &Matrix::print)
-        .def_static("identity", &Matrix::identity)
-        .def_static("zeros", &Matrix::zeros)
-        .def_static("random", &Matrix::random)
-        .def("__mul__", [](const Matrix& a, const Matrix& b) { return a * b; })
-        .def("__add__", [](const Matrix& a, const Matrix& b) { return a + b; })
-        .def("__sub__", [](const Matrix& a, const Matrix& b) { return a - b; })
-        .def("__repr__", [](const Matrix& m) {
-            std::string result = "Matrix(" + std::to_string(m.rows()) + "x" + std::to_string(m.cols()) + ")";
-            return result;
-        });
-        // .def("to_numpy", [](const Matrix& m) {
-        //     const auto& eigen_mat = m.eigen_matrix();
-        //     auto np_array = py::array_t<Complex>({(py::ssize_t)eigen_mat.rows(), (py::ssize_t)eigen_mat.cols()});
-        //     auto np_buf = np_array.mutable_unchecked();
-
-        //     for (py::ssize_t i = 0; i < eigen_mat.rows(); ++i) {
-        //         for (py::ssize_t j = 0; j < eigen_mat.cols(); ++j) {
-        //             np_buf(i, j) = eigen_mat(i, j);
-        //         }
-        //     }
-        //     return np_array;
-        // }, "Converts the matrix to a NumPy array.");
-
-    // 绑定 Parameter 相关类
-    py::class_<Parameter>(m, "GateParameter")
-        .def(py::init<double>())
-        .def(py::init<const std::string&>())
-        .def_static("variable", &Parameter::variable)
-        .def("value", &Parameter::value)
-        .def("set_value", &Parameter::set_value)
-        .def("name", &Parameter::name)
-        .def("get_variables", &Parameter::get_variables)
-        .def("to_string", &Parameter::to_string)
-        .def("compute_gradients", &Parameter::compute_gradients)
-        // 运算符重载
-        .def("__add__", [](const Parameter& a, const Parameter& b) { return a + b; })
-        .def("__add__", [](const Parameter& a, double b) { return a + b; })
-        .def("__radd__", [](const Parameter& a, double b) { return b + a; })
-        .def("__sub__", [](const Parameter& a, const Parameter& b) { return a - b; })
-        .def("__sub__", [](const Parameter& a, double b) { return a - b; })
-        .def("__rsub__", [](const Parameter& a, double b) { return b - a; })
-        .def("__mul__", [](const Parameter& a, const Parameter& b) { return a * b; })
-        .def("__mul__", [](const Parameter& a, double b) { return a * b; })
-        .def("__rmul__", [](const Parameter& a, double b) { return b * a; })
-        .def("__truediv__", [](const Parameter& a, const Parameter& b) { return a / b; })
-        .def("__truediv__", [](const Parameter& a, double b) { return a / b; })
-        .def("__rtruediv__", [](const Parameter& a, double b) { return b / a; })
-        .def("__neg__", [](const Parameter& a) { return -a; })
-        .def("__repr__", [](const Parameter& p) {
-            return "Parameter(" + p.to_string() + ")";
-        });
-
-    // 数学函数
-    m.def("sin", [](const Parameter& p) { return sin(p); });
-    m.def("cos", [](const Parameter& p) { return cos(p); });
-    m.def("tan", [](const Parameter& p) { return tan(p); });
-    m.def("exp", [](const Parameter& p) { return exp(p); });
-    m.def("log", [](const Parameter& p) { return log(p); });
-    m.def("sqrt", [](const Parameter& p) { return sqrt(p); });
-    m.def("pow", [](const Parameter& p, double exponent) { return pow(p, exponent); });
-
-    // 绑定 Gate 基类
     py::class_<Gate>(m, "Gate")
         .def("name", &Gate::name)
         .def("get_qubit_count", &Gate::get_qubit_count)
         .def("has_parameters", &Gate::has_parameters)
         .def("parameter_count", &Gate::parameter_count)
-        .def("get_parameter", &Gate::get_parameter, py::return_value_policy::reference)
-        .def("set_parameter", &Gate::set_parameter)
-        .def("get_parameter_values", &Gate::get_parameter_values)
-        .def("get_matrix", &Gate::get_matrix)
-        .def("apply", &Gate::apply)
         .def("__repr__", [](const Gate& g) {
             return std::string(g.name()) + "Gate(" + std::to_string(g.get_qubit_count()) + " qubits)";
         });

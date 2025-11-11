@@ -37,8 +37,15 @@ public:
         return v2p; 
     }
 
-    const LayoutStructure& get_p2v() const { 
-        return p2v; 
+    const LayoutStructure& get_p2v() const {
+        return p2v;
+    }
+
+    // Get physical position assuming a hypothetical swap (without modifying layout)
+    int get_with_swap(int virt, int swap_a, int swap_b) const {
+        if (virt == swap_a) return v2p.at(swap_b);
+        if (virt == swap_b) return v2p.at(swap_a);
+        return v2p.at(virt);
     }
 
     void set_v2p( const LayoutStructure& v2p) { 
@@ -52,8 +59,14 @@ public:
     }
 
     void swap(int a, int b) {
+        int phys_a = v2p[a];
+        int phys_b = v2p[b];
+
         std::swap(v2p[a], v2p[b]);
-        _update_p2v();      
+
+        // Update only the two affected entries - O(1) instead of O(N)
+        p2v[phys_a] = b;
+        p2v[phys_b] = a;
     }
 
 
