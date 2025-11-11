@@ -1,7 +1,8 @@
 #pragma once
 #include "ast.hpp"
+#include "token.h"
 
-
+namespace qsteedcpp {
 namespace qarser {
 
     class Expression : public AstNode {
@@ -111,5 +112,5 @@ namespace qarser {
 
 
 
-
-};
+}; // namespace qarser
+}; // namespace qsteedcpp

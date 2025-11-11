@@ -1,4 +1,5 @@
 #pragma once
+#include "instructionNode.h"
 
 struct EdgeProperties 
 {

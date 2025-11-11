@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 #include "token.h"
 
+namespace qsteedcpp {
 namespace qarser {
 
 
@@ -28,3 +30,4 @@ public:
 
  
 }; // namespace qarser
+}; // namespace qsteedcpp

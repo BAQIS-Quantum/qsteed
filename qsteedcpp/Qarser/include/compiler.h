@@ -1,11 +1,12 @@
 #pragma once
-#include "preprocess.hpp"
-#include "parser.h"
-#include "SA/analyzer.hpp"
-
 #include <fstream>
 #include <sstream>
+#include "preprocess.hpp"
+#include "SA/analyzer.hpp"
+#include "AST/dag_converter.hpp"
+#include "parser.h"
 
+namespace qsteedcpp {
 namespace qarser {
     inline std::string load_qasm_from_file(const std::string& filepath) {
         std::ifstream file(filepath);
@@ -84,14 +85,7 @@ namespace qarser {
             }
             return converter.dag;
         } 
-
-
-
     };
-
-
-
-
 
     inline DAGCircuit qasm_to_dag(const std::string& source, bool from_file = false) {
         QasmCompiler qcompiler(source, from_file);
@@ -101,5 +95,5 @@ namespace qarser {
                     .get_dag();
     }
 
-
 };
+}; // namespace qsteedcpp

@@ -1,10 +1,10 @@
 #pragma once
+#include <memory>
 #include <vector>
 #include <string>
 #include "visitor.hpp"
-#include "SA/context/symbol.hpp"
 
-
+namespace qsteedcpp {
 namespace qarser {
 
     class AstNode {
@@ -142,3 +142,4 @@ namespace qarser {
 
 
 }; // namespace qarser
+}; // namespace qsteedcpp

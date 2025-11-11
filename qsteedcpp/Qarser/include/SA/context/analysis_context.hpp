@@ -2,6 +2,7 @@
 #include "symbol.hpp"
 #include "SA/error/error.hpp"
 
+namespace qsteedcpp {
 namespace qarser {
 
     class AnalysisContext {
@@ -28,4 +29,5 @@ namespace qarser {
         }
     };
 
-}
+}; // namespace qarser
+}; // namespace qsteedcpp

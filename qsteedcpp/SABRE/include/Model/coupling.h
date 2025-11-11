@@ -2,7 +2,6 @@
 #include <map>
 #include <vector>
 #include <tuple>
-#include <memory>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_utility.hpp>
 

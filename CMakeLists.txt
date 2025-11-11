@@ -1,12 +1,10 @@
 ## Project Setting
 cmake_minimum_required(VERSION 3.15...3.29)
-
-# Set vcpkg toolchain file
-
-project(sabre LANGUAGES CXX)
+project(qsteed LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -24,7 +22,6 @@ if(DEFINED ENV{CONDA_PREFIX})
 endif()
 
 if (MSVC)
-  cmake_policy(SET CMP0167 NEW)
   add_compile_options(/wd4244) # Disable warning C4244 (Conversion from 'int' to 'float', possible loss of data)
   add_compile_options(/wd4819) # Disable warning C4819 (Code page in Unicode build)
   add_definitions(-D_USE_MATH_DEFINES)
@@ -46,8 +43,14 @@ if(Boost_FOUND)
 endif()
 
 
+# 外部依赖管理
+include(cmake/Dependencies.cmake)
+set(BUILD_TESTING OFF CACHE BOOL "Disable all testing")
+
+
 # Find Graphviz
-option(BUILD_WITH_GRAPHVIZ "Build with Graphviz support" OFF)
+# option(BUILD_WITH_GRAPHVIZ "Build with Graphviz support" OFF)
+set(BUILD_WITH_GRAPHVIZ OFF CACHE BOOL "Disable Graphviz support")
 message(STATUS "BUILD_WITH_GRAPHVIZ is set to ${BUILD_WITH_GRAPHVIZ}")
 
 # set(GRAPHVIZ_ROOT "" CACHE PATH "Path to Graphviz installation")
@@ -72,28 +75,47 @@ set(QSTEED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qsteedcpp")
 set(QARSER_DIR "${QSTEED_CPP_DIR}/Qarser")
 set(SABRE_DIR "${QSTEED_CPP_DIR}/SABRE")
 set(DAG_DIR "${QSTEED_CPP_DIR}/DAG")
-set(GATES_DIR "${QSTEED_CPP_DIR}/Gates")
+set(QUANTUM_CIRCUIT_DIR "${QSTEED_CPP_DIR}/QuantumCircuit")
+set(PASSES_DIR "${QSTEED_CPP_DIR}/passes")
 
 file(GLOB_RECURSE QARSER_SOURCES "${QARSER_DIR}/*.cpp")
 file(GLOB_RECURSE SABRE_SOURCES "${SABRE_DIR}/*.cpp")
 file(GLOB_RECURSE DAG_SOURCES "${DAG_DIR}/*.cpp")
-file(GLOB_RECURSE GATES_SOURCES "${GATES_DIR}/*.cpp")
+file(GLOB_RECURSE QUANTUM_CIRCUIT_SOURCES "${QUANTUM_CIRCUIT_DIR}/*.cpp")
+file(GLOB_RECURSE PASSES_SOURCES "${PASSES_DIR}/*.cpp")
 
 include_directories(
   "${QSTEED_CPP_DIR}"
 )
 
-# 0. Build DAG module
+# 0. Build QuantumCircuit module)
+add_library(quantum_circuit_lib STATIC ${QUANTUM_CIRCUIT_SOURCES})
+target_include_directories(
+  quantum_circuit_lib
+  PUBLIC
+    "${QUANTUM_CIRCUIT_DIR}/include"
+)
+target_link_libraries(
+  quantum_circuit_lib
+  PUBLIC
+    Boost::headers
+    Eigen3::Eigen
+    autodiff::autodiff
+)
+
+# 1. Build DAG module
 add_library(dag_lib STATIC ${DAG_SOURCES})
 target_include_directories(
   dag_lib
   PUBLIC
     "${DAG_DIR}/include"
     "${SABRE_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
 )
 target_link_libraries(
   dag_lib
   PUBLIC
+    quantum_circuit_lib
     Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
@@ -102,7 +124,7 @@ endif()
 
 
 
-# 1. Build Qaser module
+# 2. Build Qarser module
 add_library(qarser_lib STATIC ${QARSER_SOURCES})
 target_include_directories(
   qarser_lib
@@ -110,7 +132,7 @@ target_include_directories(
     "${QARSER_DIR}/include"
     "${DAG_DIR}/include"
     "${SABRE_DIR}/include" 
-    "${GATES_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
 )
 target_link_libraries(
   qarser_lib
@@ -119,13 +141,14 @@ target_link_libraries(
     Boost::headers
 )
 
-# 2. Build SABRE module
+# 3. Build SABRE module
 add_library(sabre_lib STATIC ${SABRE_SOURCES})
 target_include_directories(
   sabre_lib 
   PUBLIC 
     "${SABRE_DIR}/include"
     "${DAG_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
 )    
 target_link_libraries(
   sabre_lib
@@ -136,10 +159,24 @@ target_link_libraries(
 if (BUILD_WITH_GRAPHVIZ)
     target_link_libraries(sabre_lib PRIVATE gvc cgraph)
 endif()
-# target_compile_definitions(sabre_test PRIVATE BOOST_NO_CXX98_FUNCTION_BASE)
+
+# 4. Build Passes module
+add_library(passes_lib STATIC ${PASSES_SOURCES})
+target_include_directories(
+  passes_lib
+  PUBLIC
+    "${PASSES_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
+)
+target_link_libraries(
+  passes_lib
+  PUBLIC
+    quantum_circuit_lib
+    Boost::headers
+)
 
 
-
+# Find python and pybind11
 if(SKBUILD)
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" -c
@@ -152,34 +189,21 @@ if(SKBUILD)
   set(PYBIND11_FINDPYTHON ON)
   find_package(pybind11 REQUIRED CONFIG)
 else()
-  ## --  Build Testing -- ##
   set(PYBIND11_FINDPYTHON ON)
   add_subdirectory(extern/pybind11)
-
-  add_executable(
-    qsteedcpp_test
-      # "${QSTEED_CPP_DIR}/test.cpp"
-      "${QARSER_DIR}/src/test.cpp"
-
-  )
-  target_link_libraries(
-    qsteedcpp_test PRIVATE
-      dag_lib
-      qarser_lib
-      sabre_lib
-  )
 endif()
 
-# message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
-# message(STATUS "Python Version: ${Python_VERSION}")
+message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
+message(STATUS "Python Version: ${Python_VERSION}")
 
 
 set(target qsteedcpp)
 pybind11_add_module(
   ${target}
-    ${QARSER_SOURCES}
-    ${SABRE_SOURCES}
-    "${QSTEED_CPP_DIR}/binding.cpp"
+   "${QSTEED_CPP_DIR}/bindings/binding.cpp"
+    "${QSTEED_CPP_DIR}/bindings/gate_bindings.cpp"
+    "${QSTEED_CPP_DIR}/bindings/circuit_bindings.cpp"
+    "${QSTEED_CPP_DIR}/bindings/pass_bindings.cpp"
 )
 target_include_directories(
   ${target}
@@ -187,31 +211,57 @@ target_include_directories(
     "${QARSER_DIR}/include"
     "${SABRE_DIR}/include"
     "${DAG_DIR}/include"
+    "${QUANTUM_CIRCUIT_DIR}/include"
+    "${PASSES_DIR}"
 )
 target_link_libraries(
   ${target} 
   PRIVATE 
+    quantum_circuit_lib
     dag_lib
     sabre_lib 
     qarser_lib
+    passes_lib
     pybind11::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
   target_link_libraries(${target} PRIVATE gvc cgraph)
 endif()
 
-install(TARGETS ${target} LIBRARY DESTINATION .)
+# install(TARGETS ${target} LIBRARY DESTINATION qsteed/passes/mapping/cpp_utils)
+install(TARGETS ${target} LIBRARY DESTINATION qsteed)
+
+# Generate Stub
+if(SKBUILD)
+    # Generate a single .pyi file
+    add_custom_command(
+        TARGET ${target} POST_BUILD
+        COMMAND ${PYTHON_EXECUTABLE} -m pybind11_stubgen ${target} -o ${CMAKE_CURRENT_BINARY_DIR}/stubs/
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating type stubs for ${target} module"
+        VERBATIM
+    )
+    
+    # Install the generated .pyi stub file alongside the .so file
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stubs/${target}.pyi 
+            DESTINATION passes/mapping/cpp_utils
+            OPTIONAL)
+endif()
 
 
 ## -- Module Testing -- ##
-option(BUILD_TESTS "Build test programs" OFF)
-message(STATUS "BUILD_TESTS is set to ${BUILD_TESTS}")
+if(SKBUILD)
+    option(BUILD_CPP_TESTS "Build C++ test programs" OFF)
+else()
+    option(BUILD_CPP_TESTS "Build C++ test programs" ON)
+endif()
 
-if(BUILD_TESTS)
+message(STATUS "BUILD_CPP_TESTS is set to ${BUILD_CPP_TESTS}")
+
+if(BUILD_CPP_TESTS)
+    message(STATUS "Building C++ tests...")
     enable_testing()
     
-    # Google Test
-    include(FetchContent)
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
@@ -220,8 +270,7 @@ if(BUILD_TESTS)
     FetchContent_MakeAvailable(googletest)
     
     # Test Modules
-    add_subdirectory(${QSTEED_CPP_DIR}/Gates/tests)
-    # add_subdirectory(Qarser/tests)
-    # add_subdirectory(DAG/tests)
-    # add_subdirectory(SABRE/tests)
+    add_subdirectory(qsteedcpp/tests)
+else()
+    message(STATUS "Skipping C++ tests.")
 endif()

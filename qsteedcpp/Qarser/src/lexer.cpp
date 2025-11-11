@@ -1,7 +1,7 @@
 #include <cctype>
-#include <stdexcept> 
 #include "lexer.h"
 
+namespace qsteedcpp {
 namespace qarser {
 
 QasmLexer::QasmLexer(const std::string& source) 
@@ -202,4 +202,5 @@ const std::unordered_map<std::string, TokenType> QasmLexer::keywords {
     {"ln",        TokenType::LN}
 };
 
-};
+}; // namespace qarser
+}; // namespace qsteedcpp

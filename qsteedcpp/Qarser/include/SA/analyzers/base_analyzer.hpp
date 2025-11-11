@@ -1,9 +1,8 @@
 #pragma once    
-#include "AST/ast.hpp"
-#include "SA/context/symbol.hpp"
+#include "AST/visitor.hpp"
 #include "SA/context/analysis_context.hpp"
-#include "SA/error/error.hpp"
 
+namespace qsteedcpp {
 namespace qarser {
 
     class BaseAnalyzer : public BaseVisitor {
@@ -13,8 +12,7 @@ namespace qarser {
     protected:
         explicit BaseAnalyzer(AnalysisContext& context) 
             : context(context) {}
-
-        
     };
 
 }; 
+}; // namespace qsteedcpp

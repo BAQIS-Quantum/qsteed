@@ -1,8 +1,8 @@
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import DAGCircuit as Cpp_DAGCircuit
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import InstructionNode as Cpp_InstructionNode
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import Parameter as Cpp_Parameter
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import ParameterType as Cpp_ParameterType
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import OperatorType
+from qsteed.qsteedcpp import DAGCircuit as Cpp_DAGCircuit
+from qsteed.qsteedcpp import InstructionNode as Cpp_InstructionNode
+from qsteed.qsteedcpp import Parameter as Cpp_Parameter
+from qsteed.qsteedcpp import ParameterType as Cpp_ParameterType
+from qsteed.qsteedcpp import OperatorType
 
 
 from quafu import QuantumCircuit
@@ -41,17 +41,18 @@ def QuantumCircuit_to_cppDag(circuit: QuantumCircuit) -> Cpp_DAGCircuit:
     return dag
 
 
-def cppDag_to_QuantumCircuit(dag: Cpp_DAGCircuit) -> QuantumCircuit:
+def cppDag_to_QuantumCircuit(dag: Cpp_DAGCircuit, num_qubits: int) -> QuantumCircuit:
     """
     Converts a Cpp_DAGCircuit to a QuantumCircuit.
 
     Args:
         dag (Cpp_DAGCircuit): The Cpp_DAGCircuit object to be converted.
+        num_qubits (int): The number of qubits for the output circuit.
 
     Returns:
         QuantumCircuit: The converted QuantumCircuit object.
     """
-    q_circuit = QuantumCircuit(len(dag.get_qubits_used()))
+    q_circuit = QuantumCircuit(num_qubits)
     for vertex in dag.vertices():
         if dag.graph[vertex].name == "start" or dag.graph[vertex].name == "end":
             continue

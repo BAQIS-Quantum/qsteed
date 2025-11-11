@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <unordered_map>
 #include <string>
-#include <stdexcept>
 
 namespace sabre {
 
@@ -12,6 +11,15 @@ namespace sabre {
     using node_pos_t = uint64_t;
     using edge_pos_t = std::pair<node_pos_t, node_pos_t>;
     using SwapPos = std::pair<int, int>;
+
+    struct SwapPosHash {
+        template <class T1, class T2>
+        std::size_t operator() (const std::pair<T1, T2> &p) const {
+            auto h1 = std::hash<T1>{}(p.first);
+            auto h2 = std::hash<T2>{}(p.second);
+            return h1 ^ (h2 << 1);
+        }
+    };
 
     using RawLayout = std::unordered_map<int, int>;
 

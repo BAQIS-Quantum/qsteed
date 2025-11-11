@@ -1,10 +1,10 @@
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import DAGCircuit as Cpp_DAGCircuit
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import InstructionNode as Cpp_InstructionNode
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import MeasureNode as Cpp_MeasureNode
+from qsteed.qsteedcpp import DAGCircuit as Cpp_DAGCircuit
+from qsteed.qsteedcpp import InstructionNode as Cpp_InstructionNode
+from qsteed.qsteedcpp import MeasureNode as Cpp_MeasureNode
 
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import EdgeProperties
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import ParameterType as Cpp_ParameterType
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import Parameter as Cpp_Parameter
+from qsteed.qsteedcpp import EdgeProperties
+from qsteed.qsteedcpp import ParameterType as Cpp_ParameterType
+from qsteed.qsteedcpp import Parameter as Cpp_Parameter
 
 from qsteed.dag.dagcircuit import DAGCircuit
 from qsteed.dag.instruction_node import InstructionNode 

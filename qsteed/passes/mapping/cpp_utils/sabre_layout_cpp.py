@@ -1,5 +1,5 @@
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import SabreLayout as Cpp_SabreLayout
-from qsteed.passes.mapping.cpp_utils.qsteedcpp import CouplingCircuit as Cpp_CouplingCircuit
+from qsteed.qsteedcpp import SabreLayout as Cpp_SabreLayout
+from qsteed.qsteedcpp import CouplingCircuit as Cpp_CouplingCircuit
 from typing import Union
 from .dag_converter import *
 from .qc_converter import *
@@ -149,8 +149,14 @@ class SabreLayout(BasePass):
         )
 
         # Run
-        optimized_circuit = self._sabre_layout.run(circuit)
-        optimized_circuit = cppDag_to_QuantumCircuit(optimized_circuit)
+        optimized_circuit_dag = self._sabre_layout.run(circuit)
+
+        all_qubits = set(optimized_circuit_dag.get_qubits_used())
+        if optimized_circuit_dag.measure:
+            all_qubits.update(optimized_circuit_dag.measure.keys())
+        num_qubits = max(all_qubits) + 1 if all_qubits else 0
+
+        optimized_circuit = cppDag_to_QuantumCircuit(optimized_circuit_dag, num_qubits)
 
         self.model._layout["initial_layout"] = Layout(self._sabre_layout.get_model().initial_layout.get_v2p())
         self.model._layout["final_layout"] = Layout(self._sabre_layout.get_model().final_layout.get_v2p())

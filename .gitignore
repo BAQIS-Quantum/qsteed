@@ -129,3 +129,8 @@ venv.bak/
 
 # Cython debug symbols
 cython_debug/
+
+
+# AI assistant files
+.gemini/
+.claude/

@@ -1,6 +1,6 @@
 [build-system]
-requires = ["scikit-build", "setuptools>=42", "wheel", "pybind11", "cmake"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core", "cmake", "ninja", "pybind11", "pybind11-stubgen"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "qsteed"
@@ -9,7 +9,7 @@ description = "Quantum Software of Compilation for supporting Real Quantum devic
 authors = [
     {name = "Xuhongze", email = "xhzby1995@163.com"}
 ]
-license = {text = "Apache-2.0 License"}
+license = "Apache-2.0"
 keywords = ["qsteed", "quantum compiling", "quantum computing", "quantum operating system"]
 requires-python = ">=3.10"
 
@@ -22,11 +22,12 @@ Documentation = "https://github.com/BAQIS-Quantum/QSteed/wiki"
 Source = "https://github.com/BAQIS-Quantum/QSteed"
 Issues = "https://github.com/BAQIS-Quantum/QSteed/issues"
 
-[tool.setuptools.packages.find]
-include = ["qsteed", "qsteed.*"]
+[project.scripts]
+qsteed-config = "qsteed.qsteed_config:copy_config"
+qsteed-build-db = "qsteed.first_build_db:first_build_db"
 
-[tool.setuptools]
-include-package-data = true
+[tool.skbuild]
+cmake.args = ["-DBUILD_WITH_GRAPHVIZ=OFF"]
 
 [tool.setuptools.dynamic]
 version = {file = "qsteed/VERSION.txt"}
@@ -45,8 +46,4 @@ repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 
 [tool.cibuildwheel.windows]
-repair-wheel-command = "copy {wheel} {dest_dir}"
-
-[project.scripts]
-qsteed-config = "qsteed.qsteed_config:copy_config"
-qsteed-build-db = "qsteed.first_build_db:first_build_db"
+repair-wheel-command = "cp {wheel} {dest_dir}/."

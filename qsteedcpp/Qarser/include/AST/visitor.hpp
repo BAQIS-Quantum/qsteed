@@ -1,5 +1,6 @@
 #pragma once
 
+namespace qsteedcpp {
 namespace qarser {
 
     class Program;
@@ -60,5 +61,5 @@ namespace qarser {
     };
 
 
-
 }; // namespace qarser
+}; // namespace qsteedcpp

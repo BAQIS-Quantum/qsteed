@@ -1,7 +1,9 @@
 #pragma once
 #include "base_analyzer.hpp"
+#include "AST/gate.hpp"
 
 
+namespace qsteedcpp {
 namespace qarser {
 
     class DeclarationAnalyzer : public BaseAnalyzer {
@@ -32,3 +34,4 @@ namespace qarser {
     };
 
 }; // namespace qarser
+}; // namespace qsteedcpp

@@ -1,7 +1,9 @@
 #pragma once
 #include <iostream>
 #include "ast.hpp"
+#include "gate.hpp"
 
+namespace qsteedcpp {
 namespace qarser {
 
 class AstPrinter: public BaseVisitor {
@@ -195,5 +197,5 @@ public:
 
 
 
-
-};
+}; // namespace qarser
+}; // namespace qsteedcpp"

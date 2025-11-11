@@ -1,5 +1,4 @@
-﻿#include <set>
-#include <boost/graph/reverse_graph.hpp>
+﻿#include <boost/graph/reverse_graph.hpp>
 #include <boost/graph/copy.hpp>
 #include <boost/graph/graph_utility.hpp>
 // #include "DAG/dag.h"

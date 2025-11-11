@@ -3,7 +3,7 @@
 #include <string>
 
 
-
+namespace qsteedcpp {
 namespace qarser {
 
     class GateScopeSymbol {
@@ -65,4 +65,5 @@ namespace qarser {
         }
     };
 
-}
+}; // namespace qarser
+}; // namespace qsteedcpp
