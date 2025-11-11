@@ -37,6 +37,7 @@ dependencies = {file = "requirements.txt"}
 [tool.cibuildwheel]
 manylinux-x86_64-image = "manylinux2014"
 manylinux-i686-image = "manylinux2014"
+build = "cp310-win_amd64 cp311-win_amd64 cp312-win_amd64"
 
 [tool.cibuildwheel.linux]
 repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
