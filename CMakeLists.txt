@@ -11,9 +11,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Set CMake module path to include custom modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-
 # Add conda environment paths
 if(DEFINED ENV{CONDA_PREFIX})
   message(STATUS "Detected conda env: $ENV{CONDA_PREFIX}")
@@ -90,36 +87,26 @@ include_directories(
 
 # 0. Build QuantumCircuit module)
 add_library(quantum_circuit_lib STATIC ${QUANTUM_CIRCUIT_SOURCES})
-target_include_directories(
-  quantum_circuit_lib
-  PUBLIC
+target_include_directories( quantum_circuit_lib PUBLIC
     "${QUANTUM_CIRCUIT_DIR}"
 )
-target_link_libraries(
-  quantum_circuit_lib
-  PUBLIC
-    Boost::headers
-    # Eigen3::Eigen
-    # autodiff::autodiff
-)
+# target_link_libraries( quantum_circuit_lib PUBLIC
+#   Boost::headers
+# )
 
 # 1. Build DAG module
 add_library(dag_lib STATIC ${DAG_SOURCES})
-target_include_directories(
-  dag_lib
-  PUBLIC
-    "${DAG_DIR}/include"
-    "${SABRE_DIR}/include"
-    "${QUANTUM_CIRCUIT_DIR}"
+target_include_directories( dag_lib PUBLIC
+  "${DAG_DIR}/include"
+  "${SABRE_DIR}/include"
+  "${QUANTUM_CIRCUIT_DIR}"
 )
-target_link_libraries(
-  dag_lib
-  PUBLIC
-    quantum_circuit_lib
-    Boost::headers
+target_link_libraries( dag_lib PUBLIC
+  quantum_circuit_lib
+  Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
-    target_link_libraries(dag_lib PRIVATE gvc cgraph)
+  target_link_libraries(dag_lib PRIVATE gvc cgraph)
 endif()
 
 
@@ -134,43 +121,33 @@ target_include_directories(
     "${SABRE_DIR}/include" 
     "${QUANTUM_CIRCUIT_DIR}"
 )
-target_link_libraries(
-  qarser_lib
-  PUBLIC
+target_link_libraries( qarser_lib PUBLIC
     dag_lib
     Boost::headers
 )
 
 # 3. Build SABRE module
 add_library(sabre_lib STATIC ${SABRE_SOURCES})
-target_include_directories(
-  sabre_lib
-  PUBLIC
-    "${SABRE_DIR}"
-    "${DAG_DIR}/include"
-    "${QUANTUM_CIRCUIT_DIR}"
+target_include_directories( sabre_lib PUBLIC
+  "${SABRE_DIR}"
+  "${DAG_DIR}/include"
+  "${QUANTUM_CIRCUIT_DIR}"
 )    
-target_link_libraries(
-  sabre_lib
-  PUBLIC
-    dag_lib
-    Boost::headers
+target_link_libraries( sabre_lib PUBLIC
+  dag_lib
+  Boost::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
-    target_link_libraries(sabre_lib PRIVATE gvc cgraph)
+  target_link_libraries(sabre_lib PRIVATE gvc cgraph)
 endif()
 
 # 4. Build Passes module
 add_library(passes_lib STATIC ${PASSES_SOURCES})
-target_include_directories(
-  passes_lib
-  PUBLIC
+target_include_directories( passes_lib PUBLIC
     "${PASSES_DIR}"
     "${QUANTUM_CIRCUIT_DIR}"
 )
-target_link_libraries(
-  passes_lib
-  PUBLIC
+target_link_libraries( passes_lib PUBLIC
     quantum_circuit_lib
     Boost::headers
 )
@@ -198,31 +175,26 @@ message(STATUS "Python Version: ${Python_VERSION}")
 
 
 set(target qsteedcpp)
-pybind11_add_module(
-  ${target}
-   "${QSTEED_CPP_DIR}/bindings/binding.cpp"
-    "${QSTEED_CPP_DIR}/bindings/gate_bindings.cpp"
-    "${QSTEED_CPP_DIR}/bindings/circuit_bindings.cpp"
-    "${QSTEED_CPP_DIR}/bindings/pass_bindings.cpp"
+pybind11_add_module( ${target}
+  "${QSTEED_CPP_DIR}/bindings/binding.cpp"
+  "${QSTEED_CPP_DIR}/bindings/gate_bindings.cpp"
+  "${QSTEED_CPP_DIR}/bindings/circuit_bindings.cpp"
+  "${QSTEED_CPP_DIR}/bindings/pass_bindings.cpp"
 )
-target_include_directories(
-  ${target}
-  PUBLIC
-    "${QARSER_DIR}/include"
-    "${SABRE_DIR}/include"
-    "${DAG_DIR}/include"
-    "${QUANTUM_CIRCUIT_DIR}"
-    "${PASSES_DIR}"
+target_include_directories( ${target} PUBLIC
+  "${QARSER_DIR}/include"
+  "${SABRE_DIR}/include"
+  "${DAG_DIR}/include"
+  "${QUANTUM_CIRCUIT_DIR}"
+  "${PASSES_DIR}"
 )
-target_link_libraries(
-  ${target} 
-  PRIVATE 
-    quantum_circuit_lib
-    dag_lib
-    sabre_lib 
-    qarser_lib
-    passes_lib
-    pybind11::headers
+target_link_libraries( ${target}  PRIVATE 
+  quantum_circuit_lib
+  dag_lib
+  sabre_lib 
+  qarser_lib
+  passes_lib
+  pybind11::headers
 )
 if (BUILD_WITH_GRAPHVIZ)
   target_link_libraries(${target} PRIVATE gvc cgraph)
@@ -244,8 +216,11 @@ if(SKBUILD)
     
     # Install the generated .pyi stub file alongside the .so file
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stubs/${target}.pyi 
-            DESTINATION passes/mapping/cpp_utils
-            OPTIONAL)
+            DESTINATION qsteed
+            OPTIONAL
+    )
+
+    message(STATUS "Successfully installed .pyi file")
 endif()
 
 

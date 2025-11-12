@@ -4,11 +4,11 @@
 #include "Model/model.h"
 #include "Model/coupling.h"
 #include "Model/layout.h"
+#include "sabre_core.h"
 #include "sabre_layout.h"
 #include "sabre_routing.h"
 #include "dag.h"
 #include "parameter.h"
-#include "parser.h"
 #include "compiler.h"
 
 namespace py = pybind11;
@@ -29,6 +29,11 @@ PYBIND11_MODULE(qsteedcpp, m) {
     bind_quantum_circuit(m);
     
     bind_passes(m);
+
+    py::enum_<Heuristic>(m, "Heuristic")
+        .value("FIDELITY", Heuristic::FIDELITY)
+        .value("DISTANCE", Heuristic::DISTANCE)
+        .value("MIXTURE", Heuristic::MIXTURE);
 
     py::class_<SabreLayout>(m, "SabreLayout")
         .def(py::init<const CouplingCircuit&>())
@@ -182,9 +187,7 @@ PYBIND11_MODULE(qsteedcpp, m) {
         .def_readwrite("tunable", &Parameter::tunable);
 
 
-    py::class_<qarser::Parser>(m, "Parser")
-        .def(py::init<const std::string&>())
-        .def("parse", &qarser::Parser::parse);
+
 
     py::class_<qarser::QasmCompiler>(m, "QasmCompiler")
         .def(py::init<const std::string&, bool>())

@@ -95,8 +95,6 @@ void bind_quantum_circuit(py::module& m) {
         .def("num_clbits", &QuantumCircuit::num_clbits)
         .def("num_gates", &QuantumCircuit::num_gates)
         .def("size", &QuantumCircuit::size, "Returns the total number of instructions in the circuit.")
-
-        // Add the new binding here
        
         // Method to get all instructions
         .def("get_instructions", &QuantumCircuit::get_instructions, 

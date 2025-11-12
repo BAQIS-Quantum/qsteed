@@ -91,7 +91,6 @@ namespace qsteedcpp {
         }
         void add_gate(std::unique_ptr<Gate> gate, const std::vector<int>& qubits);
 
-        // 收集电路中所有唯一的参数 UUID（用于后端）
         std::set<std::string> get_all_parameter_uuids() const;
 
         void print() const;

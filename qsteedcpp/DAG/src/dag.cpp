@@ -1,7 +1,6 @@
 #include "dag.h"
 
 
-
 void DAGCircuit::add_instruction_node_end(const InstructionNode& node) {
     if (!this->empty()) {
         const node_pos_t node_index = add_node(node);

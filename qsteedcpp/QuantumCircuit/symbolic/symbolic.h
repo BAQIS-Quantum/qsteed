@@ -7,24 +7,19 @@
 
 namespace qsteedcpp {
 
-// ========== 符号计算系统（SymPy 风格 + 值类型包装）==========
+// ========== 符号计算系统 ==========
 //
 // 设计理念：
 // 1. 内部：Expression 继承体系（Constant, Parameter, BinaryOp, UnaryOp）
 // 2. 外部：Expr 值类型包装器（用户友好，隐藏指针）
-//
-// 使用示例：
-//   Parameter theta(true);          // 创建参数
-//   Expr angle = theta * 2 + 0.5;   // 值语义！
-//   qc.rx(angle, 0);                // 直接传值
 
 // 前向声明
 class Expression;
 class Parameter;
 class Expr;
 
-// ========== 1. Expression：表达式基类（内部实现）==========
 
+// ========== 1. Expression System ==========
 class Expression {
 public:
     virtual ~Expression() = default;
@@ -43,9 +38,7 @@ public:
     virtual std::shared_ptr<Expression> clone() const = 0;
 };
 
-// ========== 2. Expression 子类（内部实现）==========
 
-// 2.1 Constant：常量表达式
 class Constant : public Expression {
 private:
     double value_;
@@ -70,7 +63,7 @@ public:
     }
 };
 
-// 2.2 Parameter：参数表达式
+
 class Parameter : public Expression {
 private:
     std::string uuid_;
@@ -135,7 +128,6 @@ public:
         return value_ >= other.value_;
     }
 
-    // 哈希支持（基于 UUID，用于容器）
     struct Hash {
         std::size_t operator()(const Parameter& param) const {
             return std::hash<std::string>{}(param.get_uuid());
@@ -143,7 +135,7 @@ public:
     };
 };
 
-// 2.3 BinaryOp：二元运算表达式
+
 class BinaryOp : public Expression {
 private:
     std::shared_ptr<Expression> left_;
@@ -180,7 +172,7 @@ public:
     }
 };
 
-// 2.4 UnaryOp：一元运算表达式
+
 class UnaryOp : public Expression {
 private:
     std::shared_ptr<Expression> operand_;

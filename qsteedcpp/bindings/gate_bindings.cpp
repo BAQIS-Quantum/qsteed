@@ -4,7 +4,6 @@
 #include <pybind11/complex.h>
 #include <pybind11/numpy.h>
 #include "gates/base_gate.h"
-#include "gates/standard_gates.h"
 
 
 namespace py = pybind11;
@@ -20,38 +19,4 @@ void bind_gates(py::module& m) {
             return std::string(g.name()) + "Gate(" + std::to_string(g.get_qubit_count()) + " qubits)";
         });
 
-    // 绑定具体的门类
-    py::class_<HGate, Gate>(m, "HGate")
-        .def(py::init<>());
-
-    py::class_<XGate, Gate>(m, "XGate")
-        .def(py::init<>());
-
-    py::class_<YGate, Gate>(m, "YGate")
-        .def(py::init<>());
-
-    py::class_<ZGate, Gate>(m, "ZGate")
-        .def(py::init<>());
-
-    py::class_<RXGate, Gate>(m, "RXGate")
-        .def(py::init<const Parameter&>());
-
-    py::class_<RYGate, Gate>(m, "RYGate")
-        .def(py::init<const Parameter&>());
-
-    py::class_<RZGate, Gate>(m, "RZGate")
-        .def(py::init<const Parameter&>());
-
-    py::class_<CNOTGate, Gate>(m, "CNOTGate")
-        .def(py::init<>());
-
-    // 绑定便捷的工厂函数
-    m.def("H", &H);
-    m.def("X", &X);
-    m.def("Y", &Y);
-    m.def("Z", &Z);
-    m.def("RX", &RX);
-    m.def("RY", &RY);
-    m.def("RZ", &RZ);
-    m.def("CNOT", &CNOT);
 }

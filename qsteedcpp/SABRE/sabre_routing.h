@@ -32,7 +32,6 @@ namespace sabre {
             : c_circuit(c_circuit) {}
         SabreRouting(const CouplingCircuit& c_circuit, const Heuristic& heuristic)
             : c_circuit(c_circuit), heuristic(heuristic) {}
-        // SabreRouting() = default;
 
         void set_model(Model& model) { 
             this->model = std::make_shared<Model>(model); 
