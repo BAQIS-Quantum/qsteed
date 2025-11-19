@@ -1,11 +1,11 @@
 #pragma once
 #include <string>
 #include "sabre_core.h"
-#include "Model/coupling.h"
-#include "Model/model.h"
-#include "Model/layout.h"
+#include "model/coupling.h"
+#include "model/model.h"
+#include "model/layout.h"
 #include "sabre_routing.h"
-#include "dag.h" 
+#include "DAG/dag.h" 
 
 namespace sabre {
 

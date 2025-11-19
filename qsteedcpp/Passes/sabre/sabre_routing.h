@@ -3,10 +3,10 @@
 #include <cmath>
 #include <unordered_set>
 #include "sabre_core.h"
-#include "Model/model.h"
-#include "Model/coupling.h"
-#include "Model/layout.h"
-#include "dag.h"
+#include "model/model.h"
+#include "model/coupling.h"
+#include "model/layout.h"
+#include "DAG/dag.h"
 
 namespace sabre {
 

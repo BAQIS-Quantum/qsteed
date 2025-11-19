@@ -2,7 +2,7 @@
 #include "AST/ast.hpp"
 #include "AST/gate.hpp"
 #include "AST/visitor.hpp"
-#include "dag.h"
+#include "DAG/dag.h"
 #include <unordered_set>
 
 namespace qsteedcpp {;

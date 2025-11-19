@@ -2,7 +2,8 @@
 #include <boost/graph/floyd_warshall_shortest.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include "coupling.h"
-#include "visualization.h"
+#include "DAG/vis/visualization.h"
+
 
 
 CouplingCircuit::CouplingCircuit(CouplingList c_list) : c_list(c_list) {

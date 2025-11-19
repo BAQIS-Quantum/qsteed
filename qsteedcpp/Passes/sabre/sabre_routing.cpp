@@ -1,4 +1,3 @@
-#include <sabre_routing.h>
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
@@ -7,8 +6,8 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
-#include "Model/layout.h"
-#include "sabre_routing.h"
+#include "sabre/model/layout.h"
+#include "sabre/sabre_routing.h"
 
 #include "vendor/prettyprint.hpp"
 

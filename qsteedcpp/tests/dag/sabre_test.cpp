@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <boost/graph/graph_utility.hpp>
 #include <iostream>
-#include "sabre_layout.h"
-#include "dag.h"
-#include "Model/coupling.h"
+#include "sabre/sabre_layout.h"
+#include "DAG/dag.h"
+#include "sabre/model/coupling.h"
 
 class SabreTest : public ::testing::Test {
 protected:

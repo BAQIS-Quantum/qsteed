@@ -15,8 +15,6 @@ target_include_directories(circuit_test PUBLIC
     "QuantumCircuit/circuit"
 )
 
-
-
 # Unroll tests
 add_executable(unroll_test
     unroll/unroll_test.cpp
@@ -42,22 +40,20 @@ target_include_directories(unroll_test PUBLIC
 
 
 
-# DAG/SABRE tests
+# SABRE tests
 add_executable(sabre_test
     "dag/sabre_test.cpp"
 )
 
 target_link_libraries(sabre_test PRIVATE
     GTest::gtest_main
-    dag_lib
-    sabre_lib
+    passes_lib
     Boost::boost
 )
 
 target_include_directories(sabre_test PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/../DAG/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../SABRE/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../Model/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Passes
 )
 
 # Qarser tests
@@ -68,7 +64,7 @@ add_executable(qarser_test
 target_link_libraries(qarser_test PRIVATE
     GTest::gtest_main
     qarser_lib
-    dag_lib
+    quantum_circuit_lib
 )
 
 target_include_directories(qarser_test

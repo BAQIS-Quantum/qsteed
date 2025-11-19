@@ -8,16 +8,12 @@
 namespace qsteedcpp {
 
 // ========== 符号计算系统 ==========
-//
-// 设计理念：
 // 1. 内部：Expression 继承体系（Constant, Parameter, BinaryOp, UnaryOp）
 // 2. 外部：Expr 值类型包装器（用户友好，隐藏指针）
 
-// 前向声明
 class Expression;
 class Parameter;
 class Expr;
-
 
 // ========== 1. Expression System ==========
 class Expression {
@@ -239,7 +235,6 @@ public:
     }
 
     // ========== 运算符重载（友元，返回 Expr 值类型）==========
-
     // 加法
     friend Expr operator+(const Expr& lhs, const Expr& rhs) {
         auto node = std::make_shared<BinaryOp>(lhs.expr_, rhs.expr_, "+");
@@ -341,5 +336,6 @@ public:
         return Expr(node);
     }
 };
+
 
 } // namespace qsteedcpp

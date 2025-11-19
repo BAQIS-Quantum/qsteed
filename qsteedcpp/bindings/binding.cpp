@@ -1,14 +1,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "Model/backend.h"
-#include "Model/model.h"
-#include "Model/coupling.h"
-#include "Model/layout.h"
-#include "sabre_core.h"
-#include "sabre_layout.h"
-#include "sabre_routing.h"
-#include "dag.h"
-#include "parameter.h"
+#include "sabre/model/backend.h"
+#include "sabre/model/model.h"
+#include "sabre/model/coupling.h"
+#include "sabre/model/layout.h"
+#include "sabre/sabre_core.h"
+#include "sabre/sabre_layout.h"
+#include "sabre/sabre_routing.h"
+#include "DAG/dag.h"
+#include "DAG/parameter.h"
 #include "compiler.h"
 
 namespace py = pybind11;
