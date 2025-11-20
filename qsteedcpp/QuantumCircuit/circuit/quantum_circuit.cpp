@@ -56,6 +56,10 @@ void QuantumCircuit::rx(const Expr& theta, int qubit) {
     add_gate(std::make_unique<RXGate>(theta), {qubit});
 }
 
+void QuantumCircuit::rx(const Parameter& theta, int qubit) {
+    add_gate(std::make_unique<RXGate>(Expr(theta)), {qubit});
+}
+
 void QuantumCircuit::rx(double theta, int qubit) {
     add_gate(std::make_unique<RXGate>(Expr(theta)), {qubit});
 }
@@ -64,12 +68,20 @@ void QuantumCircuit::ry(const Expr& phi, int qubit) {
     add_gate(std::make_unique<RYGate>(phi), {qubit});
 }
 
+void QuantumCircuit::ry(const Parameter& phi, int qubit) {
+    add_gate(std::make_unique<RYGate>(Expr(phi)), {qubit});
+}
+
 void QuantumCircuit::ry(double phi, int qubit) {
     add_gate(std::make_unique<RYGate>(Expr(phi)), {qubit});
 }
 
 void QuantumCircuit::rz(const Expr& lambda, int qubit) {
     add_gate(std::make_unique<RZGate>(lambda), {qubit});
+}
+
+void QuantumCircuit::rz(const Parameter& lambda, int qubit) {
+    add_gate(std::make_unique<RZGate>(Expr(lambda)), {qubit});
 }
 
 void QuantumCircuit::rz(double lambda, int qubit) {
@@ -142,6 +154,10 @@ void QuantumCircuit::toffoli(int control1, int control2, int target) {
 
 void QuantumCircuit::p(const Expr& lambda, int qubit) {
     add_gate(std::make_unique<PhaseGate>(lambda), {qubit});
+}
+
+void QuantumCircuit::p(const Parameter& lambda, int qubit) {
+    add_gate(std::make_unique<PhaseGate>(Expr(lambda)), {qubit});
 }
 
 void QuantumCircuit::p(double lambda, int qubit) {

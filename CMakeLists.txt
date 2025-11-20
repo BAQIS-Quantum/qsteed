@@ -100,7 +100,7 @@ target_include_directories(
   qarser_lib
   PUBLIC
     "${QUANTUM_CIRCUIT_DIR}"
-    "${QARSER_DIR}/include"
+    "${QARSER_DIR}"
 )
 target_link_libraries( qarser_lib PUBLIC
     Boost::headers
@@ -119,7 +119,7 @@ target_link_libraries( passes_lib PUBLIC
 )
 
 
-# Find python and pybind11
+# Find python and pybind11 FIRST (before Torch to avoid Python finding issues)
 if(SKBUILD)
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" -c
@@ -140,29 +140,83 @@ message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
 message(STATUS "Python Version: ${Python_VERSION}")
 
 
+# 4. Optional Torch Backend (AFTER pybind11 to avoid Python finding conflicts)
+# Auto-detect torch if available (for pip install qsteed[torch])
+option(BUILD_TORCH_BACKEND "Build Torch backend" OFF)
+
+# For non-SKBUILD mode, add extern/libtorch to search path
+if(NOT SKBUILD AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/extern/libtorch")
+    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/extern/libtorch")
+endif()
+
+# Try to find Torch (will succeed if user did pip install qsteed[torch])
+find_package(Torch QUIET)
+
+if(BUILD_TORCH_BACKEND OR Torch_FOUND)
+    if(Torch_FOUND)
+        message(STATUS "=== Torch detected, building Torch Backend ===")
+        message(STATUS "  - Torch version: ${Torch_VERSION}")
+        message(STATUS "  - Torch libraries: ${TORCH_LIBRARIES}")
+
+        set(BUILD_TORCH_BACKEND ON)  # Set BEFORE add_subdirectory
+        add_subdirectory(qsteedcpp/backends)
+        set(TORCH_BACKEND_BINDINGS "${QSTEED_CPP_DIR}/backends/torch/bindings.cpp")
+    else()
+        message(STATUS "BUILD_TORCH_BACKEND=ON but Torch not found!")
+        message(FATAL_ERROR "Please install PyTorch: pip install torch")
+    endif()
+else()
+    message(STATUS "=== Torch not found, skipping Torch Backend ===")
+    message(STATUS "  To enable: pip install qsteed[torch]")
+    set(TORCH_BACKEND_BINDINGS "")
+endif()
+
+
 set(target qsteedcpp)
 pybind11_add_module( ${target}
   "${QSTEED_CPP_DIR}/bindings/binding.cpp"
   "${QSTEED_CPP_DIR}/bindings/gate_bindings.cpp"
   "${QSTEED_CPP_DIR}/bindings/circuit_bindings.cpp"
   "${QSTEED_CPP_DIR}/bindings/pass_bindings.cpp"
+  "${QSTEED_CPP_DIR}/bindings/expression_bindings.cpp"
+  ${TORCH_BACKEND_BINDINGS}
 )
 target_include_directories( ${target} PUBLIC
   "${QUANTUM_CIRCUIT_DIR}"
   "${PASSES_DIR}"
-  "${QARSER_DIR}/include"
+  "${QARSER_DIR}"
 )
-target_link_libraries( ${target}  PRIVATE 
+target_link_libraries( ${target}  PRIVATE
   quantum_circuit_lib
   qarser_lib
   passes_lib
   pybind11::headers
 )
 
+# Link torch backend if enabled
+if(BUILD_TORCH_BACKEND)
+  target_link_libraries(${target} PRIVATE torch_backend_lib "${TORCH_LIBRARIES}")
+  target_include_directories(${target} PRIVATE
+    "${QSTEED_CPP_DIR}/backends/torch"
+    "${TORCH_INCLUDE_DIRS}")
+  target_compile_definitions(${target} PRIVATE BUILD_TORCH_BACKEND)
+
+  # Set RPATH to find LibTorch libraries at runtime
+  set_target_properties(${target} PROPERTIES
+    BUILD_WITH_INSTALL_RPATH FALSE
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+  )
+endif()
+
 install(TARGETS ${target} LIBRARY DESTINATION qsteed)
 
 # Generate Stub
 if(SKBUILD)
+    message(STATUS "=== SKBUILD mode detected, will generate stub files ===")
+    message(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
+    message(STATUS "Target: ${target}")
+    message(STATUS "Stub output dir: ${CMAKE_CURRENT_BINARY_DIR}/stubs/")
+
     add_custom_command(
         TARGET ${target} POST_BUILD
         COMMAND ${PYTHON_EXECUTABLE} -m pybind11_stubgen ${target} -o ${CMAKE_CURRENT_BINARY_DIR}/stubs/
@@ -170,14 +224,16 @@ if(SKBUILD)
         COMMENT "Generating type stubs for ${target} module"
         VERBATIM
     )
-    
+
     # Install the generated .pyi stub file alongside the .so file
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stubs/${target}.pyi 
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stubs/${target}.pyi
             DESTINATION qsteed
             OPTIONAL
     )
 
-    message(STATUS "Successfully installed .pyi file")
+    message(STATUS "Stub generation and install configured")
+else()
+    message(STATUS "=== NOT in SKBUILD mode, skipping stub generation ===")
 endif()
 
 

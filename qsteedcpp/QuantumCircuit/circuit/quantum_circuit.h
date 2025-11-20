@@ -5,7 +5,7 @@
 #include <set>
 #include <cmath>
 #include "circuit_instruction.h"
-#include "symbolic/symbolic.h"
+#include "expression/expr.h"
 
 
 namespace qsteedcpp {
@@ -43,15 +43,19 @@ namespace qsteedcpp {
 
         // Single-qubit gates (parameterized)
         void rx(const Expr& theta, int qubit);
+        void rx(const Parameter& theta, int qubit);
         void rx(double theta, int qubit);
 
         void ry(const Expr& phi, int qubit);
+        void ry(const Parameter& phi, int qubit);
         void ry(double phi, int qubit);
 
         void rz(const Expr& lambda, int qubit);
+        void rz(const Parameter& lambda, int qubit);
         void rz(double lambda, int qubit);
 
         void p(const Expr& lambda, int qubit);
+        void p(const Parameter& lambda, int qubit);
         void p(double lambda, int qubit);
 
         void u3(const Expr& theta, const Expr& phi, const Expr& lambda, int qubit);

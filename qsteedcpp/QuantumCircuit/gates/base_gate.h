@@ -3,9 +3,30 @@
 #include <string>
 #include <memory>
 #include <set>
-#include "symbolic/symbolic.h"
+#include "expression/expr.h"
 
 namespace qsteedcpp {
+
+// Gate type enumeration for efficient gate identification
+enum class GateType {
+    // Single-qubit non-parametric gates
+    H, X, Y, Z, S, SDG, T, TDG,
+
+    // Single-qubit parametric gates
+    RX, RY, RZ, P, U3,
+
+    // Two-qubit non-parametric gates
+    CNOT, CZ, SWAP, ISWAP,
+
+    // Two-qubit parametric gates
+    RXX, RYY, RZZ, CP,
+
+    // Three-qubit gates
+    TOFFOLI,
+
+    // Custom/unknown gates
+    CUSTOM
+};
 
 class Gate {
 private:
@@ -21,6 +42,7 @@ public:
 
     virtual ~Gate() = default;
 
+    virtual GateType type() const = 0;
     virtual const char* name() const = 0;
 
     int get_qubit_count() const { return qubit_count_; }

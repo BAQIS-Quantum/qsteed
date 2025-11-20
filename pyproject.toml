@@ -35,6 +35,7 @@ dependencies = [
 
 [project.optional-dependencies]
 tests = ["pytest"]
+torch = ["torch"]
 
 [project.urls]
 Homepage = "https://github.com/BAQIS-Quantum/QSteed"

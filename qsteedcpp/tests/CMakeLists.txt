@@ -2,7 +2,7 @@ message("TESTing")
 
 # Circuit tests
 add_executable(circuit_test
-    "circuit/symbolic_test.cpp"
+    "circuit/expression_test.cpp"
     "circuit/test_circuit_drawer.cpp"
 )
 
@@ -69,9 +69,53 @@ target_link_libraries(qarser_test PRIVATE
 
 target_include_directories(qarser_test
     PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/../Qarser/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Qarser
     ${CMAKE_CURRENT_SOURCE_DIR}/../DAG/include
 )
+
+# Torch Backend tests (only if BUILD_TORCH_BACKEND is enabled)
+if(BUILD_TORCH_BACKEND)
+    add_executable(torch_backend_test
+        backends/torch_backend_test.cpp
+    )
+
+    target_link_libraries(torch_backend_test PRIVATE
+        GTest::gtest_main
+        quantum_circuit_lib
+        torch_backend_lib
+        "${TORCH_LIBRARIES}"
+    )
+
+    target_include_directories(torch_backend_test PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/../
+        ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit
+        ${CMAKE_CURRENT_SOURCE_DIR}/../backends
+        ${TORCH_INCLUDE_DIRS}
+    )
+
+    add_test(NAME torch_backend_test COMMAND torch_backend_test)
+
+    # Autograd test
+    add_executable(torch_autograd_simple_test
+        backends/torch_autograd_simple_test.cpp
+    )
+
+    target_link_libraries(torch_autograd_simple_test PRIVATE
+        GTest::gtest_main
+        quantum_circuit_lib
+        torch_backend_lib
+        "${TORCH_LIBRARIES}"
+    )
+
+    target_include_directories(torch_autograd_simple_test PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/../
+        ${CMAKE_CURRENT_SOURCE_DIR}/../QuantumCircuit
+        ${CMAKE_CURRENT_SOURCE_DIR}/../backends
+        ${TORCH_INCLUDE_DIRS}
+    )
+
+    add_test(NAME torch_autograd_simple_test COMMAND torch_autograd_simple_test)
+endif()
 
 # Add all tests to CTest
 add_test(NAME circuit_test COMMAND circuit_test)

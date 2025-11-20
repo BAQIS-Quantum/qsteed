@@ -19,16 +19,27 @@ using namespace qsteedcpp;
 void bind_quantum_circuit(py::module& m);
 void bind_gates(py::module& m);
 void bind_passes(py::module& m);
+void bind_expressions(py::module& m);
+
+#ifdef BUILD_TORCH_BACKEND
+void bind_torch_backend(py::module& m);
+#endif
 
 
 PYBIND11_MODULE(qsteedcpp, m) {
     m.doc() = "QSteed C++ Extensions";
 
+    bind_expressions(m);
+
     bind_gates(m);
-    
+
     bind_quantum_circuit(m);
-    
+
     bind_passes(m);
+
+#ifdef BUILD_TORCH_BACKEND
+    bind_torch_backend(m);
+#endif
 
     py::enum_<Heuristic>(m, "Heuristic")
         .value("FIDELITY", Heuristic::FIDELITY)
