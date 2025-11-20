@@ -4,14 +4,34 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "qsteed"
-dynamic = ["version", "readme", "dependencies"]
+dynamic = ["version"]
+readme = {file = "README.md", content-type = "text/markdown"}
 description = "Quantum Software of Compilation for supporting Real Quantum device"
 authors = [
     {name = "Xuhongze", email = "xhzby1995@163.com"}
 ]
 license = "Apache-2.0"
+license-files = ["LICENSE"]
 keywords = ["qsteed", "quantum compiling", "quantum computing", "quantum operating system"]
+
 requires-python = ">=3.10"
+dependencies = [
+    "dill>=0.3.8",
+    "ipython>=8.14.0",
+    "matplotlib>=3.5.2",
+    "networkx>=2.6.3",
+    "numpy>=1.20.3,<2.0.0",
+    "Pillow>=10.4.0",
+    "graphviz>=0.14.2",
+    "rich>=13.7.1",
+    "scipy>=1.8.1",
+    "tabulate>=0.9.0",
+    "sqlalchemy>=2.0.28",
+    "flask>=3.0.2",
+    "pymysql>=1.1.0",
+    "flask_sqlalchemy>=3.1.1",
+]
+
 
 [project.optional-dependencies]
 tests = ["pytest"]
@@ -26,13 +46,13 @@ Issues = "https://github.com/BAQIS-Quantum/QSteed/issues"
 qsteed-config = "qsteed.qsteed_config:copy_config"
 qsteed-build-db = "qsteed.first_build_db:first_build_db"
 
-[tool.skbuild]
+[tool.scikit-build]
 cmake.args = ["-DBUILD_WITH_GRAPHVIZ=OFF"]
 
-[tool.setuptools.dynamic]
-version = {file = "qsteed/VERSION.txt"}
-readme = {file = "README.md", content-type = "text/markdown"}
-dependencies = {file = "requirements.txt"}
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "qsteed/VERSION.txt"
+regex = "(?P<value>.*)"
 
 [tool.cibuildwheel]
 manylinux-x86_64-image = "manylinux2014"
