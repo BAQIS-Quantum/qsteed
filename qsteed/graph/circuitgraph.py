@@ -16,8 +16,7 @@
 
 import networkx as nx
 import numpy as np
-from quafu import QuantumCircuit
-from quafu.elements import Barrier, Measure
+from qsteed.qsteedcpp import QuantumCircuit, Barrier, Measure
 
 
 def relabel_graph(graph):

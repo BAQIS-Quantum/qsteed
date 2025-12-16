@@ -104,7 +104,7 @@ DAGCircuit SabreRouting::run(const DAGCircuit& dag) {
         for (const auto& node_index : front_layer) {
             const InstructionNode& node = dag.graph[node_index];
             // if the gate is a 2-qubit gate
-            if (node.qubit_pos.size() == 2 && node.name != "barrier" && node.name != "XY" && node.name != "measure") {
+            if (node.qubit_pos.size() == 2 && node.name != "barrier" && node.name != "XY") {
                 int v0 = node.qubit_pos[0];
                 int v1 = node.qubit_pos[1];
                 int p0 = current_layout[v0];

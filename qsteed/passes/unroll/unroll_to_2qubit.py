@@ -17,8 +17,9 @@
 import copy
 from math import pi
 
-from quafu import QuantumCircuit
-from quafu.elements import Barrier, Delay, XYResonance, Measure
+# from quafu import QuantumCircuit
+# from quafu.elements import Barrier, Delay, XYResonance, Measure
+from qsteed.qsteedcpp import QuantumCircuit, Barrier, Delay, XYResonance, Measure
 
 from qsteed.passes.basepass import BasePass
 from qsteed.passes.unroll.rules_library import Rules_dict
@@ -43,7 +44,8 @@ class UnrollTo2Qubit(BasePass):
         new_circuit = QuantumCircuit(circuit.num)
         for op in gates:
             if (op.name.lower() in self.quantum_element) or (get_length(op.pos) <= 2):
-                new_circuit.add_gate(op)
+                # new_circuit.add_gate(op)
+                new_circuit.append(op)
             else:
                 current_op = copy.deepcopy(op)
                 new_circuit = self._apply_gate_rules(current_op, op, new_circuit=new_circuit, depth=self.gate_run_limit)
@@ -62,7 +64,8 @@ class UnrollTo2Qubit(BasePass):
                 current_op.name.lower()))
 
         if (gate.name.lower() in self.quantum_element) or (get_length(gate.pos) <= 2):
-            new_circuit.add_gate(gate)
+            # new_circuit.add_gate(gate)
+            new_circuit.append(gate)
             return new_circuit
         elif gate.name.lower() == 'unitary':
             # TODO: Currently quafu has no definition of unitary gate.

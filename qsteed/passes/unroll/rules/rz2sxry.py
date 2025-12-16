@@ -18,8 +18,14 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import RXGate, RYGate, RZGate, SXGate, SXdgGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    RX as RXGate,
+    RY as RYGate,
+    RZ as RZGate,
+    SX as SXGate,
+    SXdg as SXdgGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -34,12 +40,12 @@ class RZToSXRY(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = RZGate(0, 0).name.lower()
-        self.basis = [RYGate(0, 0).name.lower(), SXGate.name.lower(), SXdgGate.name.lower()]
+        self.original = RZGate.name.lower()
+        self.basis = [RYGate.name.lower(), SXGate.name.lower(), SXdgGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, RZGate):
+        if op.name == 'rz':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
@@ -49,7 +55,7 @@ class RZToSXRY(UnrollPass):
             else:
                 paras = op.paras
             rule.append(SXGate(pos))
-            rule.append(RYGate(pos, -paras))
+            rule.append(RYGate(-paras, pos))
             rule.append(SXdgGate(pos))
         else:
             rule.append(op)

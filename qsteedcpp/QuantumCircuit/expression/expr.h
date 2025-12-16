@@ -17,7 +17,7 @@ public:
         : expr_(std::make_shared<Constant>(value)) {}
 
     Expr(const Parameter& param)
-        : expr_(param.clone()) {}
+        : expr_(param.share()) {}  // Use share() to maintain parameter value synchronization
 
     explicit Expr(std::shared_ptr<Expression> expr)
         : expr_(std::move(expr)) {}
@@ -35,8 +35,8 @@ public:
         return expr_->get_parameter_uuids();
     }
 
-    std::string to_string() const {
-        return expr_->to_string();
+    std::string to_string(bool numeric_params = false) const {
+        return expr_->to_string(numeric_params);
     }
 
     // Evaluate the expression to a double value

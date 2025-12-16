@@ -21,8 +21,7 @@ from qsteed.dag.circuit_dag_convert import node_to_gate, gate_to_node
 from qsteed.dag.dagcircuit import DAGCircuit
 from qsteed.passes.basepass import BasePass
 from qsteed.passes.decomposition.ZYZ_decompose import zyz_decomposition, xyx_decomposition, zxz_decomposition
-from quafu import QuantumCircuit
-from quafu.elements.element_gates.rotation import RZGate, RYGate, RXGate
+from qsteed.qsteedcpp import QuantumCircuit, RZ, RY, RX
 
 
 class OneQubitGateOptimization(BasePass):

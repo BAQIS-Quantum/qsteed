@@ -1,6 +1,6 @@
 #pragma once
-#include "SA/context/symbol.hpp"
-#include "SA/error/error.hpp"
+#include "Qarser/SA/context/symbol.hpp"
+#include "Qarser/SA/error/error.hpp"
 
 namespace qsteedcpp {
 namespace qarser {

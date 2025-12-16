@@ -18,8 +18,17 @@ from math import pi
 from typing import List
 
 import numpy as np
-from quafu.elements import Instruction
-from quafu.elements.element_gates import MCYGate, CXGate, ToffoliGate, CPGate, SdgGate, SGate, HGate, CYGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    MCY as MCYGate,
+    CX as CXGate,
+    Toffoli as ToffoliGate,
+    CP as CPGate,
+    Sdg as SdgGate,
+    S as SGate,
+    H as HGate,
+    CY as CYGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -41,13 +50,13 @@ class MCYToCNOT(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = MCYGate([0, 1], 2).name.lower()
-        self.basis = [CXGate.name.lower(), SdgGate.name.lower(), SGate.name.lower(), CPGate(0, 1, 0).name.lower(),
-                      CYGate.name.lower(), ToffoliGate(0, 1, 2).name.lower()]
+        self.original = MCYGate.name.lower()
+        self.basis = [CXGate.name.lower(), SdgGate.name.lower(), SGate.name.lower(), CPGate.name.lower(),
+                      CYGate.name.lower(), ToffoliGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, MCYGate):
+        if op.name == 'mcy':
             control_bits = op.ctrls
             if isinstance(op.targs, list):
                 target_bit = op.targs[0]
@@ -78,9 +87,9 @@ class MCYToCNOT(UnrollPass):
                         next_idx = ones_bits[1]
                         rule.append(CXGate(control_bits[next_idx], control_bits[set_idx]))
                     if np.sum(code) % 2 == 0:
-                        rule.append(CPGate(control_bits[set_idx], target_bit, -theta))
+                        rule.append(CPGate(-theta, control_bits[set_idx], target_bit))
                     else:
-                        rule.append(CPGate(control_bits[set_idx], target_bit, theta))
+                        rule.append(CPGate(theta, control_bits[set_idx], target_bit))
                     last_code = code
 
                 rule.append(HGate(target_bit))

@@ -37,10 +37,10 @@ class StandardizedCircuit:
         Reset barrier before measurement
 
         Args:
-            circuit: quafu.QuantumCircuit
+            circuit: QuantumCircuit
 
         Returns:
-            circuit: quafu.QuantumCircuit of reset barrier
+            circuit: QuantumCircuit of reset barrier
         """
         # circuit: qiskit QuantumCircuit
 

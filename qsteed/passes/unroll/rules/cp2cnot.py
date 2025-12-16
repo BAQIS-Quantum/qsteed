@@ -16,8 +16,12 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import CPGate, CXGate, PhaseGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    CP as CPGate,
+    CX as CXGate,
+    Phase as PhaseGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -36,8 +40,8 @@ class CPToCNOT(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.parameter_type = 'parameterized_gate'
-        self.original = CPGate(0, 1, 0).name.lower()
-        self.basis = [CXGate.name.lower(), PhaseGate(0, 0).name.lower()]
+        self.original = CPGate.name.lower()
+        self.basis = [CXGate.name.lower(), PhaseGate.name.lower()]
         # qc = QuantumCircuit(2)
         # qc.p(0, theta/2)
         # qc.cnot(0, 1)
@@ -46,18 +50,18 @@ class CPToCNOT(UnrollPass):
         # qc.p(1, theta/2)
         # self.circuit = qc
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, CPGate):
+        if op.name == 'cp':
             if isinstance(op.paras, list):
                 theta = op.paras[0]
             else:
                 theta = op.paras
-            rule.append(PhaseGate(op.pos[0], theta / 2))
+            rule.append(PhaseGate(theta / 2, op.pos[0]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(PhaseGate(op.pos[1], -theta / 2))
+            rule.append(PhaseGate(-theta / 2, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(PhaseGate(op.pos[1], theta / 2))
+            rule.append(PhaseGate(theta / 2, op.pos[1]))
         else:
             rule.append(op)
         self.rule = rule
@@ -66,12 +70,12 @@ class CPToCNOT(UnrollPass):
     # def run(self, circuit: QuantumCircuit) -> QuantumCircuit:
     #     new_circuit = QuantumCircuit(circuit.num)
     #     for op in circuit.gates:
-    #         if isinstance(op, CPGate):
-    #             new_circuit.add_gate(PhaseGate(op.pos[0],theta/2))
+    #         if op.name == 'cp':
+    #             new_circuit.add_gate(PhaseGate(theta/2, op.pos[0]))
     #             new_circuit.add_gate(CXGate(op.pos[0], op.pos[1]))
-    #             new_circuit.add_gate(PhaseGate(op.pos[1],-theta/2))
+    #             new_circuit.add_gate(PhaseGate(-theta/2, op.pos[1]))
     #             new_circuit.add_gate(CXGate(op.pos[0],op.pos[1]))
-    #             new_circuit.add_gate(PhaseGate(op.pos[1],theta/2))
+    #             new_circuit.add_gate(PhaseGate(theta/2, op.pos[1]))
     #         else:
     #             new_circuit.add_gate(op)
     #     return new_circuit

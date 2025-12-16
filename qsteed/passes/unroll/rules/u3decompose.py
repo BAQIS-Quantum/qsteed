@@ -16,9 +16,13 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import U3Gate
-from quafu.elements.element_gates.rotation import RXGate, RYGate, RZGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    U3 as U3Gate,
+    RX as RXGate,
+    RY as RYGate,
+    RZ as RZGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 from qsteed.passes.decomposition.unitary_decompose import UnitaryDecompose
@@ -34,13 +38,13 @@ class U3Decompose(UnrollPass):
 
     def __init__(self, one_qubit_decompose: str = 'XYX') -> None:
         super().__init__()
-        self.original = U3Gate(0, 0, 0, 0).name.lower()
-        self.basis = [RXGate(0, 0).name.lower(), RYGate(0, 0).name.lower(), RZGate(0, 0).name.lower()]
+        self.original = U3Gate.name.lower()
+        self.basis = [RXGate.name.lower(), RYGate.name.lower(), RZGate.name.lower()]
         self.one_qubit_decompose = one_qubit_decompose
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, U3Gate):
+        if op.name == 'u3':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:

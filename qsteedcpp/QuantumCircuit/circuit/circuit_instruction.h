@@ -40,37 +40,64 @@ public:
 class Reset {
 public:
     int qubit_index;
-    
+
     explicit Reset(int q) : qubit_index(q) {}
+};
+
+class Delay {
+public:
+    int qubit_index;
+    int duration;
+    std::string unit;
+
+    Delay(int pos, int dur, const std::string& u = "ns")
+        : qubit_index(pos), duration(dur), unit(u) {}
+};
+
+class XYResonance {
+public:
+    int qubit_start;
+    int qubit_end;
+    int duration;
+    std::string unit;
+
+    XYResonance(int qs, int qe, int dur, const std::string& u = "ns")
+        : qubit_start(qs), qubit_end(qe), duration(dur), unit(u) {}
 };
 
 struct Condition {
     int clbit_index;
     int value;
-    
+
     Condition(int idx, int val) : clbit_index(idx), value(val) {}
 };
 
 
 class CircuitInstruction {
 public:
-    std::variant<std::unique_ptr<Gate>, Measurement, Barrier, Reset> operation;
+    std::variant<std::unique_ptr<Gate>, Measurement, Barrier, Reset, Delay, XYResonance> operation;
     std::vector<int> qubits;
     std::vector<int> clbits;
     std::optional<Condition> condition;
-    
+
     // Constructors
     CircuitInstruction(std::unique_ptr<Gate> gate, const std::vector<int>& q)
         : operation(std::move(gate)), qubits(q) {}
-    
+
     CircuitInstruction(const Measurement& meas)
         : operation(meas), qubits(meas.qubit_indices), clbits(meas.clbit_indices) {}
-    
+
     CircuitInstruction(const Barrier& barrier)
         : operation(barrier), qubits(barrier.qubits) {}
-    
+
     CircuitInstruction(const Reset& reset)
         : operation(reset), qubits{reset.qubit_index} {}
+
+    CircuitInstruction(const Delay& delay)
+        : operation(delay), qubits{delay.qubit_index} {}
+
+    CircuitInstruction(const XYResonance& xy)
+        : operation(xy), qubits{xy.qubit_start, xy.qubit_end} {}
 
     // 1. Copy Constructor
     CircuitInstruction(const CircuitInstruction& other) :
@@ -116,19 +143,27 @@ public:
     bool is_gate() const {
         return std::holds_alternative<std::unique_ptr<Gate>>(operation);
     }
-    
+
     bool is_measurement() const {
         return std::holds_alternative<Measurement>(operation);
     }
-    
+
     bool is_barrier() const {
         return std::holds_alternative<Barrier>(operation);
     }
-    
+
     bool is_reset() const {
         return std::holds_alternative<Reset>(operation);
     }
-    
+
+    bool is_delay() const {
+        return std::holds_alternative<Delay>(operation);
+    }
+
+    bool is_xyresonance() const {
+        return std::holds_alternative<XYResonance>(operation);
+    }
+
     std::string name() const {
         if (is_gate()) {
             return std::get<std::unique_ptr<Gate>>(operation)->name();
@@ -138,11 +173,19 @@ public:
             return "barrier";
         } else if (is_reset()) {
             return "reset";
+        } else if (is_delay()) {
+            return "delay";
+        } else if (is_xyresonance()) {
+            return "xyresonance";
         }
         return "unknown";
     }
+
+    std::optional<int> get_duration() const;
+    std::optional<std::string> get_unit() const;
     
-    // clone method for explicit deep copy
+    std::string to_qasm(bool with_para = false) const;
+
     CircuitInstruction clone() const {
         return CircuitInstruction(*this); // Now we can just use the copy constructor
     }

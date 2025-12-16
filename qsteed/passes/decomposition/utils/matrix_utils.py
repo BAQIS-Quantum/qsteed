@@ -17,7 +17,8 @@
 import cmath
 
 import numpy as np
-from quafu.elements.matrices import IdMatrix
+# from quafu.elements.matrices import IdMatrix
+from qsteed.passes.decomposition.utils.matrice import IdMatrix
 
 
 def split_matrix(matrix: np.ndarray):

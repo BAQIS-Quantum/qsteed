@@ -16,8 +16,13 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import RXXGate, CXGate, RZGate, HGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    RXX as RXXGate,
+    CX as CXGate,
+    RZ as RZGate,
+    H as HGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -35,12 +40,12 @@ class RXXToCNOT(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.parameter_type = 'parameterized_gate'
-        self.original = RXXGate(0, 1, 0).name.lower()
-        self.basis = [CXGate.name.lower(), RZGate(0, 0).name.lower(), HGate.name.lower()]
+        self.original = RXXGate.name.lower()
+        self.basis = [CXGate.name.lower(), RZGate.name.lower(), HGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, RXXGate):
+        if op.name == 'rxx':
             if isinstance(op.paras, list):
                 paras = op.paras[0]
             else:
@@ -48,7 +53,7 @@ class RXXToCNOT(UnrollPass):
             rule.append(HGate(op.pos[0]))
             rule.append(HGate(op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(RZGate(op.pos[1], paras))
+            rule.append(RZGate(paras, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
             rule.append(HGate(op.pos[0]))
             rule.append(HGate(op.pos[1]))
@@ -60,7 +65,7 @@ class RXXToCNOT(UnrollPass):
     # def run(self, circuit: QuantumCircuit) -> QuantumCircuit:
     #     new_circuit = QuantumCircuit(circuit.num)
     #     for op in circuit.gates:
-    #         if isinstance(op, RXXGate):
+    #         if op.name == 'rxx':
     #             new_circuit.add_gate(HGate(op.pos[0]))
     #             new_circuit.add_gate(HGate(op.pos[1]))
     #             new_circuit.add_gate(CXGate(op.pos[0], op.pos[1]))

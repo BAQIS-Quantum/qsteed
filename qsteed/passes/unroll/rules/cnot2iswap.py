@@ -17,8 +17,15 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import ISwapGate, CXGate, RXGate, RYGate, RZGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction, 
+    ISwap as ISwapGate, 
+    CX as CXGate, 
+    RX as RXGate, 
+    RY as RYGate, 
+    RZ as RZGate
+)
+
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -35,20 +42,20 @@ class CNOTToISWAP(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = CXGate.name.lower()
-        self.basis = [RXGate(0, 0).name.lower(), RYGate(0, 0).name.lower(), RZGate(0, 0).name.lower(),
+        self.basis = [RXGate.name.lower(), RYGate.name.lower(), RZGate.name.lower(),
                       ISwapGate.name.lower()]
         self.global_phase = pi / 4
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, CXGate):
-            rule.append(RZGate(op.pos[0], -pi / 2))
-            rule.append(RXGate(op.pos[1], pi / 2))
-            rule.append(RZGate(op.pos[1], pi / 2))
+        if op.name in ['cx', 'cnot']:
+            rule.append(RZGate(-pi / 2, op.pos[0]))
+            rule.append(RXGate(pi / 2, op.pos[1]))
+            rule.append(RZGate(pi / 2, op.pos[1]))
             rule.append(ISwapGate(op.pos[0], op.pos[1]))
-            rule.append(RXGate(op.pos[0], pi / 2))
+            rule.append(RXGate(pi / 2, op.pos[0]))
             rule.append(ISwapGate(op.pos[0], op.pos[1]))
-            rule.append(RZGate(op.pos[1], pi / 2))
+            rule.append(RZGate(pi / 2, op.pos[1]))
         else:
             rule.append(op)
         self.rule = rule

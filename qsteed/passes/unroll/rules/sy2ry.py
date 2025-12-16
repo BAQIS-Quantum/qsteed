@@ -17,9 +17,11 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import SYGate
-from quafu.elements.element_gates.rotation import RYGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    SY as SYGate,
+    RY as RYGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -36,17 +38,17 @@ class SYToRY(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = SYGate.name.lower()
-        self.basis = [RYGate(0, 0).name.lower()]
+        self.basis = [RYGate.name.lower()]
         self.global_phase = pi / 4
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, SYGate):
+        if op.name == 'sy':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
                 pos = op.pos
-            rule.append(RYGate(pos, pi / 2))
+            rule.append(RYGate(pi / 2, pos))
         else:
             rule.append(op)
         self.rule = rule

@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "AST/ast.hpp"
 #include "AST/gate.hpp"
+#include "QuantumCircuit/expression/expr.h"
 
 namespace qsteedcpp {
 namespace qarser {
@@ -61,12 +62,12 @@ private:
     std::unique_ptr<GateDef> parse_gate_def();
     std::unique_ptr<Statement> parse_gate_def_body();
 
-    // Experssion parsing
-    std::unique_ptr<Expression> parse_expression();
-    std::unique_ptr<Expression> parse_additive();
-    std::unique_ptr<Expression> parse_multiplicative();
-    std::unique_ptr<Expression> parse_unary();
-    std::unique_ptr<Expression> parse_primary();
+    // Expression parsing - returns QuantumCircuit Expr
+    Expr parse_expression();
+    Expr parse_additive();
+    Expr parse_multiplicative();
+    Expr parse_unary();
+    Expr parse_primary();
 
 
 

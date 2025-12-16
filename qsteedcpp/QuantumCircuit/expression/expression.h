@@ -38,7 +38,7 @@ public:
 
     virtual Type get_type() const = 0;
     virtual std::set<std::string> get_parameter_uuids() const = 0;
-    virtual std::string to_string() const = 0;
+    virtual std::string to_string(bool numeric_params) const = 0;
     virtual std::shared_ptr<Expression> clone() const = 0;
     virtual double eval() const = 0;
 };

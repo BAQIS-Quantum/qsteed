@@ -19,7 +19,7 @@ from copy import deepcopy
 from pprint import pprint
 from typing import Union
 
-from quafu import QuantumCircuit
+from qsteed.qsteedcpp import QuantumCircuit
 
 from qsteed.dag.circuit_dag_convert import dag_to_circuit
 from qsteed.dag.dagcircuit import DAGCircuit

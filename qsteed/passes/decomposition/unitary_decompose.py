@@ -17,8 +17,10 @@
 import math
 
 import numpy as np
-from quafu import QuantumCircuit
-from quafu.elements.matrices import ry_mat, rz_mat, CXMatrix, rx_mat
+# from quafu import QuantumCircuit
+# from quafu.elements.matrices import ry_mat, rz_mat, CXMatrix, rx_mat
+from qsteed.qsteedcpp import QuantumCircuit
+from qsteed.passes.decomposition.utils.matrice import ry_mat, rz_mat, CXMatrix, rx_mat
 
 from qsteed.passes.decomposition.CSD_decompose import fatCSD
 from qsteed.passes.decomposition.one_qubit_decompose import OneQubitDecompose
@@ -176,7 +178,8 @@ class UnitaryDecompose(object):
         for i in range(len(index)):
             control_qubit = qubits[index[i]]
             self.gates_list.append((rz_mat(thetas[i]), [target_qubit], 'RZ', thetas[i]))
-            self.quafuQC.rz(target_qubit, thetas[i])
+            # self.quafuQC.rz(target_qubit, thetas[i])
+            self.quafuQC.rz(thetas[i], target_qubit)
             self.gates_list.append((CXMatrix, [control_qubit, target_qubit], 'CX'))
             self.quafuQC.cnot(control_qubit, target_qubit)
 
@@ -197,7 +200,8 @@ class UnitaryDecompose(object):
         for i in range(len(index)):
             control_qubit = qubits[index[i]]
             self.gates_list.append((ry_mat(thetas[i]), [target_qubit], 'RY', thetas[i]))
-            self.quafuQC.ry(target_qubit, thetas[i])
+            # self.quafuQC.ry(target_qubit, thetas[i])
+            self.quafuQC.ry(thetas[i], target_qubit)
             self.gates_list.append((CXMatrix, [control_qubit, target_qubit], 'CX'))
             self.quafuQC.cnot(control_qubit, target_qubit)
 
@@ -207,32 +211,44 @@ class UnitaryDecompose(object):
             self.gates_list.append((rz_mat(gamma), qubits, 'RZ', gamma))
             self.gates_list.append((ry_mat(beta), qubits, 'RY', beta))
             self.gates_list.append((rz_mat(alpha), qubits, 'RZ', alpha))
-            self.quafuQC.rz(qubits[0], gamma)
-            self.quafuQC.ry(qubits[0], beta)
-            self.quafuQC.rz(qubits[0], alpha)
+            # self.quafuQC.rz(qubits[0], gamma)
+            # self.quafuQC.ry(qubits[0], beta)
+            # self.quafuQC.rz(qubits[0], alpha)
+            self.quafuQC.rz(gamma, qubits[0])
+            self.quafuQC.ry(beta, qubits[0])
+            self.quafuQC.rz(alpha, qubits[0])
         elif self.one_qubit_decompose == 'ZXZ':
             # ZXZ decomposition for single-qubit gate
             self.gates_list.append((rz_mat(gamma), qubits, 'RZ', gamma))
             self.gates_list.append((rx_mat(beta), qubits, 'RX', beta))
             self.gates_list.append((rz_mat(alpha), qubits, 'RZ', alpha))
-            self.quafuQC.rz(qubits[0], gamma)
-            self.quafuQC.rx(qubits[0], beta)
-            self.quafuQC.rz(qubits[0], alpha)
+            # self.quafuQC.rz(qubits[0], gamma)
+            # self.quafuQC.rx(qubits[0], beta)
+            # self.quafuQC.rz(qubits[0], alpha)
+            self.quafuQC.rz(gamma, qubits[0])
+            self.quafuQC.rx(beta, qubits[0])
+            self.quafuQC.rz(alpha, qubits[0])
         elif self.one_qubit_decompose == 'XYX':
             # XYX decomposition for single-qubit gate
             self.gates_list.append((rx_mat(gamma), qubits, 'RX', gamma))
             self.gates_list.append((ry_mat(beta), qubits, 'RY', beta))
             self.gates_list.append((rx_mat(alpha), qubits, 'RX', alpha))
-            self.quafuQC.rx(qubits[0], gamma)
-            self.quafuQC.ry(qubits[0], beta)
-            self.quafuQC.rx(qubits[0], alpha)
+            # self.quafuQC.rx(qubits[0], gamma)
+            # self.quafuQC.ry(qubits[0], beta)
+            # self.quafuQC.rx(qubits[0], alpha)
+            self.quafuQC.rx(gamma, qubits[0])
+            self.quafuQC.ry(beta, qubits[0])
+            self.quafuQC.rx(alpha, qubits[0])
         elif self.one_qubit_decompose == 'XZX':
             # XZX decomposition for single-qubit gate
             self.gates_list.append((rx_mat(gamma), qubits, 'RX', gamma))
             self.gates_list.append((rz_mat(beta), qubits, 'RZ', beta))
             self.gates_list.append((rx_mat(alpha), qubits, 'RX', alpha))
-            self.quafuQC.rx(qubits[0], gamma)
-            self.quafuQC.rz(qubits[0], beta)
-            self.quafuQC.rx(qubits[0], alpha)
+            # self.quafuQC.rx(qubits[0], gamma)
+            # self.quafuQC.rz(qubits[0], beta)
+            # self.quafuQC.rx(qubits[0], alpha)
+            self.quafuQC.rx(gamma, qubits[0])
+            self.quafuQC.rz(beta, qubits[0])
+            self.quafuQC.rx(alpha, qubits[0])
         else:
             raise ValueError("The selected decomposition method can only be: ZYZ, ZXZ, XYX, XZX")

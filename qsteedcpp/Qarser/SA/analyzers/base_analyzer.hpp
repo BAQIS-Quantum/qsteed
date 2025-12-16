@@ -1,6 +1,6 @@
 #pragma once    
-#include "AST/visitor.hpp"
-#include "SA/context/analysis_context.hpp"
+#include "Qarser/AST/visitor.hpp"
+#include "Qarser/SA/context/analysis_context.hpp"
 
 namespace qsteedcpp {
 namespace qarser {

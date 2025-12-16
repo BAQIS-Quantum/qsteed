@@ -4,6 +4,7 @@ from qsteed.qsteedcpp import Heuristic
 
 from .dag_converter import *
 from .qc_converter import *
+from qsteed.qsteedcpp import dag_to_circuit, circuit_to_dag
 
 
 class SabreRouting():
@@ -58,11 +59,14 @@ class SabreRouting():
             The routed DAG.
         """
         if isinstance(dag, DAGCircuit):
-            dag = dag_to_cppDag(dag)
+            raise NotImplementedError("DAGCircuit to Cpp_DAGCircuit conversion is not implemented yet.")
+            dag = cppDag_to_dag(dag)
             dag = self.sabre_routing.run(dag)
             return cppDag_to_dag(dag)
 
         elif isinstance(dag, QuantumCircuit):
-            dag = QuantumCircuit_to_cppDag(dag)
+            # dag = QuantumCircuit_to_cppDag(dag)
+            dag = circuit_to_dag(dag)
             dag = self.sabre_routing.run(dag)
-            return cppDag_to_QuantumCircuit(dag)
+            # return cppDag_to_QuantumCircuit(dag)
+            return dag_to_circuit(dag, dag.num_qubits)

@@ -84,9 +84,6 @@ public:
         return parameters_;
     }
 
-    /**
-     * 获取单个参数（通过索引）
-     */
     torch::Tensor parameter(size_t index) const {
         if (index >= parameters_.size()) {
             throw std::out_of_range("Parameter index out of range");
@@ -94,22 +91,12 @@ public:
         return parameters_[index];
     }
 
-    /**
-     * 获取单个参数（通过 Parameter 对象）
-     * 这是用户友好的接口，避免用户手动查找索引
-     */
     torch::Tensor get_parameter(const Parameter& param) const;
 
-    /**
-     * 参数数量
-     */
     size_t num_parameters() const {
         return parameters_.size();
     }
 
-    /**
-     * 设置参数值（可选，通常不需要手动调用）
-     */
     void set_parameter(size_t index, const torch::Tensor& value) {
         if (index >= parameters_.size()) {
             throw std::out_of_range("Parameter index out of range");

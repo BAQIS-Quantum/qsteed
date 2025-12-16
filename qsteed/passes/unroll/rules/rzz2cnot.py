@@ -16,8 +16,12 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import RZZGate, CXGate, RZGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    RZZ as RZZGate,
+    CX as CXGate,
+    RZ as RZGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -35,8 +39,8 @@ class RZZToCNOT(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.parameter_type = 'parameterized_gate'
-        self.original = RZZGate(0, 1, 0).name.lower()
-        self.basis = [CXGate.name.lower(), RZGate(0, 0).name.lower()]
+        self.original = RZZGate.name.lower()
+        self.basis = [CXGate.name.lower(), RZGate.name.lower()]
 
         # TODO: After pyquafu has parameterized quantum circuits, the circuit can be generated during initialization.
         # qc = QuantumCircuit(2)
@@ -45,15 +49,15 @@ class RZZToCNOT(UnrollPass):
         # qc.cnot(0, 1)
         # self.circuit = qc
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, RZZGate):
+        if op.name == 'rzz':
             if isinstance(op.paras, list):
                 paras = op.paras[0]
             else:
                 paras = op.paras
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(RZGate(op.pos[1], paras))
+            rule.append(RZGate(paras, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
         else:
             rule.append(op)
@@ -63,7 +67,7 @@ class RZZToCNOT(UnrollPass):
     # def run(self, circuit: QuantumCircuit) -> QuantumCircuit:
     #     new_circuit = QuantumCircuit(circuit.num)
     #     for op in circuit.gates:
-    #         if isinstance(op, RZZGate):
+    #         if op.name == 'rzz':
     #             new_circuit.add_gate(CXGate(op.pos[0], op.pos[1]))
     #             new_circuit.add_gate(RZGate(op.pos[1],op.paras))
     #             new_circuit.add_gate(CXGate(op.pos[0], op.pos[1]))

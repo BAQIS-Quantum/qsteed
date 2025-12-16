@@ -16,8 +16,13 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import ISwapGate, CXGate, HGate, SGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    ISwap as ISwapGate,
+    CX as CXGate,
+    H as HGate,
+    S as SGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -46,9 +51,9 @@ class ISWAPToCNOT(UnrollPass):
         # qc.h(1)
         # self.circuit = qc
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, ISwapGate):
+        if op.name == 'iswap':
             rule.append(SGate(op.pos[0]))
             rule.append(SGate(op.pos[1]))
             rule.append(HGate(op.pos[0]))
@@ -63,7 +68,7 @@ class ISWAPToCNOT(UnrollPass):
     # def run(self, circuit: QuantumCircuit) -> QuantumCircuit:
     #     new_circuit = QuantumCircuit(circuit.num)
     #     for op in circuit.gates:
-    #         if isinstance(op, ISwapGate):
+    #         if op.name == 'iswap':
     #             new_circuit.add_gate(SGate(op.pos[0]))
     #             new_circuit.add_gate(SGate(op.pos[1]))
     #             new_circuit.add_gate(HGate(op.pos[0]))

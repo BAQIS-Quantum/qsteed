@@ -18,9 +18,17 @@ import copy
 from math import pi
 from typing import List
 
-from quafu import QuantumCircuit
-from quafu.elements import Barrier, Delay, XYResonance, Measure
-from quafu.elements.element_gates import CXGate, RXGate, RYGate, RZGate, IdGate, CPGate, CZGate, ISwapGate
+from qsteed.qsteedcpp import QuantumCircuit, Barrier, Delay, XYResonance, Measure
+from qsteed.qsteedcpp import (
+    CX as CXGate,
+    RX as RXGate,
+    RY as RYGate,   
+    RZ as RZGate,
+    Id as IdGate,
+    CP as CPGate,
+    CZ as CZGate,
+    ISwap as ISwapGate,
+)
 
 from qsteed.passes.basepass import BasePass
 from qsteed.passes.unroll.rules_library import Rules_dict, CX_rules, Swap_rules
@@ -83,7 +91,8 @@ class UnrollToBasis(BasePass):
                 current_op.name.lower(), self.basis_gates))
 
         if gate.name.lower() in self.basis_gates:
-            new_circuit.add_gate(gate)
+            # new_circuit.add_gate(gate)
+            new_circuit.append(gate)
             return new_circuit
         elif gate.name.lower() == 'unitary':
             # TODO: Currently quafu has no definition of unitary gate.
@@ -99,7 +108,8 @@ class UnrollToBasis(BasePass):
             rule = rule_class.run(gate)
             self.global_phase += rule_class.global_phase
             if set(basis).issubset(set(self.basis_gates)):
-                [new_circuit.add_gate(g) for g in rule]
+                # [new_circuit.add_gate(g) for g in rule]
+                [new_circuit.append(g) for g in rule]
                 return new_circuit
             else:
                 for gate in rule:

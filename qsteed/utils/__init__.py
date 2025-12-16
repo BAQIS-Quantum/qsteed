@@ -16,3 +16,6 @@
 
 from .random_circuit import RandomCircuit
 from .reverse_circuit import reverse_circuit
+from .circuit_utils import attach_layered_circuit_method
+
+attach_layered_circuit_method()

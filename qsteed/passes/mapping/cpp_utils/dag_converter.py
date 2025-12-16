@@ -1,10 +1,8 @@
 from qsteed.qsteedcpp import DAGCircuit as Cpp_DAGCircuit
 from qsteed.qsteedcpp import InstructionNode as Cpp_InstructionNode
 from qsteed.qsteedcpp import MeasureNode as Cpp_MeasureNode
-
 from qsteed.qsteedcpp import EdgeProperties
-from qsteed.qsteedcpp import ParameterType as Cpp_ParameterType
-from qsteed.qsteedcpp import Parameter as Cpp_Parameter
+from qsteed.qsteedcpp.expression import Expr
 
 from qsteed.dag.dagcircuit import DAGCircuit
 from qsteed.dag.instruction_node import InstructionNode 
@@ -57,7 +55,7 @@ def node_to_cppNode(node: InstructionNode) -> Cpp_InstructionNode:
 
     elif isinstance(node.pos, list):
         cpp_node = Cpp_InstructionNode()
-        cpp_node.name = node.name 
+        cpp_node.name = node.name
         cpp_node.qubit_pos = node.pos
 
         if node.paras:

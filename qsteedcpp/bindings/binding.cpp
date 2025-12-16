@@ -8,8 +8,9 @@
 #include "sabre/sabre_layout.h"
 #include "sabre/sabre_routing.h"
 #include "DAG/dag.h"
-#include "DAG/parameter.h"
 #include "compiler.h"
+#include "QuantumCircuit/expression/expr.h"
+#include "QuantumCircuit/expression/nodes/parameter.h"
 
 namespace py = pybind11;
 using namespace sabre;
@@ -31,9 +32,17 @@ PYBIND11_MODULE(qsteedcpp, m) {
 
     bind_expressions(m);
 
-    bind_gates(m);
+    // Enable implicit conversions after expression types are bound
+    py::implicitly_convertible<double, qsteedcpp::Expr>();
+    py::implicitly_convertible<int, qsteedcpp::Expr>();
+    py::implicitly_convertible<float, qsteedcpp::Expr>();
+    py::implicitly_convertible<qsteedcpp::Parameter, qsteedcpp::Expr>();
 
+    // Bind circuit and instruction FIRST, so CircuitInstruction is a known type
     bind_quantum_circuit(m);
+
+    // Bind gates SECOND, as they will now be factories that return CircuitInstruction
+    bind_gates(m);
 
     bind_passes(m);
 
@@ -58,8 +67,8 @@ PYBIND11_MODULE(qsteedcpp, m) {
         .def_readwrite("heuristic", &SabreLayout::heuristic);
 
      py::class_<SabreRouting>(m, "SabreRouting")
-        .def(py::init<const CouplingCircuit&>()) 
-        .def(py::init<const CouplingCircuit&, Heuristic>()) 
+        .def(py::init<const CouplingCircuit&>())
+        .def(py::init<const CouplingCircuit&, Heuristic>())
         .def("set_model", &SabreRouting::set_model)
         .def("get_model", &SabreRouting::get_model)
         .def("get_add_swap_count", &SabreRouting::get_add_swap_count)
@@ -96,31 +105,20 @@ PYBIND11_MODULE(qsteedcpp, m) {
     py::class_<InstructionNode>(m, "InstructionNode")
         .def(py::init<>())
         .def(py::init<const std::string>())
-
         .def(py::init<const std::string, const std::vector<int>>())
         .def(py::init<const std::string, const int>())
-
-
-        // for Parameter 
-        .def(py::init<const std::string, const int, const std::vector<Parameter>, const int, const std::string>())
-        .def(py::init<const std::string, const std::vector<int>, const std::vector<Parameter>, const int, const std::string>())
-
-        // for paras
-        .def(py::init<const std::string, const int, const std::vector<double>, const int, const std::string>())
-        .def(py::init<const std::string, const std::vector<int>, const std::vector<double>, const int, const std::string>())
-        .def(py::init<const std::string, const int, const double, const int, const std::string>())
-        .def(py::init<const std::string, const std::vector<int>, const double, const int, const std::string>())
-
+        // New constructor using Expr
+        .def(py::init<const std::string, const std::vector<int>, const std::vector<Expr>, int, const std::string>())
         .def_readwrite("name", &InstructionNode::name)
         .def_readwrite("qubit_pos", &InstructionNode::qubit_pos)
         .def_readwrite("paras", &InstructionNode::paras)
-        .def_readwrite("parameter", &InstructionNode::parameters)
         .def_readwrite("duration", &InstructionNode::duration)
         .def_readwrite("unit", &InstructionNode::unit);
 
     py::class_<MeasureNode, InstructionNode>(m, "MeasureNode")
         .def(py::init<>())
-        .def(py::init<std::vector<int>, std::vector<int>>());
+        .def(py::init<std::vector<int>, std::vector<int>>())
+        .def_readwrite("classic_pos", &MeasureNode::classic_pos);
 
     py::class_<EdgeProperties>(m, "EdgeProperties")
         .def(py::init<>())
@@ -147,58 +145,8 @@ PYBIND11_MODULE(qsteedcpp, m) {
         .def("num_qubits", &DAGCircuit::num_qubits)
         .def("vertices", [](DAGCircuit &s) {return py::make_iterator(s.vertex_begin(), s.vertex_end());})
         .def("reverse", &DAGCircuit::reverse)
-// #ifdef WITH_GRAPHVIZ
-//         .def("draw", &DAGCircuit::draw)
-// #endif
         .def_readwrite("graph", &DAGCircuit::graph)
         .def_readwrite("measure", &DAGCircuit::measure);
-
-    // m.def("reverse_DagGraph", &reverse_DagGraph, "Reverse a DagGraph object");
-
-
-    // Parameter
-    py::enum_<OperatorType>(m, "OperatorType")
-        .value("ADD", OperatorType::ADD)
-        .value("SUB", OperatorType::SUB)
-        .value("MUL", OperatorType::MUL)
-        .value("TRUEDIV", OperatorType::TRUEDIV)
-        .value("FLOORDIV", OperatorType::FLOORDIV)
-        .value("POW", OperatorType::POW)
-        .value("SIN", OperatorType::SIN)
-        .value("COS", OperatorType::COS)
-        .value("TAN", OperatorType::TAN)
-        .value("EXP", OperatorType::EXP)
-        .value("LOG", OperatorType::LOG)
-        .value("SQRT", OperatorType::SQRT)
-        .value("ABS", OperatorType::ABS)
-        .value("NEG", OperatorType::NEG)
-        .value("CONST", OperatorType::CONST);
-
-
-    py::enum_<ParameterType>(m, "ParameterType")
-        .value("None", ParameterType::None)
-        .value("DOUBLE", ParameterType::DOUBLE)
-        .value("PARAMETER", ParameterType::PARAMETER)
-        .value("PARAMETER_EXPRESSION", ParameterType::PARAMETER_EXPRESSION);
-
-    py::class_<ParameterExpression>(m, "ParameterExpression")
-        .def(py::init<>())
-        .def_readwrite("operands", &ParameterExpression::operands)
-        .def_readwrite("funcs", &ParameterExpression::operators);
-
-    py::class_<Parameter>(m, "Parameter")
-        .def(py::init<>())
-        .def(py::init<ParameterType, double>())
-        .def(py::init<ParameterType, const std::string, double>())
-        .def_readwrite("operands", &Parameter::operands)
-        .def_readwrite("funcs", &Parameter::operators)
-        .def_readwrite("type", &Parameter::ptype)
-        .def_readwrite("name", &Parameter::name)
-        .def_readwrite("value", &Parameter::value)
-        .def_readwrite("tunable", &Parameter::tunable);
-
-
-
 
     py::class_<qarser::QasmCompiler>(m, "QasmCompiler")
         .def(py::init<const std::string&, bool>())

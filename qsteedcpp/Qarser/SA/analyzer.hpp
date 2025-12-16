@@ -1,10 +1,9 @@
 #pragma once
-#include <memory>
-#include "SA/context/analysis_context.hpp"
-#include "AST/ast.hpp"
-#include "SA/analyzers/declaration_analyzer.hpp"
-#include "SA/analyzers/gate_usage_analyzer.hpp"
-#include "SA/analyzers/gate_def_analyzer.hpp"
+#include "Qarser/SA/context/analysis_context.hpp"
+#include "Qarser/AST/ast.hpp"
+#include "Qarser/SA/analyzers/declaration_analyzer.hpp"
+#include "Qarser/SA/analyzers/gate_usage_analyzer.hpp"
+#include "Qarser/SA/analyzers/gate_def_analyzer.hpp"
 
 
 namespace qsteedcpp {

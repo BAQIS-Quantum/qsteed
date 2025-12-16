@@ -13,15 +13,10 @@ namespace qarser {
     class Barrier;
     class GateDef;
 
-    class NumberExpr;
-    class IdentifierExpr;
-    class UnaryExpr;
-    class BinaryExpr;
-
 
 
     class AstVisitor {
-    public: 
+    public:
         virtual void visit(Program& program) = 0;
         virtual void visit(Include& include) = 0;
         virtual void visit(QRegister& qreg) = 0;
@@ -31,11 +26,6 @@ namespace qarser {
         virtual void visit(Reset& reset) = 0;
         virtual void visit(Barrier& barrier) = 0;
         virtual void visit(GateDef& gate_def) = 0;
-
-        virtual void visit(NumberExpr& expr) = 0;
-        virtual void visit(IdentifierExpr& expr) = 0;
-        virtual void visit(UnaryExpr& expr) = 0;
-        virtual void visit(BinaryExpr& expr) = 0;
 
         virtual ~AstVisitor() = default;
     };
@@ -53,11 +43,6 @@ namespace qarser {
         void visit(Reset& reset) override {}
         void visit(Barrier& barrier) override {}
         void visit(GateDef& gate_def) override {}
-
-        void visit(NumberExpr& expr) override {}
-        void visit(IdentifierExpr& expr) override {}
-        void visit(UnaryExpr& expr) override {}
-        void visit(BinaryExpr& expr) override {}
     };
 
 

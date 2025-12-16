@@ -18,7 +18,7 @@ public:
         return {};
     }
 
-    std::string to_string() const override {
+    std::string to_string(bool numeric_params = false) const override {
         return std::to_string(value_);
     }
 

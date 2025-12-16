@@ -16,8 +16,13 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import CYGate, CXGate, SGate, SdgGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    CY as CYGate,
+    CX as CXGate,
+    S as SGate,
+    Sdg as SdgGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -43,9 +48,9 @@ class CYToCNOT(UnrollPass):
         # qc.s(1)
         # self.circuit = qc
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, CYGate):
+        if op.name == 'cy':
             rule.append(SdgGate(op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
             rule.append(SGate(op.pos[1]))
@@ -57,7 +62,7 @@ class CYToCNOT(UnrollPass):
     # def run(self, circuit: QuantumCircuit) -> QuantumCircuit:
     #     new_circuit = QuantumCircuit(circuit.num)
     #     for op in circuit.gates:
-    #         if isinstance(op, CYGate):
+    #         if op.name == 'cy':
     #             new_circuit.add_gate(SdgGate(op.pos[1]))
     #             new_circuit.add_gate(CXGate(op.pos[0], op.pos[1]))
     #             new_circuit.add_gate(SGate(op.pos[1]))

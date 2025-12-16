@@ -13,6 +13,33 @@
 
 namespace qsteedcpp {
 
+// Helper to recursively find all Parameter nodes in an expression tree
+void collect_param_nodes(const Expression* node, std::unordered_map<std::string, const Parameter*>& param_nodes) {
+    if (!node) return;
+
+    if (node->get_type() == Expression::Type::PARAMETER) {
+        const auto* param_node = static_cast<const Parameter*>(node);
+        // Only insert if not already present
+        if (param_nodes.find(param_node->get_uuid()) == param_nodes.end()) {
+            param_nodes[param_node->get_uuid()] = param_node;
+        }
+        return;
+    }
+
+    if (node->get_type() == Expression::Type::BINARY_OP) {
+        const auto* binary_node = static_cast<const BinaryOp*>(node);
+        collect_param_nodes(binary_node->get_left(), param_nodes);
+        collect_param_nodes(binary_node->get_right(), param_nodes);
+        return;
+    }
+
+    if (node->get_type() == Expression::Type::UNARY_OP) {
+        const auto* unary_node = static_cast<const UnaryOp*>(node);
+        collect_param_nodes(unary_node->get_operand(), param_nodes);
+        return;
+    }
+}
+
 // TorchExprEvaluator: 将Expression树转换为torch操作（保持梯度流）
 class TorchExprEvaluator {
 private:
@@ -132,31 +159,51 @@ void TorchBackend::compile(const QuantumCircuit& qc) {
     qc_ = qc;
     std::cout << "[DEBUG] Circuit has " << qc.num_qubits() << " qubits" << std::endl;
 
-    // 提取所有参数 UUID（使用 set 保证顺序一致）
-    auto param_uuids_set = qc.get_all_parameter_uuids();
-    param_uuids_ = std::vector<std::string>(
-        param_uuids_set.begin(),
-        param_uuids_set.end()
-    );
-    std::cout << "[DEBUG] Found " << param_uuids_.size() << " unique parameters" << std::endl;
+    // 1. Collect all unique Parameter nodes from the circuit
+    std::unordered_map<std::string, const Parameter*> param_nodes;
+    const auto& instructions = qc_.get_instructions();
+    for (const auto& inst : instructions) {
+        if (std::holds_alternative<std::unique_ptr<Gate>>(inst.operation)) {
+            const auto& gate_ptr = std::get<std::unique_ptr<Gate>>(inst.operation);
+            if (gate_ptr->has_parameters()) {
+                for (size_t i = 0; i < gate_ptr->parameter_count(); ++i) {
+                    collect_param_nodes(gate_ptr->get_parameter_expression(i).get(), param_nodes);
+                }
+            }
+        }
+    }
+    std::cout << "[DEBUG] Found " << param_nodes.size() << " unique parameter nodes" << std::endl;
 
-    // 为每个参数创建 torch::Tensor (requires_grad=true)
+    // 2. Create an ordered list of UUIDs
+    param_uuids_.clear();
+    for(const auto& pair : param_nodes) {
+        param_uuids_.push_back(pair.first);
+    }
+    // Sort to ensure consistent order, which is important for reproducibility
+    std::sort(param_uuids_.begin(), param_uuids_.end());
+
+    // 3. Create torch::Tensors with correct requires_grad
     parameters_.clear();
     for (const auto& uuid : param_uuids_) {
-        std::cout << "[DEBUG] Creating tensor for parameter UUID: " << uuid.substr(0, 8) << "..." << std::endl;
-        double default_val = get_param_default_value(uuid);
-        std::cout << "[DEBUG] Default value: " << default_val << std::endl;
-        auto param_tensor = torch::tensor(default_val, torch::requires_grad(true));
+        const Parameter* node = param_nodes.at(uuid);
+        double value = node->get_value();
+        bool trainable = node->is_trainable();
+
+        std::cout << "[DEBUG] Creating tensor for param UUID: " << uuid.substr(0, 8) 
+                  << "..., value: " << value << ", trainable: " << trainable << std::endl;
+        
+        auto opts = torch::TensorOptions().dtype(torch::kDouble).requires_grad(trainable);
+        auto param_tensor = torch::tensor(value, opts);
         parameters_.push_back(param_tensor);
     }
 
     // 预编译所有gate的参数表达式
     std::cout << "[DEBUG] Precompiling gate parameter expressions" << std::endl;
     gate_param_evaluators_.clear();
-    const auto& instructions = qc_.get_instructions();
+    const auto& insts = qc_.get_instructions();
 
-    for (size_t inst_idx = 0; inst_idx < instructions.size(); ++inst_idx) {
-        const auto& inst = instructions[inst_idx];
+    for (size_t inst_idx = 0; inst_idx < insts.size(); ++inst_idx) {
+        const auto& inst = insts[inst_idx];
         std::vector<std::function<torch::Tensor(const std::unordered_map<std::string, torch::Tensor>&)>> gate_evals;
 
         if (std::holds_alternative<std::unique_ptr<Gate>>(inst.operation)) {

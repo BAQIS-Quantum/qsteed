@@ -30,22 +30,21 @@ enum class GateType {
 
 class Gate {
 private:
-    int qubit_count_;
     std::vector<Expr> param_expressions_;
 
 public:
-    Gate(int qubit_count)
-        : qubit_count_(qubit_count) {}
+    Gate() = default;
 
-    Gate(int qubit_count, std::vector<Expr> exprs)
-        : qubit_count_(qubit_count), param_expressions_(std::move(exprs)) {}
+    Gate(std::vector<Expr> exprs)
+        : param_expressions_(std::move(exprs)) {}
 
     virtual ~Gate() = default;
 
     virtual GateType type() const = 0;
     virtual const char* name() const = 0;
 
-    int get_qubit_count() const { return qubit_count_; }
+    // Pure virtual function - subclasses return their static qubit_count
+    virtual int get_qubit_count() const = 0;
 
     bool has_parameters() const { return !param_expressions_.empty(); }
     size_t parameter_count() const { return param_expressions_.size(); }
@@ -79,7 +78,12 @@ template<typename Derived>
 class ClonableGate : public Gate {
 public:
     using Gate::Gate;
-    
+
+    // Implement get_qubit_count by returning the Derived class's static constant
+    int get_qubit_count() const override {
+        return Derived::qubit_count;
+    }
+
     std::unique_ptr<Gate> clone() const override {
         return std::make_unique<Derived>(static_cast<const Derived&>(*this));
     }

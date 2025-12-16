@@ -1,6 +1,7 @@
 from qsteed.qsteedcpp import SabreLayout as Cpp_SabreLayout
 from qsteed.qsteedcpp import CouplingCircuit as Cpp_CouplingCircuit
-from typing import Union
+import qsteed.qsteedcpp as qsteedcpp
+from typing import Union, List
 from .dag_converter import *
 from .qc_converter import *
 
@@ -87,9 +88,12 @@ class SabreLayout(BasePass):
         """
 
         if isinstance(circuit, DAGCircuit):
-            circuit = dag_to_cppDag(circuit)
+            # circuit = dag_to_cppDag(circuit)
+            raise NotImplementedError("DAGCircuit to Cpp_DAGCircuit conversion is not implemented yet.")
+
         elif isinstance(circuit, QuantumCircuit):
-            circuit = QuantumCircuit_to_cppDag(circuit)
+            # circuit = QuantumCircuit_to_cppDag(circuit)
+            circuit = qsteedcpp.circuit_to_dag(circuit)
         else:
             raise TypeError('Error: SabreLayout pass only supports QuantumCircuit or DAGCircuit.')
 
@@ -156,7 +160,8 @@ class SabreLayout(BasePass):
             all_qubits.update(optimized_circuit_dag.measure.keys())
         num_qubits = max(all_qubits) + 1 if all_qubits else 0
 
-        optimized_circuit = cppDag_to_QuantumCircuit(optimized_circuit_dag, num_qubits)
+        # optimized_circuit = cppDag_to_QuantumCircuit(optimized_circuit_dag, num_qubits)
+        optimized_circuit = qsteedcpp.dag_to_circuit(optimized_circuit_dag, num_qubits)
 
         self.model._layout["initial_layout"] = Layout(self._sabre_layout.get_model().initial_layout.get_v2p())
         self.model._layout["final_layout"] = Layout(self._sabre_layout.get_model().final_layout.get_v2p())

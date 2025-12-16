@@ -21,9 +21,10 @@ from random import choice
 from typing import Union, List
 
 import numpy as np
-from quafu import QuantumCircuit
-from quafu.elements import Barrier, XYResonance, Measure
-from quafu.elements.element_gates import SwapGate
+# from quafu import QuantumCircuit
+# from quafu.elements import Barrier, XYResonance, Measure
+# from quafu.elements.element_gates import SwapGate
+from qsteed.qsteedcpp import QuantumCircuit, Barrier, XYResonance, Measure, Swap as SwapGate
 
 from qsteed.dag.circuit_dag_convert import circuit_to_dag, gate_to_node, copy_dag
 from qsteed.dag.dagcircuit import DAGCircuit
@@ -248,8 +249,9 @@ class SabreRouting(BasePass):
             swap_candidates = self._obtain_swaps(front_layer, current_layout)
             best_swap = self._get_best_swap(swap_candidates, current_layout, front_layer, extended_set,
                                             unavailable_2qubits)
-            swap_node = gate_to_node(SwapGate(best_swap[0], best_swap[1]),
-                                     specific_label='add' + str(self.add_swap_count))
+            # Create a C++ SwapGate for gate_to_node
+            swap_gate_inst = SwapGate(best_swap[0], best_swap[1])
+            swap_node = gate_to_node(swap_gate_inst, specific_label='add' + str(self.add_swap_count))
             self._apply_gate(mapped_dag, swap_node, current_layout)
             self.add_swap_count += 1
             current_layout.swap(best_swap[0], best_swap[1])

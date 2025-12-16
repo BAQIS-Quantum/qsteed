@@ -17,8 +17,13 @@
 from typing import List
 
 import numpy as np
-from quafu.elements import Instruction
-from quafu.elements.element_gates import ControlledU, CXGate, RZGate, RYGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    ControlledU,
+    CX as CXGate,
+    RZ as RZGate,
+    RY as RYGate,
+)
 from scipy.linalg import sqrtm
 
 from qsteed.passes.basepass import UnrollPass
@@ -53,9 +58,9 @@ class ControlledUToCNOT(UnrollPass):
         self.original = ControlledU.name.lower()
         self.basis = [CXGate.name.lower(), RZGate.name.lower(), RYGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, ControlledU):
+        if op.name in ['controlledu', 'mcu']:
             control_bits = op.ctrls
             target_bit = op.targs[0]
             U = op.targ_gate

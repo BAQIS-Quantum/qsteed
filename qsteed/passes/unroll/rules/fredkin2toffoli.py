@@ -16,8 +16,12 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import ToffoliGate, CXGate, FredkinGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    Toffoli as ToffoliGate,
+    CX as CXGate,
+    Fredkin as FredkinGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -36,12 +40,12 @@ class FredkinToToffoli(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = FredkinGate(0, 1, 2).name.lower()
-        self.basis = [CXGate.name.lower(), ToffoliGate(0, 1, 2).name.lower()]
+        self.original = FredkinGate.name.lower()
+        self.basis = [CXGate.name.lower(), ToffoliGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, FredkinGate):
+        if op.name in ['fredkin', 'cswap']:
             rule.append(CXGate(op.pos[2], op.pos[1]))
             rule.append(ToffoliGate(op.pos[0], op.pos[1], op.pos[2]))
             rule.append(CXGate(op.pos[2], op.pos[1]))

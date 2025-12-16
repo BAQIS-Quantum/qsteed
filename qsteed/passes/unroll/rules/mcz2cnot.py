@@ -18,8 +18,15 @@ from math import pi
 from typing import List
 
 import numpy as np
-from quafu.elements import Instruction
-from quafu.elements.element_gates import MCZGate, CXGate, HGate, ToffoliGate, CPGate, CZGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    MCZ as MCZGate,
+    CX as CXGate,
+    H as HGate,
+    Toffoli as ToffoliGate,
+    CP as CPGate,
+    CZ as CZGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -42,14 +49,14 @@ class MCZToCNOT(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = MCZGate([0, 1], 2).name.lower()
-        self.basis = [CXGate.name.lower(), HGate.name.lower(), CPGate(0, 1, 0).name.lower(),
-                      ToffoliGate(0, 1, 2).name.lower(),
+        self.original = MCZGate.name.lower()
+        self.basis = [CXGate.name.lower(), HGate.name.lower(), CPGate.name.lower(),
+                      ToffoliGate.name.lower(),
                       CZGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, MCZGate):
+        if op.name == 'mcz':
             control_bits = op.ctrls
             if isinstance(op.targs, list):
                 target_bit = op.targs[0]
@@ -77,9 +84,9 @@ class MCZToCNOT(UnrollPass):
                         next_idx = ones_bits[1]
                         rule.append(CXGate(control_bits[next_idx], control_bits[set_idx]))
                     if np.sum(code) % 2 == 0:
-                        rule.append(CPGate(control_bits[set_idx], target_bit, -theta))
+                        rule.append(CPGate(-theta, control_bits[set_idx], target_bit))
                     else:
-                        rule.append(CPGate(control_bits[set_idx], target_bit, theta))
+                        rule.append(CPGate(theta, control_bits[set_idx], target_bit))
                     last_code = code
         else:
             rule.append(op)

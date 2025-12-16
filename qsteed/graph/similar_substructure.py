@@ -17,7 +17,7 @@
 import math
 
 import networkx as nx
-from quafu import QuantumCircuit
+from qsteed.qsteedcpp import QuantumCircuit
 
 from qsteed.compiler.qasm_parser import qreg_creg
 from qsteed.graph.circuitgraph import circuit_to_graph, relabel_graph

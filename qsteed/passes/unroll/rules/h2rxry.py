@@ -17,8 +17,12 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import HGate, RYGate, RXGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    H as HGate,
+    RY as RYGate,
+    RX as RXGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -34,18 +38,18 @@ class HToRXRY(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = HGate.name.lower()
-        self.basis = [RXGate(0, 0).name.lower(), RYGate(0, 0).name.lower()]
+        self.basis = [RXGate.name.lower(), RYGate.name.lower()]
         self.global_phase = pi / 2
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, HGate):
+        if op.name == 'h':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
                 pos = op.pos
-            rule.append(RYGate(pos, pi / 2))
-            rule.append(RXGate(pos, pi))
+            rule.append(RYGate(pi / 2, pos))
+            rule.append(RXGate(pi, pos))
         else:
             rule.append(op)
         self.rule = rule

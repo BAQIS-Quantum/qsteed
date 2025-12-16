@@ -16,8 +16,12 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import CRZGate, CXGate, RZGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    CRZ as CRZGate,
+    CX as CXGate,
+    RZ as RZGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -37,17 +41,17 @@ class CRZToCNOT(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = CRZGate(0, 1, 0).name.lower()
-        self.basis = [CXGate.name.lower(), RZGate(0, 0).name.lower()]
+        self.original = CRZGate.name.lower()
+        self.basis = [CXGate.name.lower(), RZGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, CRZGate):
+        if op.name == 'crz':
             theta = op.paras[0]  # Assuming CRZGate takes one parameter θ
 
-            rule.append(RZGate(op.pos[1], theta / 2))
+            rule.append(RZGate(theta / 2, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(RZGate(op.pos[1], -theta / 2))
+            rule.append(RZGate(-theta / 2, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
         else:
             rule.append(op)

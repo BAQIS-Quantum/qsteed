@@ -17,8 +17,11 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import RXGate, SXdgGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    RX as RXGate,
+    SXdg as SXdgGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -35,17 +38,17 @@ class SXdgToRX(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = SXdgGate.name.lower()
-        self.basis = [RXGate(0, 0).name.lower()]
+        self.basis = [RXGate.name.lower()]
         self.global_phase = 7 * pi / 4
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, SXdgGate):
+        if op.name == 'sxdg':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
                 pos = op.pos
-            rule.append(RXGate(pos, -pi / 2))
+            rule.append(RXGate(-pi / 2, pos))
         else:
             rule.append(op)
         self.rule = rule

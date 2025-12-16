@@ -19,11 +19,18 @@ from typing import Any
 
 import networkx as nx
 import numpy as np
-from quafu import QuantumCircuit
-from quafu.elements import Barrier, Delay, XYResonance
-from quafu.elements.element_gates import *
-from quafu.elements.element_gates.clifford import *
-from quafu.elements.element_gates.pauli import *
+# from quafu import QuantumCircuit
+# from quafu.elements import Barrier, Delay, XYResonance
+# from quafu.elements.element_gates import *
+# from quafu.elements.element_gates.clifford import *
+# from quafu.elements.element_gates.pauli import *
+from qsteed.qsteedcpp import (
+    QuantumCircuit,
+    Barrier,
+    Delay,
+    XYResonance,
+)
+from qsteed.utils.gates import gate_classes as GATE_CLASSES
 
 from .dagcircuit import DAGCircuit
 from .instruction_node import InstructionNode
@@ -32,51 +39,6 @@ StartColor = "#90EE90"
 EndColor = "#F44336"
 MiddleColor = "#ADD8E6"
 
-GATE_CLASSES = {
-    "x": XGate,
-    "y": YGate,
-    "z": ZGate,
-    "h": HGate,
-    "s": SGate,
-    "sdg": SdgGate,
-    "t": TGate,
-    "tdg": TdgGate,
-    "rx": RXGate,
-    "ry": RYGate,
-    "rz": RZGate,
-    "id": IdGate,
-    "sx": SXGate,
-    "sxdg": SXdgGate,
-    "sy": SYGate,
-    "sydg": SYdgGate,
-    "w": WGate,
-    "sw": SWGate,
-    "swdg": SWdgGate,
-    "p": PhaseGate,
-    "delay": Delay,
-    "barrier": Barrier,
-    "cx": CXGate,
-    "cp": CPGate,
-    "swap": SwapGate,
-    "iswap": ISwapGate,
-    "rxx": RXXGate,
-    "ryy": RYYGate,
-    "rzz": RZZGate,
-    "cy": CYGate,
-    "cz": CZGate,
-    "cs": CSGate,
-    "ct": CTGate,
-    "cry": CRYGate,
-    "crx": CRXGate,
-    "crz": CRZGate,
-    "xy": XYResonance,
-    "ccx": ToffoliGate,
-    "cswap": FredkinGate,
-    "mcx": MCXGate,
-    "mcy": MCYGate,
-    "mcz": MCZGate,
-    "u3": U3Gate,
-}
 
 
 def gate_to_node(input_gate, specific_label):
@@ -92,19 +54,22 @@ def gate_to_node(input_gate, specific_label):
         node: a node in the graph, with specific label. A node is a InstructionNode object.
 
     """
-    gate = copy.deepcopy(input_gate)  # avoid modifying the original gate
-    if not isinstance(gate.pos, list):  # if gate.pos is not a list, make it a list
-        gate.pos = [gate.pos]
+    # New cpp gate will automatically handle the pos and paras attributes
+    hashable_gate = InstructionNode(input_gate.name, input_gate.pos, input_gate.paras, input_gate.duration, input_gate.unit, label=specific_label)
+
+    # gate = copy.deepcopy(input_gate)  # avoid modifying the original gate
+    # if not isinstance(gate.pos, list):  # if gate.pos is not a list, make it a list
+    #     gate.pos = [gate.pos]
 
     # use getattr check 'paras' and other attributes if exist. if the attr doesn't exist,return None
-    gate.paras = getattr(gate, 'paras', None) or None
-    gate.duration = getattr(gate, 'duration', None) or None
-    gate.unit = getattr(gate, 'unit', None) or None
+    # gate.paras = getattr(gate, 'paras', None) or None
+    # gate.duration = getattr(gate, 'duration', None) or None
+    # gate.unit = getattr(gate, 'unit', None) or None
 
-    if gate.paras and not isinstance(gate.paras, list):  # if paras is True and not a list, make it a list
-        gate.paras = [gate.paras]
+    # if gate.paras and not isinstance(gate.paras, list):  # if paras is True and not a list, make it a list
+    #     gate.paras = [gate.paras]
 
-    hashable_gate = InstructionNode(gate.name, gate.pos, gate.paras, gate.duration, gate.unit, label=specific_label)
+    # hashable_gate = InstructionNode(gate.name, gate.pos, gate.paras, gate.duration, gate.unit, label=specific_label)
     return hashable_gate
 
 
@@ -217,10 +182,15 @@ def node_to_gate(node_in_dag):
     if gate_name == "barrier":
         return gate_class(node_in_dag.pos)
 
-    # Prepare arguments for gate initialization
-    args = node_in_dag.pos
+    # args = node_in_dag.pos
+    # if node_in_dag.paras:
+    #     args += node_in_dag.paras
+
+    # parameters first, then qubits
     if node_in_dag.paras:
-        args += node_in_dag.paras
+        args = node_in_dag.paras + node_in_dag.pos
+    else:
+        args = node_in_dag.pos
 
     # Handle specific gate types with additional parameters
     if gate_name in ["delay", "xy"]:
@@ -268,9 +238,10 @@ def dag_to_circuit(dep_graph, qubits: int):
     for gate in nx.topological_sort(dep_graph):
         if gate not in [-1, float('inf')]:
             if gate.name == "measure":
-                qcircuit.measures = gate.pos
+                qcircuit.measure(gate.pos)
             else:
-                qcircuit.gates.append(node_to_gate(gate))
+                gate_instruction = node_to_gate(gate)
+                qcircuit.append(gate_instruction)
     return qcircuit
 
 

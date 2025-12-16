@@ -17,8 +17,12 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import WGate, RYGate, RZGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    W as WGate,
+    RY as RYGate,
+    RZ as RZGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -35,22 +39,22 @@ class WToRYRZ(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = WGate.name.lower()
-        self.basis = [RYGate(0, 0).name.lower(), RZGate(0, 0).name.lower()]
+        self.basis = [RYGate.name.lower(), RZGate.name.lower()]
         self.global_phase = pi / 2
         # qc = QuantumCircuit(1)
         # qc.rz(0, pi / 2)
         # qc.ry(0, pi)
         # self.circuit = qc
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, WGate):
+        if op.name == 'w':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
                 pos = op.pos
-            rule.append(RZGate(pos, pi / 2))
-            rule.append(RYGate(pos, pi))
+            rule.append(RZGate(pi / 2, pos))
+            rule.append(RYGate(pi, pos))
         else:
             rule.append(op)
         self.rule = rule

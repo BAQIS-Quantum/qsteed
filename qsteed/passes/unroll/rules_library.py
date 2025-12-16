@@ -14,7 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from quafu.elements.element_gates import CXGate, CZGate, ISwapGate, CPGate, SwapGate
+from qsteed.qsteedcpp import (
+    CX as CXGate,
+    CZ as CZGate,
+    ISwap as ISwapGate,
+    CP as CPGate,
+    Swap as SwapGate,
+)
 
 from qsteed.passes.unroll import rules
 from qsteed.passes.unroll.rules import *
@@ -38,7 +44,7 @@ for class_name in class_names:
 # TODO: Conversion of CNOT with other two-qubit gates, such as iswap, cz
 CX_rules = {CZGate.name.lower(): {CNOTToCZ().original: [CNOTToCZ().basis, CNOTToCZ()]},
             ISwapGate.name.lower(): {CNOTToISWAP().original: [CNOTToISWAP().basis, CNOTToISWAP()]},
-            CPGate(0, 1, 0).name.lower(): {CNOTToCP().original: [CNOTToCP().basis, CNOTToCP()]}}
+            CPGate.name.lower(): {CNOTToCP().original: [CNOTToCP().basis, CNOTToCP()]}}
 
 Swap_rules = {CZGate.name.lower(): {SwapToCZRXRY().original: [CNOTToCZ().basis, SwapToCZRXRY()]},
               CXGate.name.lower(): {SwapToCNOT().original: [CNOTToISWAP().basis, SwapToCNOT()]}

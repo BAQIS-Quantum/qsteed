@@ -144,14 +144,14 @@ namespace qarser {
         Token name = consume(TokenType::IDENTIFIER, "Expect a gate name!");
 
         // Parsing gate parameters
-        std::vector<std::unique_ptr<Expression>> parameters;
+        std::vector<Expr> parameters;
         if (try_consume(TokenType::LEFT_PAREN)) {
             do {
                 parameters.push_back(parse_expression());
             } while (try_consume(TokenType::COMMA));
             consume(TokenType::RIGHT_PAREN, "Expect ')' !");
         }
-               
+
         // Parsing qreg references
         std::vector<RegisterRef> qubits = parse_register_ref();
 
@@ -209,58 +209,58 @@ namespace qarser {
     }
 
 
-    std::unique_ptr<Expression> Parser::parse_expression() {
+    Expr Parser::parse_expression() {
         return parse_additive();
     }
 
-    std::unique_ptr<Expression> Parser::parse_additive() {
-        auto left = parse_multiplicative();
-       
+    Expr Parser::parse_additive() {
+        Expr left = parse_multiplicative();
+
         while (match(TokenType::PLUS) || match(TokenType::MINUS)) {
             Token op = current;
             advance();
 
-            auto right = parse_multiplicative();
+            Expr right = parse_multiplicative();
 
-            left = std::make_unique<BinaryExpr>(
-                op.line, op.type,
-                std::move(left),
-                std::move(right)
-            );
+            if (op.type == TokenType::PLUS) {
+                left = left + right;
+            } else {
+                left = left - right;
+            }
         }
 
         return left;
     }
 
-    std::unique_ptr<Expression> Parser::parse_multiplicative() {
-        std::unique_ptr<Expression> left = parse_unary();
+    Expr Parser::parse_multiplicative() {
+        Expr left = parse_unary();
 
         while (match(TokenType::STAR) || match(TokenType::SLASH)) {
             Token op = current;
             advance();
-            std::unique_ptr<Expression> right = parse_unary();
+            Expr right = parse_unary();
 
-            left = std::make_unique<BinaryExpr>(
-                op.line, op.type, 
-                std::move(left), 
-                std::move(right)
-            );
+            if (op.type == TokenType::STAR) {
+                left = left * right;
+            } else {
+                left = left / right;
+            }
         }
         return left;
     }
 
 
-    std::unique_ptr<Expression> Parser::parse_unary() {
+    Expr Parser::parse_unary() {
         if (match(TokenType::MINUS) || match(TokenType::PLUS)) {
             Token op = current;
             advance();
-            auto operand = parse_primary();
+            Expr operand = parse_primary();
 
-            return std::make_unique<UnaryExpr>(
-                op.line,
-                op.type,
-                std::move(operand)
-            );
+            if (op.type == TokenType::MINUS) {
+                return -operand;
+            } else {
+                return operand;
+            }
         }
 
         if ( match(TokenType::SIN) || match(TokenType::COS) ||
@@ -271,14 +271,17 @@ namespace qarser {
             advance();
 
             consume(TokenType::LEFT_PAREN, "Expect '(' !");
-            auto operand = parse_expression();
+            Expr operand = parse_expression();
             consume(TokenType::RIGHT_PAREN, "Expect ')' !");
 
-            return std::make_unique<UnaryExpr>(
-                op.line,
-                op.type,
-                std::move(operand)
-            );
+            switch (op.type) {
+                case TokenType::SIN: return sin(operand);
+                case TokenType::COS: return cos(operand);
+                case TokenType::TAN: return tan(operand);
+                case TokenType::EXP: return exp(operand);
+                case TokenType::LN: return log(operand);
+                default: error("Unknown unary operator!");
+            }
         }
 
         return parse_primary();
@@ -286,37 +289,26 @@ namespace qarser {
 
 
 
-    std::unique_ptr<Expression> Parser::parse_primary() {
+    Expr Parser::parse_primary() {
         if (try_consume(TokenType::NUMBER)) {
-            return std::make_unique<NumberExpr>(
-                previous.line, 
-                std::stod(previous.lexeme)
-            );
+            return Expr(std::stod(previous.lexeme));
         }
 
         // Identifier
         if (try_consume(TokenType::IDENTIFIER)) {
             if (previous.lexeme == "pi") {
-                return std::make_unique<NumberExpr>(
-                    previous.line,
-                    M_PI
-                );
+                return Expr(M_PI);
             }
             if (previous.lexeme == "e") {
-                return std::make_unique<NumberExpr>(
-                    previous.line,
-                    M_E
-                );
+                return Expr(M_E);
             }
-            return std::make_unique<IdentifierExpr>(
-                previous.line,
-                previous.lexeme
-            );
+            // Parameter - create with default value 0.0
+            return Expr(Parameter(0.0));
         }
 
 
         if (try_consume(TokenType::LEFT_PAREN)) {
-            std::unique_ptr<Expression> expr = parse_expression();
+            Expr expr = parse_expression();
             consume(TokenType::RIGHT_PAREN, "Expect ')' !");
             return expr;
         }

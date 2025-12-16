@@ -32,7 +32,7 @@ public:
         return left_params;
     }
 
-    std::string to_string() const override {
+    std::string to_string(bool numeric_params = false) const override {
         std::string op_str;
         switch (op_) {
             case BinaryOpType::ADD: op_str = "+"; break;
@@ -41,7 +41,7 @@ public:
             case BinaryOpType::DIV: op_str = "/"; break;
             case BinaryOpType::POW: op_str = "^"; break;
         }
-        return "(" + left_->to_string() + " " + op_str + " " + right_->to_string() + ")";
+        return "(" + left_->to_string(numeric_params) + " " + op_str + " " + right_->to_string(numeric_params) + ")";
     }
 
     std::shared_ptr<Expression> clone() const override {

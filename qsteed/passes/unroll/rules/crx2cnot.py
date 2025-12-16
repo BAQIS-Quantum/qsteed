@@ -16,8 +16,14 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import CRXGate, CXGate, SGate, RYGate, SdgGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    CRX as CRXGate,
+    CX as CXGate,
+    S as SGate,
+    RY as RYGate,
+    Sdg as SdgGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -37,19 +43,19 @@ class CRXToCNOT(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = CRXGate(0, 1, 0).name.lower()
-        self.basis = [CXGate.name.lower(), SGate.name.lower(), SdgGate.name.lower(), RYGate(0, 0).name.lower()]
+        self.original = CRXGate.name.lower()
+        self.basis = [CXGate.name.lower(), SGate.name.lower(), SdgGate.name.lower(), RYGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, CRXGate):
+        if op.name == 'crx':
             theta = op.paras[0]  # Assuming CRZGate takes one parameter θ
 
             rule.append(SGate(op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(RYGate(op.pos[1], -theta / 2))
+            rule.append(RYGate(-theta / 2, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(RYGate(op.pos[1], theta / 2))
+            rule.append(RYGate(theta / 2, op.pos[1]))
             rule.append(SdgGate(op.pos[1]))
         else:
             rule.append(op)

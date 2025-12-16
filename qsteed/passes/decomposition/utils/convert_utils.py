@@ -15,7 +15,8 @@
 # limitations under the License.
 
 import numpy as np
-from quafu import QuantumCircuit
+# from quafu import QuantumCircuit
+from qsteed.qsteedcpp import QuantumCircuit
 
 from qsteed.passes.decomposition.ZYZ_decompose import zyz_decomposition
 from qsteed.passes.decomposition.utils.matrix_utils import general_kron, general_CNOT
@@ -29,21 +30,26 @@ def gates_list_to_circuit(gates_list, nqubit):
         nqubit (int): number of qubits
 
     Returns:
-        circuit: pyquafu QuantumCircuit class
+        circuit: QuantumCircuit class
     """
     circuit = QuantumCircuit(nqubit)
     for g in gates_list:
         if g[2] == 'CX':
             circuit.cnot(g[1][0], g[1][1])
         elif g[2] == 'RY':
-            circuit.ry(g[1][0], g[3].real)
+            # circuit.ry(g[1][0], g[3].real)
+            circuit.ry(g[3].real, g[1][0])
         elif g[2] == 'RZ':
-            circuit.rz(g[1][0], g[3].real)
+            # circuit.rz(g[1][0], g[3].real)
+            circuit.rz(g[3].real, g[1][0])
         elif g[2] == 'U':
             gamma, beta, alpha, global_phase = zyz_decomposition(g[0])
-            circuit.rz(g[1][0], gamma)
-            circuit.ry(g[1][0], beta)
-            circuit.rz(g[1][0], alpha)
+            # circuit.rz(g[1][0], gamma)
+            # circuit.ry(g[1][0], beta)
+            # circuit.rz(g[1][0], alpha)
+            circuit.rz(gamma, g[1][0])
+            circuit.ry(beta, g[1][0])
+            circuit.rz(alpha, g[1][0])
         else:
             pass
     return circuit
@@ -86,7 +92,7 @@ def circuit_to_unitary(circuit):
     """ Convert gates_list to unitary.
 
     Args:
-        circuit (QuantumCircuit): pyquafu QuantumCircuit class
+        circuit (QuantumCircuit): QuantumCircuit class
 
     Returns:
         unitary: np.array

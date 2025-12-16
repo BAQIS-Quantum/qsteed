@@ -39,7 +39,6 @@ void bind_torch_backend(py::module& m) {
         "    # Access gradients via backend.parameters()")
         .def(py::init([]() {
             // Ensure torch is imported when creating TorchBackend instance
-            // (in case it wasn't imported during module initialization)
             py::module_::import("torch");
             return new qsteedcpp::TorchBackend();
         }), "Create a new TorchBackend instance")

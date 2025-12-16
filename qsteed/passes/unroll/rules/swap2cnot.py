@@ -16,8 +16,11 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import SwapGate, CXGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    Swap as SwapGate,
+    CX as CXGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -37,9 +40,9 @@ class SwapToCNOT(UnrollPass):
         self.original = SwapGate.name.lower()
         self.basis = [CXGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, SwapGate):
+        if op.name == 'swap':
             rule.append(CXGate(op.pos[0], op.pos[1]))
             rule.append(CXGate(op.pos[1], op.pos[0]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
@@ -51,7 +54,7 @@ class SwapToCNOT(UnrollPass):
     # def run(self, circuit: QuantumCircuit) -> QuantumCircuit:
     #     new_circuit = QuantumCircuit(circuit.num)
     #     for op in circuit.gates:
-    #         if isinstance(op, SwapGate):
+    #         if op.name == 'swap':
     #             new_circuit.add_gate(CXGate(op.pos[0], op.pos[1]))
     #             new_circuit.add_gate(CXGate(op.pos[1], op.pos[0]))
     #             new_circuit.add_gate(CXGate(op.pos[0], op.pos[1]))

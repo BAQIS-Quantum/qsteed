@@ -17,9 +17,11 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates.pauli import ZGate
-from quafu.elements.element_gates.rotation import RZGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    Z as ZGate,
+    RZ as RZGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -35,20 +37,20 @@ class ZToRZ(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = ZGate.name.lower()
-        self.basis = [RZGate(0, 0).name.lower()]
+        self.basis = [RZGate.name.lower()]
         self.global_phase = pi / 2
         # qc = QuantumCircuit(1)
         # qc.rz(0, pi)
         # self.circuit = qc
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, ZGate):
+        if op.name == 'z':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
                 pos = op.pos
-            rule.append(RZGate(pos, pi))
+            rule.append(RZGate(pi, pos))
         else:
             rule.append(op)
         self.rule = rule

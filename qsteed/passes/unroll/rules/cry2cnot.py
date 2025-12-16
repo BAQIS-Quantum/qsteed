@@ -16,8 +16,12 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import CRYGate, CXGate, RYGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    CRY as CRYGate,
+    CX as CXGate,
+    RY as RYGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -37,17 +41,17 @@ class CRYToCNOT(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = CRYGate(0, 1, 0).name.lower()
-        self.basis = [CXGate.name.lower(), RYGate(0, 0).name.lower()]
+        self.original = CRYGate.name.lower()
+        self.basis = [CXGate.name.lower(), RYGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, CRYGate):
+        if op.name == 'cry':
             theta = op.paras[0]  # Assuming CRZGate takes one parameter θ
 
-            rule.append(RYGate(op.pos[1], theta / 2))
+            rule.append(RYGate(theta / 2, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(RYGate(op.pos[1], -theta / 2))
+            rule.append(RYGate(-theta / 2, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
         else:
             rule.append(op)

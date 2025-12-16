@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from quafu.elements.parameters import Parameter, ParameterExpression
+from qsteed.qsteedcpp.expression import Parameter, Expr
 
 from qsteed.dag.circuit_dag_convert import dag_to_circuit
 from qsteed.dag.dagcircuit import DAGCircuit
@@ -58,7 +58,7 @@ class ParaSubstitution(BasePass):
 
         para_dict = dict()
         for para in self.para_list:
-            para_dict[f'{para.name}'] = para
+            para_dict[para.get_uuid()] = para
 
         self.para_dict = para_dict
 
@@ -68,49 +68,57 @@ class ParaSubstitution(BasePass):
         # update the parameters in the circuit gates
         self.circuit_update_gates_para(circuit)
 
-        circuit.get_parameter_grads()  # this is optional,you can use the function after  all the compilation passes
+        # circuit.get_parameter_grads()  # this is optional,you can use the function after  all the compilation passes
+        # Parameter gradients are now handled by backends (e.g., TorchBackend)
+
 
         # return the updated quantum circuit.if the input is DAGCircuit, return the new quantum circuit
         return circuit
 
     def update_global_variables(self, circuit):
         """
-        update the global variables in the circuit
+        Update the global variables in the circuit.
+
+        Note: In the new Expression system, circuit.variables is a read-only property
+        that is automatically computed from gates' parameters via get_variables().
+        Manual updates are no longer needed.
         """
-        circuit._variables = list(self.para_dict.values())
+        # No-op: variables are now automatically computed from gates
+        pass
 
     def circuit_update_gates_para(self, circuit):
         """
         Update all gate parameters in the circuit.
-        """
 
-        for gate in circuit.gates:
-            gate = self.update_gate_para(gate)
+        Note: In the new Expression system, gate.paras is read-only and
+        parameter management is handled by backends (e.g., TorchBackend).
+        This method is kept for compatibility but does nothing.
+        """
+        # No-op: parameter binding is now handled at backend execution time
+        pass
 
     def update_gate_para(self, gate):
         """
         Update the parameters in the gate.
+
+        Note: This is a no-op in the new system. Parameters are identified
+        by UUID and managed by backends.
         """
-        for i, para in enumerate(gate.paras):
-            if isinstance(para, (Parameter, ParameterExpression)):
-                gate.paras[i] = self.update_para_variables(para)
         return gate
 
     @lru_cache(maxsize=128)
     def update_para_variables(self, para):
         """
-        Update the parameters in the Parameter or ParameterExpression variable.
+        Update the parameters in the Parameter or Expr variable.
         """
         if isinstance(para, Parameter):
-            para = self.para_dict[f'{para.name}']
+            para = self.para_dict[para.get_uuid()]
             return para
 
-        elif isinstance(para, ParameterExpression):
-            para.pivot = self.update_para_variables(para.pivot)
-            for i, operand in enumerate(para.operands):
-                if isinstance(operand, (Parameter, ParameterExpression)):
-                    para.operands[i] = self.update_para_variables(operand)
-
+        elif isinstance(para, Expr):
+            # Expr is immutable in qsteedcpp, cannot modify in-place
+            # For now, just return the para as is
+            # TODO: May need to implement Expr parameter substitution if needed
             return para
 
         else:
@@ -154,7 +162,7 @@ class ParaSubstitutionCached(BasePass):
             circuit = dag_to_circuit(circuit, circuit.circuit_qubits)
 
         if self._para_dict_cache is None:
-            para_dict = {f'{para.name}': para for para in self.para_list}
+            para_dict = {para.get_uuid(): para for para in self.para_list}
             self.para_dict = para_dict
             self._para_dict_cache = para_dict
         else:
@@ -191,25 +199,23 @@ class ParaSubstitutionCached(BasePass):
         gate_id = id(gate)
         if gate_id not in self._gate_para_cache:
             for i, para in enumerate(gate.paras):
-                if isinstance(para, (Parameter, ParameterExpression)):
+                if isinstance(para, (Parameter, Expr)):
                     gate.paras[i] = self.update_para_variables(para)
             self._gate_para_cache[gate_id] = gate
         return self._gate_para_cache[gate_id]
 
     def update_para_variables(self, para):
         """
-        Update the parameters in the Parameter or ParameterExpression variable.
+        Update the parameters in the Parameter or Expr variable.
         """
         if isinstance(para, Parameter):
-            para = self.para_dict[f'{para.name}']
+            para = self.para_dict[para.get_uuid()]
             return para
 
-        elif isinstance(para, ParameterExpression):
-            para.pivot = self.update_para_variables(para.pivot)
-            for i, operand in enumerate(para.operands):
-                if isinstance(operand, (Parameter, ParameterExpression)):
-                    para.operands[i] = self.update_para_variables(operand)
-
+        elif isinstance(para, Expr):
+            # Expr is immutable in qsteedcpp, cannot modify in-place
+            # For now, just return the para as is
+            # TODO: May need to implement Expr parameter substitution if needed
             return para
 
         else:

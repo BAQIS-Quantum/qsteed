@@ -17,9 +17,11 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates.pauli import YGate
-from quafu.elements.element_gates.rotation import RYGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    Y as YGate,
+    RY as RYGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -35,20 +37,20 @@ class YToRY(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = YGate.name.lower()
-        self.basis = [RYGate(0, 0).name.lower()]
+        self.basis = [RYGate.name.lower()]
         self.global_phase = pi / 2
         # qc = QuantumCircuit(1)
         # qc.ry(0, pi)
         # self.circuit = qc
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, YGate):
+        if op.name == 'y':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
                 pos = op.pos
-            rule.append(RYGate(pos, pi))
+            rule.append(RYGate(pi, pos))
         else:
             rule.append(op)
         self.rule = rule

@@ -1,6 +1,6 @@
 #pragma once
-#include "AST/ast.hpp"
-#include "AST/expression.hpp"
+#include "ast.hpp"
+#include "QuantumCircuit/expression/expr.h"
 
 namespace qsteedcpp {
 namespace qarser {
@@ -11,10 +11,10 @@ namespace qarser {
         int index;
 
     public:
-        RegisterRef(const std::string& name) 
+        RegisterRef(const std::string& name)
             : name(name), index(-1) {}
 
-        RegisterRef(const std::string& name, int index) 
+        RegisterRef(const std::string& name, int index)
             : name(name), index(index) {}
 
         bool isRefWholeRegister() const {
@@ -34,15 +34,15 @@ namespace qarser {
     public:
         std::string name;
         std::vector<RegisterRef> qubits;
-        std::vector<std::unique_ptr<Expression>> params;
+        std::vector<Expr> params;
     public:
-        Gate(int line, 
-            const std::string& name, 
-            std::vector<std::unique_ptr<Expression>>&& params,
+        Gate(int line,
+            const std::string& name,
+            std::vector<Expr>&& params,
             const std::vector<RegisterRef>& qubits
         )
-            : Statement(line), 
-                name(name), 
+            : Statement(line),
+                name(name),
                 params(std::move(params)),
                 qubits(qubits) {}
 

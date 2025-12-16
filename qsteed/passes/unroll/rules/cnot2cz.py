@@ -16,8 +16,12 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import CZGate, CXGate, HGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction, 
+    CZ as CZGate, 
+    CX as CXGate, 
+    H as HGate
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -38,9 +42,9 @@ class CNOTToCZ(UnrollPass):
         self.original = CXGate.name.lower()
         self.basis = [CZGate.name.lower(), HGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, CXGate):
+        if op.name in ['cx', 'cnot']:
             rule.append(HGate(op.pos[1]))
             rule.append(CZGate(op.pos[0], op.pos[1]))
             rule.append(HGate(op.pos[1]))

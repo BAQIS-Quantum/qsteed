@@ -17,8 +17,13 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import RYYGate, CXGate, RZGate, RXGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    RYY as RYYGate,
+    CX as CXGate,
+    RZ as RZGate,
+    RX as RXGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -37,23 +42,23 @@ class RYYToCNOT(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.parameter_type = 'parameterized_gate'
-        self.original = RYYGate(0, 1, 0).name.lower()
-        self.basis = [CXGate.name.lower(), RXGate(0, 0).name.lower(), RZGate(0, 0).name.lower()]
+        self.original = RYYGate.name.lower()
+        self.basis = [CXGate.name.lower(), RXGate.name.lower(), RZGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, RYYGate):
+        if op.name == 'ryy':
             if isinstance(op.paras, list):
                 paras = op.paras[0]
             else:
                 paras = op.paras
-            rule.append(RXGate(op.pos[0], pi / 2))
-            rule.append(RXGate(op.pos[1], pi / 2))
+            rule.append(RXGate(pi / 2, op.pos[0]))
+            rule.append(RXGate(pi / 2, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(RZGate(op.pos[1], paras))
+            rule.append(RZGate(paras, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(RXGate(op.pos[0], -pi / 2))
-            rule.append(RXGate(op.pos[1], -pi / 2))
+            rule.append(RXGate(-pi / 2, op.pos[0]))
+            rule.append(RXGate(-pi / 2, op.pos[1]))
         else:
             rule.append(op)
         self.rule = rule
@@ -62,14 +67,14 @@ class RYYToCNOT(UnrollPass):
     # def run(self, circuit: QuantumCircuit) -> QuantumCircuit:
     #     new_circuit = QuantumCircuit(circuit.num)
     #     for op in circuit.gates:
-    #         if isinstance(op, RYYGate):
-    #             new_circuit.add_gate(RXGate(op.pos[0],np.pi/2))
-    #             new_circuit.add_gate(RXGate(op.pos[1],np.pi/2))
+    #         if op.name == 'ryy':
+    #             new_circuit.add_gate(RXGate(np.pi/2, op.pos[0]))
+    #             new_circuit.add_gate(RXGate(np.pi/2, op.pos[1]))
     #             new_circuit.add_gate(CXGate(op.pos[0], op.pos[1]))
     #             new_circuit.add_gate(RZGate(op.pos[1],op.paras))
     #             new_circuit.add_gate(CXGate(op.pos[0], op.pos[1]))
-    #             new_circuit.add_gate(RXGate(op.pos[0],-np.pi/2))
-    #             new_circuit.add_gate(RXGate(op.pos[1],-np.pi/2))
+    #             new_circuit.add_gate(RXGate(-np.pi/2, op.pos[0]))
+    #             new_circuit.add_gate(RXGate(-np.pi/2, op.pos[1]))
     #         else:
     #             new_circuit.add_gate(op)
     #     return new_circuit

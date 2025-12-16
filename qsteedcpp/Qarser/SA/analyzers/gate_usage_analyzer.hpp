@@ -1,6 +1,6 @@
 #pragma once    
-#include "SA/analyzers/base_analyzer.hpp"
-#include "AST/gate.hpp"
+#include "Qarser/SA/analyzers/base_analyzer.hpp"
+#include "Qarser/AST/gate.hpp"
 
 
 namespace qsteedcpp {

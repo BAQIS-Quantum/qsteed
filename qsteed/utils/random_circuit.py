@@ -18,9 +18,13 @@ import random
 from collections import defaultdict
 from math import pi
 
-from quafu import QuantumCircuit
-from quafu.elements.element_gates import QuantumGate
-from quafu.elements.element_gates import pauli
+# from quafu import QuantumCircuit
+# from quafu.elements.element_gates import QuantumGate
+# from quafu.elements.element_gates import pauli
+from qsteed.qsteedcpp import QuantumCircuit, Id
+from qsteed.utils.gates import gate_classes
+
+
 
 
 class RandomCircuit:
@@ -44,48 +48,56 @@ class RandomCircuit:
         gate = random.choice(self.gates_list)
         if gate.lower() in gates_group['1-qubit-constant']:
             pos = random.choice(qubits)
-            self._circuit.add_gate(QuantumGate.gate_classes[gate](pos))
+            # self._circuit.add_gate(QuantumGate.gate_classes[gate](pos))
+            self._circuit.append(gate_classes[gate](pos))
             used_qubits.add(pos)
         elif gate.lower() in gates_group['1-qubit-parameterized']:
             if gate.lower() != 'u3':
                 pos = random.choice(qubits)
                 para = random.uniform(0, 2 * pi)
-                self._circuit.add_gate(QuantumGate.gate_classes[gate](pos, para))
+                # self._circuit.add_gate(QuantumGate.gate_classes[gate](pos, para))
+                self._circuit.append(gate_classes[gate](para, pos))
                 used_qubits.add(pos)
             else:
                 pos = random.choice(qubits)
                 para = [random.uniform(0, 2 * pi) for _ in range(3)]
-                self._circuit.add_gate(QuantumGate.gate_classes[gate](pos, para[0], para[1], para[2]))
+                # self._circuit.add_gate(QuantumGate.gate_classes[gate](pos, para[0], para[1], para[2]))
+                self._circuit.append(gate_classes[gate](para[0], para[1], para[2], pos))
                 used_qubits.add(pos)
         elif gate.lower() in gates_group['2-qubit-constant']:
             pos = random.sample(qubits, 2)
-            self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[0], pos[1]))
+            # self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[0], pos[1]))
+            self._circuit.append(gate_classes[gate](pos[0], pos[1]))
             [used_qubits.add(i) for i in pos]
         elif gate.lower() in gates_group['2-qubit-parameterized']:
             pos = random.sample(qubits, 2)
             para = random.uniform(0, 2 * pi)
-            self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[0], pos[1], para))
+            # self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[0], pos[1], para))
+            self._circuit.append(gate_classes[gate](para, pos[0], pos[1]))
             [used_qubits.add(i) for i in pos]
         elif gate.lower() in gates_group['3-qubit-constant']:
             pos = random.sample(qubits, 3)
-            self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[0], pos[1], pos[2]))
+            # self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[0], pos[1], pos[2]))
+            self._circuit.append(gate_classes[gate](pos[0], pos[1], pos[2]))
             [used_qubits.add(i) for i in pos]
         elif gate.lower() in gates_group['multi-qubit-constant']:
             if gate.lower() in ['mcx', 'mcy', 'mcz']:
                 pos = random.sample(qubits, self.max_qubit)
-                self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[1:], pos[0]))
+                # self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[1:], pos[0]))
+                self._circuit.append(gate_classes[gate](pos[1:], pos[0]))
                 [used_qubits.add(i) for i in pos]
             elif gate.lower() in ['mcrx', 'mcry', 'mcrz']:
                 pos = random.sample(qubits, self.max_qubit)
                 para = random.uniform(0, 2 * pi)
-                self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[1:], pos[0], para))
+                # self._circuit.add_gate(QuantumGate.gate_classes[gate](pos[1:], pos[0], para))
+                self._circuit.append(gate_classes[gate](pos[1:], pos[0], para))
                 [used_qubits.add(i) for i in pos]
         else:
             raise NameError("Error: %s gate does not support." % (gate.lower()))
 
     def random_circuit_gates(self) -> QuantumCircuit:
         if self.gates_list is None:
-            self.gates_list = list(QuantumGate.gate_classes.keys())
+            self.gates_list = list(gate_classes.keys())
         gates_group = self.gates_group
 
         qubits = [q for q in range(self.num_qubit)]
@@ -98,12 +110,13 @@ class RandomCircuit:
         unused_qubits = list(set(qubits) - set(used_qubits))
         if unused_qubits:  # If the qubit is not used, add the IdGate gate.
             for pos in unused_qubits:
-                self._circuit.add_gate(pauli.IdGate(pos))
+                # self._circuit.add_gate(pauli.IdGate(pos))
+                self._circuit.append(Id(pos))
         return self._circuit
 
     def random_circuit_depth(self) -> QuantumCircuit:
         if self.gates_list is None:
-            self.gates_list = list(QuantumGate.gate_classes.keys())
+            self.gates_list = list(gate_classes.keys())
 
         gates_group = self.gates_group
 
@@ -119,7 +132,7 @@ class RandomCircuit:
         unused_qubits = list(set(qubits) - set(used_qubits))
         if unused_qubits:  # If the qubit is not used, add the IdGate gate.
             for pos in unused_qubits:
-                self._circuit.add_gate(pauli.IdGate(pos))
+                self._circuit.add_gate(Id(pos))
         return self._circuit
 
     def random_circuit(self):
@@ -138,7 +151,7 @@ class RandomCircuit:
     @property
     def gates_group(self):
         _gates_group = defaultdict(list)
-        for gate_name in list(QuantumGate.gate_classes.keys()):
+        for gate_name in list(gate_classes.keys()):
             if gate_name in ['id', 'x', 'y', 'z', 's', 'sdg', 't', 'tdg', 'sx', 'sxdg', 'sy', 'sydg', 'h',
                              'w', 'sw', 'swdg']:
                 _gates_group['1-qubit-constant'].append(gate_name)

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from quafu import QuantumCircuit
+from qsteed.qsteedcpp import QuantumCircuit
 
 
 def reverse_circuit(circuit: QuantumCircuit):
@@ -33,5 +33,6 @@ def reverse_circuit(circuit: QuantumCircuit):
             rev_circuit.measure([qubit], [cbit])
 
     for gate in circuit.gates[::-1]:
-        rev_circuit.add_gate(gate)
+        # rev_circuit.add_gate(gate)
+        rev_circuit.append(gate)
     return rev_circuit

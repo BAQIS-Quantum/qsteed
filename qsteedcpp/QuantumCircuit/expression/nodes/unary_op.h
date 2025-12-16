@@ -25,7 +25,7 @@ public:
         return operand_->get_parameter_uuids();
     }
 
-    std::string to_string() const override {
+    std::string to_string(bool numeric_params = false) const override {
         std::string op_str;
         switch (op_) {
             case UnaryOpType::NEG:  op_str = "-"; break;
@@ -37,9 +37,9 @@ public:
             case UnaryOpType::SQRT: op_str = "sqrt"; break;
         }
         if (op_ == UnaryOpType::NEG) {
-            return "-" + operand_->to_string();
+            return "-" + operand_->to_string(numeric_params);
         }
-        return op_str + "(" + operand_->to_string() + ")";
+        return op_str + "(" + operand_->to_string(numeric_params) + ")";
     }
 
     std::shared_ptr<Expression> clone() const override {

@@ -18,9 +18,18 @@ from math import pi
 from typing import List
 
 import numpy as np
-from quafu.elements import Instruction
-from quafu.elements.element_gates import MCRYGate, CXGate, ToffoliGate, CPGate, SdgGate, SGate, HGate, CYGate, RYGate
-
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    MCRY as MCRYGate,
+    CX as CXGate,
+    Toffoli as ToffoliGate,
+    CP as CPGate,
+    Sdg as SdgGate,
+    S as SGate,
+    H as HGate,
+    CY as CYGate,
+    RY as RYGate,
+)
 from qsteed.passes.basepass import UnrollPass
 
 
@@ -41,13 +50,13 @@ class MCRYToCNOT(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = MCRYGate([0, 1], 2, 0).name.lower()
-        self.basis = [CXGate.name.lower(), SdgGate.name.lower(), SGate.name.lower(), CPGate(0, 1, 0).name.lower(),
-                      CYGate.name.lower(), ToffoliGate(0, 1, 2).name.lower(), RYGate(0, 0).name.lower()]
+        self.original = MCRYGate.name.lower()
+        self.basis = [CXGate.name.lower(), SdgGate.name.lower(), SGate.name.lower(), CPGate.name.lower(),
+                      CYGate.name.lower(), ToffoliGate.name.lower(), RYGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, MCRYGate):
+        if op.name == 'mcry':
             control_bits = op.ctrls
             if isinstance(op.targs, list):
                 target_bit = op.targs[0]
@@ -61,11 +70,11 @@ class MCRYToCNOT(UnrollPass):
             if len(control_bits) == 1:
                 rule.append(CYGate(control_bits[0], target_bit))
             elif len(control_bits) == 2:
-                rule.append(RYGate(target_bit, theta / 2))
+                rule.append(RYGate(theta / 2, target_bit))
                 rule.append(SdgGate(target_bit))
                 rule.append(ToffoliGate(control_bits[0], control_bits[1], target_bit))
                 rule.append(SGate(target_bit))
-                rule.append(RYGate(target_bit, -theta / 2))
+                rule.append(RYGate(-theta / 2, target_bit))
                 rule.append(SdgGate(target_bit))
                 rule.append(ToffoliGate(control_bits[0], control_bits[1], target_bit))
                 rule.append(SGate(target_bit))
@@ -73,7 +82,7 @@ class MCRYToCNOT(UnrollPass):
                 graycode = self.build_gray_code(len(control_bits))
                 theta = pi / 2 ** (len(control_bits) - 1)
                 last_code = graycode[0, :]
-                rule.append(RYGate(target_bit, theta / 2))
+                rule.append(RYGate(theta / 2, target_bit))
                 rule.append(SdgGate(target_bit))
                 rule.append(HGate(target_bit))
 
@@ -88,14 +97,14 @@ class MCRYToCNOT(UnrollPass):
                         next_idx = ones_bits[1]
                         rule.append(CXGate(control_bits[next_idx], control_bits[set_idx]))
                     if np.sum(code) % 2 == 0:
-                        rule.append(CPGate(control_bits[set_idx], target_bit, -theta))
+                        rule.append(CPGate(-theta, control_bits[set_idx], target_bit))
                     else:
-                        rule.append(CPGate(control_bits[set_idx], target_bit, theta))
+                        rule.append(CPGate(theta, control_bits[set_idx], target_bit))
                     last_code = code
 
                 rule.append(HGate(target_bit))
                 rule.append(SGate(target_bit))
-                rule.append(RYGate(target_bit, -theta / 2))
+                rule.append(RYGate(-theta / 2, target_bit))
                 rule.append(SdgGate(target_bit))
                 rule.append(HGate(target_bit))
 
@@ -110,9 +119,9 @@ class MCRYToCNOT(UnrollPass):
                         next_idx = ones_bits[1]
                         rule.append(CXGate(control_bits[next_idx], control_bits[set_idx]))
                     if np.sum(code) % 2 == 0:
-                        rule.append(CPGate(control_bits[set_idx], target_bit, -theta))
+                        rule.append(CPGate(-theta, control_bits[set_idx], target_bit))
                     else:
-                        rule.append(CPGate(control_bits[set_idx], target_bit, theta))
+                        rule.append(CPGate(theta, control_bits[set_idx], target_bit))
                     last_code = code
 
                 rule.append(HGate(target_bit))

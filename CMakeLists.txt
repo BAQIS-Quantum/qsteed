@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.15...3.29)
 project(qsteed LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -152,9 +152,17 @@ endif()
 # Try to find Torch (will succeed if user did pip install qsteed[torch])
 find_package(Torch QUIET)
 
-if(BUILD_TORCH_BACKEND OR Torch_FOUND)
-    if(Torch_FOUND)
-        message(STATUS "=== Torch detected, building Torch Backend ===")
+# Check if torch is actually importable by the Python in the build environment
+execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" -c "import torch"
+    RESULT_VARIABLE _python_can_import_torch
+    OUTPUT_QUIET
+    ERROR_QUIET
+)
+
+if(BUILD_TORCH_BACKEND OR (Torch_FOUND AND _python_can_import_torch EQUAL 0))
+    if(Torch_FOUND AND _python_can_import_torch EQUAL 0)
+        message(STATUS "=== Torch detected and importable, building Torch Backend ===")
         message(STATUS "  - Torch version: ${Torch_VERSION}")
         message(STATUS "  - Torch libraries: ${TORCH_LIBRARIES}")
 
@@ -162,11 +170,18 @@ if(BUILD_TORCH_BACKEND OR Torch_FOUND)
         add_subdirectory(qsteedcpp/backends)
         set(TORCH_BACKEND_BINDINGS "${QSTEED_CPP_DIR}/backends/torch/bindings.cpp")
     else()
-        message(STATUS "BUILD_TORCH_BACKEND=ON but Torch not found!")
-        message(FATAL_ERROR "Please install PyTorch: pip install torch")
+        if(BUILD_TORCH_BACKEND)
+            message(FATAL_ERROR "BUILD_TORCH_BACKEND=ON but torch library not found or not importable by Python build environment. Please ensure PyTorch is installed (e.g., 'pip install torch').")
+        else()
+            # This case happens if CMake finds Torch but the build Python can't import it.
+            # We silently skip the backend to avoid build errors.
+            message(STATUS "=== Torch found by CMake, but not importable by Python build environment. Skipping backend. ===")
+            message(STATUS "  To enable, ensure 'torch' is in your build environment.")
+            set(TORCH_BACKEND_BINDINGS "")
+        endif()
     endif()
 else()
-    message(STATUS "=== Torch not found, skipping Torch Backend ===")
+    message(STATUS "=== Torch not found or not importable, skipping Torch Backend ===")
     message(STATUS "  To enable: pip install qsteed[torch]")
     set(TORCH_BACKEND_BINDINGS "")
 endif()
@@ -217,21 +232,32 @@ if(SKBUILD)
     message(STATUS "Target: ${target}")
     message(STATUS "Stub output dir: ${CMAKE_CURRENT_BINARY_DIR}/stubs/")
 
+    set(STUB_OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/stubs/${target}.pyi")
     add_custom_command(
         TARGET ${target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/stubs"
         COMMAND ${PYTHON_EXECUTABLE} -m pybind11_stubgen ${target} -o ${CMAKE_CURRENT_BINARY_DIR}/stubs/
+        COMMAND ${CMAKE_COMMAND} -E echo "✓ Stub file generated: ${STUB_OUTPUT_FILE}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating type stubs for ${target} module"
         VERBATIM
     )
 
     # Install the generated .pyi stub file alongside the .so file
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stubs/${target}.pyi
+    set(STUB_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/qsteed/${target}.pyi")
+    install(FILES ${STUB_OUTPUT_FILE}
             DESTINATION qsteed
             OPTIONAL
     )
 
+    # Print installation info at install time
+    install(CODE "message(STATUS \"✓ Installing stub file: ${STUB_OUTPUT_FILE}\")")
+    install(CODE "message(STATUS \"  to: ${STUB_INSTALL_PATH}\")")
+
     message(STATUS "Stub generation and install configured")
+    message(STATUS "Stub file will be installed to: ${STUB_INSTALL_PATH}")
+    message(STATUS "  Generated stub: ${STUB_OUTPUT_FILE}")
+    message(STATUS "  Install destination: qsteed/ (relative to CMAKE_INSTALL_PREFIX)")
 else()
     message(STATUS "=== NOT in SKBUILD mode, skipping stub generation ===")
 endif()

@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include "AST/visitor.hpp"
+#include "visitor.hpp"
 
 namespace qsteedcpp {
 namespace qarser {

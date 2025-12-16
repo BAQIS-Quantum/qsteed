@@ -17,8 +17,11 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import RZGate, TdgGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    RZ as RZGate,
+    Tdg as TdgGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -34,17 +37,17 @@ class TdgToRZ(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = TdgGate.name.lower()
-        self.basis = [RZGate(0, 0).name.lower()]
+        self.basis = [RZGate.name.lower()]
         self.global_phase = 15 * pi / 8
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, TdgGate):
+        if op.name == 'tdg':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
                 pos = op.pos
-            rule.append(RZGate(pos, -pi / 4))
+            rule.append(RZGate(-pi / 4, pos))
         else:
             rule.append(op)
         self.rule = rule

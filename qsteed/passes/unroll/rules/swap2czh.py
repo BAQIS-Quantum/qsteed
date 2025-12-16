@@ -16,8 +16,12 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import SwapGate, CZGate, HGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    Swap as SwapGate,
+    CZ as CZGate,
+    H as HGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -37,9 +41,9 @@ class SwapToCZH(UnrollPass):
         self.original = SwapGate.name.lower()
         self.basis = [CZGate.name.lower(), HGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, SwapGate):
+        if op.name == 'swap':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:

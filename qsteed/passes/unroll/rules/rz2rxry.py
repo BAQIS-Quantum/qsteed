@@ -18,8 +18,12 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import RXGate, RYGate, RZGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    RX as RXGate,
+    RY as RYGate,
+    RZ as RZGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -34,12 +38,12 @@ class RZToRXRY(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = RZGate(0, 0).name.lower()
-        self.basis = [RYGate(0, 0).name.lower(), RXGate(0, 0).name.lower()]
+        self.original = RZGate.name.lower()
+        self.basis = [RYGate.name.lower(), RXGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, RZGate):
+        if op.name == 'rz':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
@@ -48,9 +52,9 @@ class RZToRXRY(UnrollPass):
                 paras = op.paras[0]
             else:
                 paras = op.paras
-            rule.append(RXGate(pos, pi / 2))
-            rule.append(RYGate(pos, -paras))
-            rule.append(RXGate(pos, -pi / 2))
+            rule.append(RXGate(pi / 2, pos))
+            rule.append(RYGate(-paras, pos))
+            rule.append(RXGate(-pi / 2, pos))
         else:
             rule.append(op)
         self.rule = rule

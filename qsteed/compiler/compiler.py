@@ -21,7 +21,8 @@ import re
 import time
 from functools import reduce
 
-from quafu import QuantumCircuit as quafuQC
+# from quafu import QuantumCircuit as quafuQC
+from qsteed.qsteedcpp import QuantumCircuit as quafuQC
 
 from qsteed.backends.backend import Backend
 from qsteed.compiler.program_verification import check_openqasm

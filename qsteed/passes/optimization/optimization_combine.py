@@ -16,7 +16,7 @@
 
 import copy
 
-from quafu import QuantumCircuit
+from qsteed.qsteedcpp import QuantumCircuit
 
 from qsteed.dag.circuit_dag_convert import circuit_to_dag, dag_to_circuit
 from qsteed.dag.dagcircuit import DAGCircuit

@@ -16,8 +16,14 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import ToffoliGate, CXGate, HGate, TGate, TdgGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    Toffoli as ToffoliGate,
+    CX as CXGate,
+    H as HGate,
+    T as TGate,
+    Tdg as TdgGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -36,12 +42,12 @@ class ToffoliToCNOT(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = ToffoliGate(0, 1, 2).name.lower()
+        self.original = ToffoliGate.name.lower()
         self.basis = [CXGate.name.lower(), HGate.name.lower(), TGate.name.lower(), TdgGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, ToffoliGate):
+        if op.name in ['toffoli', 'ccx']:
             rule.append(HGate(op.pos[2]))
             rule.append(CXGate(op.pos[1], op.pos[2]))
             rule.append(TdgGate(op.pos[2]))
@@ -77,12 +83,12 @@ class ToffoliToCNOT8(UnrollPass):
 
     def __init__(self) -> None:
         super().__init__()
-        self.original = ToffoliGate(0, 1, 2).name.lower()
+        self.original = ToffoliGate.name.lower()
         self.basis = [CXGate.name.lower(), HGate.name.lower(), TGate.name.lower(), TdgGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, ToffoliGate):
+        if op.name in ['toffoli', 'ccx']:
             rule.append(HGate(op.pos[2]))
             rule.append(TGate(op.pos[0]))
             rule.append(TGate(op.pos[1]))

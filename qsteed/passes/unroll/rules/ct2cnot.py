@@ -17,8 +17,12 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import CTGate, CXGate, PhaseGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    CT as CTGate,
+    CX as CXGate,
+    Phase as PhaseGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -37,16 +41,16 @@ class CTToCNOT(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = CTGate.name.lower()
-        self.basis = [CXGate.name.lower(), PhaseGate(0, 0).name.lower()]
+        self.basis = [CXGate.name.lower(), PhaseGate.name.lower()]
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, CTGate):
-            rule.append(PhaseGate(op.pos[0], pi / 8))
+        if op.name == 'ct':
+            rule.append(PhaseGate(pi / 8, op.pos[0]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(PhaseGate(op.pos[1], -pi / 8))
+            rule.append(PhaseGate(-pi / 8, op.pos[1]))
             rule.append(CXGate(op.pos[0], op.pos[1]))
-            rule.append(PhaseGate(op.pos[1], pi / 8))
+            rule.append(PhaseGate(pi / 8, op.pos[1]))
         else:
             rule.append(op)
         self.rule = rule

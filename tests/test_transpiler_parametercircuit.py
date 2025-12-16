@@ -14,8 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from quafu import QuantumCircuit
-from quafu.elements.parameters import Parameter
+# from quafu import QuantumCircuit
+# from quafu.elements.parameters import Parameter
+from qsteed.qsteedcpp import QuantumCircuit
+from qsteed.qsteedcpp.expression import Parameter
 
 from qsteed.passes.ParameterTuning.parametersubstitution import ParaSubstitution
 from qsteed.passes.mapping.layout.sabre_layout import SabreLayout
@@ -29,10 +31,11 @@ from tests.shared_utils import get_initial_model
 
 
 def order_variables_indices(circuit: QuantumCircuit, initial_variables: list = None):
-    circuit.get_parameter_grads()
-    transpiled_variables = circuit._variables
-    initial_order = {item.name: i for i, item in enumerate(initial_variables)}
-    order_indices = [initial_order[x.name] for x in transpiled_variables]
+    # circuit.get_parameter_grads()
+    transpiled_variables = circuit.variables
+    # Use UUID instead of name for parameter identification (new Expression system)
+    initial_order = {item.get_uuid(): i for i, item in enumerate(initial_variables)}
+    order_indices = [initial_order[x.get_uuid()] for x in transpiled_variables]
     return order_indices
 
 
@@ -41,25 +44,26 @@ class TestParameterizedCircuitTranspile:
     def test_parameterized_circuit_transpile(self):
         # Create parameterized circuit
         pq = QuantumCircuit(5)
-        theta = [Parameter("theta_%d" % i, 0.1) for i in range(10)]
+        # theta = [Parameter("theta_%d" % i, 0.1) for i in range(10)]
+        theta = [Parameter(0.1) for i in range(10)]
         theta[4].value = 3.3
-        pq.rx(1, 0.8)
-        pq.rx(1, theta[2] * theta[4] * theta[3])
-        pq.rx(1, 2 * theta[4])
-        pq.ry(2, theta[5] + 0.9)
-        pq.rx(3, theta[6])
-        pq.rx(4, theta[7])
-        pq.rxx(0, 3, theta[0])
-        pq.rzz(2, 3, theta[8])
-        pq.rzz(0, 2, theta[4])
-        pq.rx(0, theta[9])
-        pq.rx(0, 3.5)
+        pq.rx(0.8, 1)
+        pq.rx(theta[2] * theta[4] * theta[3], 1)
+        pq.rx(2 * theta[4], 1)
+        pq.ry(theta[5] + 0.9, 2)
+        pq.rx(theta[6], 3)
+        pq.rx(theta[7], 4)
+        pq.rxx(theta[0], 0, 3)
+        pq.rzz(theta[8], 2, 3)
+        pq.rzz(theta[4], 0, 2)
+        pq.rx(theta[9], 0)
+        pq.rx(3.5, 0)
         pq.cx(3, 4)
-        pq.ry(2, theta[1].sin() - 4. * theta[0] + theta[2] * theta[0] + 2.5)
-        pq.rx(2, theta[1] - 4. * theta[0] + theta[2] * theta[0])
+        pq.ry(theta[1].sin() - 4. * theta[0] + theta[2] * theta[0] + 2.5, 2)
+        pq.rx(theta[1] - 4. * theta[0] + theta[2] * theta[0], 2)
         pq.measure([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])
         print("original circuit:")
-        pq.draw_circuit()
+        # pq.draw_circuit()
 
         passes = [
             UnrollTo2Qubit(),
@@ -75,21 +79,26 @@ class TestParameterizedCircuitTranspile:
         transpiler = Transpiler(passflow, initial_model)
         transpiled_circuit = transpiler.transpile(pq)
         assert transpiled_circuit is not None
-        transpiled_circuit.draw_circuit()
+        # transpiled_circuit.draw_circuit()
 
         initial_variables = transpiler.model.datadict['variables']
         assert initial_variables is not None
         print("Initial circuit variables:", initial_variables)
-        print("Compiled circuit variables:", transpiled_circuit._variables)
+        # print("Compiled circuit variables:", transpiled_circuit._variables)
+        print("Compiled circuit variables:", transpiled_circuit.variables)
 
         # After transpilation, the parameters order may be changed,
         # if we want easily update the parameter in the order of the original parameters,
         # we need to get the order map relation between the original parameters and the transpiled parameters
-        transpiled_circuit.get_parameter_grads()
+        # transpiled_circuit.get_parameter_grads()
         order_indices = order_variables_indices(transpiled_circuit, initial_variables)
         assert order_indices is not None
 
         update_initial_variables = [0, 0, 0, 9, 0, 0, 0, 0, 0, 0]
-        transpiled_circuit._update_params(update_initial_variables, order=order_indices)
+
+        # transpiled_circuit._update_params(update_initial_variables, order=order_indices)
+        for i, new_value in enumerate(update_initial_variables):
+            initial_variables[i].set_value(new_value)
+
         print('Compiled circuit updated parameters:')
-        transpiled_circuit.draw_circuit()
+        # transpiled_circuit.draw_circuit()

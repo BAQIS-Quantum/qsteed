@@ -17,8 +17,7 @@
 from abc import ABC, abstractmethod
 from typing import Union
 
-from quafu import QuantumCircuit
-from quafu.elements import Instruction
+from qsteed.qsteedcpp import QuantumCircuit
 
 from qsteed.dag.dagcircuit import DAGCircuit
 
@@ -29,7 +28,7 @@ class BasePass(ABC):
     """
 
     @abstractmethod
-    def run(self, circuit: Union[QuantumCircuit, DAGCircuit, Instruction]):
+    def run(self, circuit: Union[QuantumCircuit, DAGCircuit]):
         pass
 
 
@@ -46,5 +45,5 @@ class UnrollPass(BasePass):
         self.global_phase = 0
 
     @abstractmethod
-    def run(self, circuit: Union[QuantumCircuit, DAGCircuit, Instruction]):
+    def run(self, circuit: Union[QuantumCircuit, DAGCircuit]):
         pass

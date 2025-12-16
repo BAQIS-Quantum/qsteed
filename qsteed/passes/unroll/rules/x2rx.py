@@ -17,9 +17,11 @@
 from math import pi
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates.pauli import XGate
-from quafu.elements.element_gates.rotation import RXGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    X as XGate,
+    RX as RXGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -35,20 +37,20 @@ class XToRX(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.original = XGate.name.lower()
-        self.basis = [RXGate(0, 0).name.lower()]
+        self.basis = [RXGate.name.lower()]
         self.global_phase = pi / 2
         # qc = QuantumCircuit(1)
         # qc.rx(0, pi)
         # self.circuit = qc
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, XGate):
+        if op.name == 'x':
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
                 pos = op.pos
-            rule.append(RXGate(pos, pi))
+            rule.append(RXGate(pi, pos))
         else:
             rule.append(op)
         self.rule = rule

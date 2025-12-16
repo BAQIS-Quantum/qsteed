@@ -16,9 +16,11 @@
 
 from typing import List
 
-from quafu.elements import Instruction
-from quafu.elements.element_gates import PhaseGate
-from quafu.elements.element_gates.rotation import RZGate
+from qsteed.qsteedcpp import (
+    CircuitInstruction,
+    Phase as PhaseGate,
+    RZ as RZGate,
+)
 
 from qsteed.passes.basepass import UnrollPass
 
@@ -35,21 +37,21 @@ class PhaseToRZ(UnrollPass):
     def __init__(self) -> None:
         super().__init__()
         self.parameter_type = 'parameterized_gate'
-        self.original = PhaseGate(0, 0).name.lower()
-        self.basis = [RZGate(0, 0).name.lower()]
+        self.original = PhaseGate.name.lower()
+        self.basis = [RZGate.name.lower()]
         self.global_phase = 'lambda/2'
         # qc = QuantumCircuit(1)
         # qc.rz(0, lambda)
         # self.circuit = qc
 
-    def run(self, op: Instruction) -> List[Instruction]:
+    def run(self, op: CircuitInstruction) -> List[CircuitInstruction]:
         rule = []
-        if isinstance(op, PhaseGate):
+        if op.name in ['p', 'phase']:
             if isinstance(op.paras, list):
                 paras = op.paras[0]
             else:
                 paras = op.paras
-            rule.append(RZGate(op.pos[0], paras))
+            rule.append(RZGate(paras, op.pos[0]))
             self.global_phase = paras / 2
         else:
             rule.append(op)
