@@ -17,7 +17,7 @@
 # from quafu import QuantumCircuit
 # from quafu.elements.parameters import Parameter
 from qsteed.qsteedcpp import QuantumCircuit
-from qsteed.qsteedcpp.expression import Parameter
+from qsteed.qsteedcpp import Parameter
 
 from qsteed.passes.ParameterTuning.parametersubstitution import ParaSubstitution
 from qsteed.passes.mapping.layout.sabre_layout import SabreLayout

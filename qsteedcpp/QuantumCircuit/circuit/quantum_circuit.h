@@ -5,8 +5,8 @@
 #include <set>
 #include <cmath>
 #include <map>
-#include "circuit_instruction.h"
-#include "expression/expr.h"
+#include "QuantumCircuit/circuit/circuit_instruction.h"
+#include "QuantumCircuit/expression/expr.h"
 
 
 namespace qsteedcpp {

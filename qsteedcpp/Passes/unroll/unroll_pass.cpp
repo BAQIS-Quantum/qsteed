@@ -1,8 +1,7 @@
-#include "unroll/unroll_pass.h"
-#include "unroll/decomposition_rules.h"
-#include "circuit/quantum_circuit.h"
+#include "Passes/unroll/unroll_pass.h"
+#include "Passes/unroll/decomposition_rules.h"
+#include "QuantumCircuit/circuit/quantum_circuit.h"
 #include <algorithm>
-#include <iostream>
 
 namespace qsteedcpp {
 

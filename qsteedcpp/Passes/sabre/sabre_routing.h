@@ -6,7 +6,7 @@
 #include "model/model.h"
 #include "model/coupling.h"
 #include "model/layout.h"
-#include "DAG/dag.h"
+#include "QuantumCircuit/DAG/dag.h"
 
 namespace sabre {
 

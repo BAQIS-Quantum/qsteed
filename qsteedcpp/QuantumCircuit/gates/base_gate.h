@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <set>
-#include "expression/expr.h"
+#include "QuantumCircuit/expression/expr.h"
 #include "QuantumCircuit/gates/matrix.hpp"
 
 namespace qsteedcpp {

@@ -9,11 +9,7 @@ namespace py = pybind11;
 using namespace qsteedcpp;
 
 void bind_expressions(py::module& m) {
-    // Create expression submodule
-    py::module expr_module = m.def_submodule("expression", "Expression system for parametric quantum circuits");
-
-     // pre declaration of Parameter class & Expr class
-     py::class_<Expr> expr_class(expr_module, "Expr",
+     py::class_<Expr> expr_class(m, "Expr",
      "An expression representing a mathematical formula.\n\n"
         "Expr can represent constants, parameters, or mathematical operations\n"
         "on them. It supports arithmetic operations and mathematical functions.\n\n"
@@ -23,7 +19,7 @@ void bind_expressions(py::module& m) {
         "    angle = 2 * theta + phi  # Creates an Expr\n"
         "    qc.rx(angle, 0)");
 
-     py::class_<Parameter, std::shared_ptr<Parameter>> parameter_class(expr_module, "Parameter", 
+     py::class_<Parameter, std::shared_ptr<Parameter>> parameter_class(m, "Parameter", 
         "A trainable or fixed parameter in a quantum circuit.\n\n"
         "Parameters can be used in parametric gates (RX, RY, RZ, etc.) and\n"
         "can be trained using gradient-based optimization when used with\n"
@@ -159,7 +155,7 @@ void bind_expressions(py::module& m) {
 
 
     // Mathematical functions
-    expr_module.def("sin", [](const Expr& e) { return sin(e); },
+    m.def("sin", [](const Expr& e) { return sin(e); },
           py::arg("expr"),
           "Compute sine of an expression.\n\n"
           "Args:\n"
@@ -167,7 +163,7 @@ void bind_expressions(py::module& m) {
           "Returns:\n"
           "    Expr: sin(expr)");
 
-    expr_module.def("cos", [](const Expr& e) { return cos(e); },
+    m.def("cos", [](const Expr& e) { return cos(e); },
           py::arg("expr"),
           "Compute cosine of an expression.\n\n"
           "Args:\n"
@@ -175,7 +171,7 @@ void bind_expressions(py::module& m) {
           "Returns:\n"
           "    Expr: cos(expr)");
 
-    expr_module.def("tan", [](const Expr& e) { return tan(e); },
+    m.def("tan", [](const Expr& e) { return tan(e); },
           py::arg("expr"),
           "Compute tangent of an expression.\n\n"
           "Args:\n"
@@ -183,7 +179,7 @@ void bind_expressions(py::module& m) {
           "Returns:\n"
           "    Expr: tan(expr)");
 
-    expr_module.def("exp", [](const Expr& e) { return exp(e); },
+    m.def("exp", [](const Expr& e) { return exp(e); },
           py::arg("expr"),
           "Compute exponential of an expression.\n\n"
           "Args:\n"
@@ -191,7 +187,7 @@ void bind_expressions(py::module& m) {
           "Returns:\n"
           "    Expr: exp(expr)");
 
-    expr_module.def("log", [](const Expr& e) { return log(e); },
+    m.def("log", [](const Expr& e) { return log(e); },
           py::arg("expr"),
           "Compute natural logarithm of an expression.\n\n"
           "Args:\n"
@@ -199,7 +195,7 @@ void bind_expressions(py::module& m) {
           "Returns:\n"
           "    Expr: log(expr)");
 
-    expr_module.def("sqrt", [](const Expr& e) { return sqrt(e); },
+    m.def("sqrt", [](const Expr& e) { return sqrt(e); },
           py::arg("expr"),
           "Compute square root of an expression.\n\n"
           "Args:\n"
@@ -207,7 +203,7 @@ void bind_expressions(py::module& m) {
           "Returns:\n"
           "    Expr: sqrt(expr)");
 
-    expr_module.def("pow", [](const Expr& base, const Expr& exp) { return pow(base, exp); },
+    m.def("pow", [](const Expr& base, const Expr& exp) { return pow(base, exp); },
           py::arg("base"),
           py::arg("exponent"),
           "Compute power of an expression.\n\n"

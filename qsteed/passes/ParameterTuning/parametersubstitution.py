@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from qsteed.qsteedcpp.expression import Parameter, Expr
+from qsteed.qsteedcpp import Parameter, Expr
 
 from qsteed.dag.circuit_dag_convert import dag_to_circuit
 from qsteed.dag.dagcircuit import DAGCircuit

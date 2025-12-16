@@ -3,7 +3,7 @@
 #include <pybind11/operators.h>
 #include <pybind11/complex.h>
 #include <pybind11/numpy.h>
-#include "gates/base_gate.h"
+#include "QuantumCircuit/gates/base_gate.h"
 
 
 namespace py = pybind11;

@@ -5,7 +5,7 @@
 #include <functional>
 #include <optional>
 #include <set>
-#include "circuit/circuit_instruction.h"
+#include "QuantumCircuit/circuit/circuit_instruction.h"
 
 namespace qsteedcpp {
 

@@ -1,11 +1,8 @@
 #include <iostream>
 #include <sstream>
 #include "quantum_circuit.h"
-#include "gates/standard_gates.h"
+#include "QuantumCircuit/gates/standard_gates.h"
 #include "circuit_drawer.h"
-#include "expression/nodes/binary_op.h"
-#include "expression/nodes/unary_op.h"
-#include "expression/nodes/parameter.h"
 #include "Qarser/parser.h"
 #include "Qarser/SA/analyzer.hpp"
 #include "Qarser/AST/qasm_to_circuit.hpp"

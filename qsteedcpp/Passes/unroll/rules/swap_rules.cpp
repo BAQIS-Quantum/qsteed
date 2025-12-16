@@ -1,6 +1,6 @@
 #include "swap_rules.h"
-#include "unroll/rule_manager.h"
-#include "circuit/circuit_instruction.h"
+#include "Passes/unroll/rule_manager.h"
+#include "QuantumCircuit/circuit/circuit_instruction.h"
 #include "QuantumCircuit/gates/standard_gates.h"
 
 namespace qsteedcpp {

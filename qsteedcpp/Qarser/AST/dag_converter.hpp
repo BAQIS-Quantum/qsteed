@@ -1,7 +1,7 @@
 #pragma once
-#include "AST/ast.hpp"
-#include "AST/gate.hpp"
-#include "AST/visitor.hpp"
+#include "ast.hpp"
+#include "gate.hpp"
+#include "visitor.hpp"
 #include "QuantumCircuit/DAG/dag.h"
 #include <unordered_set>
 

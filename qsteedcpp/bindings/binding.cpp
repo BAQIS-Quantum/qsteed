@@ -1,14 +1,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "sabre/model/backend.h"
-#include "sabre/model/model.h"
-#include "sabre/model/coupling.h"
-#include "sabre/model/layout.h"
-#include "sabre/sabre_core.h"
-#include "sabre/sabre_layout.h"
-#include "sabre/sabre_routing.h"
-#include "DAG/dag.h"
-#include "compiler.h"
+#include "Passes/sabre/model/backend.h"
+#include "Passes/sabre/model/model.h"
+#include "Passes/sabre/model/coupling.h"
+#include "Passes/sabre/model/layout.h"
+#include "Passes/sabre/sabre_core.h"
+#include "Passes/sabre/sabre_layout.h"
+#include "Passes/sabre/sabre_routing.h"
+#include "QuantumCircuit/DAG/dag.h"
+#include "Qarser/compiler.h"
 #include "QuantumCircuit/expression/expr.h"
 #include "QuantumCircuit/expression/nodes/parameter.h"
 

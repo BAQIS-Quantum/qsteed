@@ -67,59 +67,6 @@ else()
 endif()
 
 
-# File filter
-set(QSTEED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qsteedcpp")
-set(QUANTUM_CIRCUIT_DIR "${QSTEED_CPP_DIR}/QuantumCircuit")
-set(QARSER_DIR "${QSTEED_CPP_DIR}/Qarser")
-set(PASSES_DIR "${QSTEED_CPP_DIR}/Passes")
-
-file(GLOB_RECURSE QUANTUM_CIRCUIT_SOURCES "${QUANTUM_CIRCUIT_DIR}/*.cpp")
-file(GLOB_RECURSE QARSER_SOURCES "${QARSER_DIR}/*.cpp")
-file(GLOB_RECURSE PASSES_SOURCES "${PASSES_DIR}/*.cpp")
-
-include_directories(
-  "${QSTEED_CPP_DIR}"
-)
-
-# 1. Build QuantumCircuit module
-add_library(quantum_circuit_lib STATIC ${QUANTUM_CIRCUIT_SOURCES})
-target_include_directories( quantum_circuit_lib PUBLIC
-    "${QUANTUM_CIRCUIT_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/vendor/eigen"
-)
-target_link_libraries( quantum_circuit_lib PUBLIC
-  Boost::headers
-)
-if (BUILD_WITH_GRAPHVIZ)
-  target_link_libraries(quantum_circuit_lib PRIVATE gvc cgraph)
-endif()
-
-
-# 2. Build Qarser module
-add_library(qarser_lib STATIC ${QARSER_SOURCES})
-target_include_directories(
-  qarser_lib
-  PUBLIC
-    "${QUANTUM_CIRCUIT_DIR}"
-    "${QARSER_DIR}"
-)
-target_link_libraries( qarser_lib PUBLIC
-    Boost::headers
-)
-
-
-# 3. Build Passes module
-add_library(passes_lib STATIC ${PASSES_SOURCES})
-target_include_directories( passes_lib PUBLIC
-    "${QUANTUM_CIRCUIT_DIR}"
-    "${PASSES_DIR}"
-)
-target_link_libraries( passes_lib PUBLIC
-    quantum_circuit_lib
-    Boost::headers
-)
-
-
 # Find python and pybind11 FIRST (before Torch to avoid Python finding issues)
 if(SKBUILD)
   execute_process(
@@ -141,7 +88,7 @@ message(STATUS "Python Interpreter: ${Python_EXECUTABLE}")
 message(STATUS "Python Version: ${Python_VERSION}")
 
 
-# 4. Optional Torch Backend (AFTER pybind11 to avoid Python finding conflicts)
+# Optional Torch Backend (AFTER pybind11 to avoid Python finding conflicts)
 # Auto-detect torch if available (for pip install qsteed[torch])
 option(BUILD_TORCH_BACKEND "Build Torch backend" OFF)
 
@@ -162,69 +109,56 @@ execute_process(
 )
 
 if(BUILD_TORCH_BACKEND OR (Torch_FOUND AND _python_can_import_torch EQUAL 0))
-    if(Torch_FOUND AND _python_can_import_torch EQUAL 0)
+    if(NOT (Torch_FOUND AND _python_can_import_torch EQUAL 0))
+        if(BUILD_TORCH_BACKEND)
+             message(FATAL_ERROR "BUILD_TORCH_BACKEND=ON but torch library not found or not importable by Python build environment. Please ensure PyTorch is installed (e.g., 'pip install torch').")
+        else()
+            message(STATUS "=== Torch found by CMake, but not importable by Python build environment. Skipping backend. ===")
+            message(STATUS "  To enable, ensure 'torch' is in your build environment.")
+        endif()
+    else()
         message(STATUS "=== Torch detected and importable, building Torch Backend ===")
         message(STATUS "  - Torch version: ${Torch_VERSION}")
         message(STATUS "  - Torch libraries: ${TORCH_LIBRARIES}")
-
-        set(BUILD_TORCH_BACKEND ON)  # Set BEFORE add_subdirectory
-        add_subdirectory(qsteedcpp/backends)
-        set(TORCH_BACKEND_BINDINGS "${QSTEED_CPP_DIR}/backends/torch/bindings.cpp")
-    else()
-        if(BUILD_TORCH_BACKEND)
-            message(FATAL_ERROR "BUILD_TORCH_BACKEND=ON but torch library not found or not importable by Python build environment. Please ensure PyTorch is installed (e.g., 'pip install torch').")
-        else()
-            # This case happens if CMake finds Torch but the build Python can't import it.
-            # We silently skip the backend to avoid build errors.
-            message(STATUS "=== Torch found by CMake, but not importable by Python build environment. Skipping backend. ===")
-            message(STATUS "  To enable, ensure 'torch' is in your build environment.")
-            set(TORCH_BACKEND_BINDINGS "")
-        endif()
+        set(BUILD_TORCH_BACKEND ON)
     endif()
 else()
     message(STATUS "=== Torch not found or not importable, skipping Torch Backend ===")
     message(STATUS "  To enable: pip install qsteed[torch]")
-    set(TORCH_BACKEND_BINDINGS "")
 endif()
 
 
+# --- C++ Core Library Build ---
+# All core C++ logic is now handled in the qsteedcpp subdirectory.
+# This call will define the 'qsteed_core' library target.
+add_subdirectory(qsteedcpp)
+
+
+# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+
+# --- Python Bindings ---
+# Build the Python binding module, which is now just a thin wrapper
+set(QSTEED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qsteedcpp") # Define path to C++ sources
 set(target qsteedcpp)
-pybind11_add_module( ${target}
+pybind11_add_module(${target} MODULE
   "${QSTEED_CPP_DIR}/bindings/binding.cpp"
   "${QSTEED_CPP_DIR}/bindings/gate_bindings.cpp"
   "${QSTEED_CPP_DIR}/bindings/circuit_bindings.cpp"
   "${QSTEED_CPP_DIR}/bindings/pass_bindings.cpp"
   "${QSTEED_CPP_DIR}/bindings/expression_bindings.cpp"
-  ${TORCH_BACKEND_BINDINGS}
-)
-target_include_directories( ${target} PUBLIC
-  "${QUANTUM_CIRCUIT_DIR}"
-  "${PASSES_DIR}"
-  "${QARSER_DIR}"
-)
-target_link_libraries( ${target}  PRIVATE
-  quantum_circuit_lib
-  qarser_lib
-  passes_lib
-  pybind11::headers
+  ${TORCH_BINDING_SOURCES}  # This variable is set by the subdirectory
 )
 
-# Link torch backend if enabled
-if(BUILD_TORCH_BACKEND)
-  target_link_libraries(${target} PRIVATE torch_backend_lib "${TORCH_LIBRARIES}")
-  target_include_directories(${target} PRIVATE
-    "${QSTEED_CPP_DIR}/backends/torch"
-    "${TORCH_INCLUDE_DIRS}")
-  target_compile_definitions(${target} PRIVATE BUILD_TORCH_BACKEND)
 
-  # Set RPATH to find LibTorch libraries at runtime
-  set_target_properties(${target} PROPERTIES
-    BUILD_WITH_INSTALL_RPATH FALSE
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-  )
-endif()
+target_link_libraries(${target} PRIVATE qsteed_core)
 
-install(TARGETS ${target} LIBRARY DESTINATION qsteed)
+set_target_properties(${target} PROPERTIES
+    INSTALL_RPATH "$ORIGIN"
+)
+
+install(TARGETS qsteed_core qsteedcpp
+        LIBRARY DESTINATION qsteed
+)
 
 # Generate Stub
 if(SKBUILD)

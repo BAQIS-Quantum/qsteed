@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
-#include "circuit/quantum_circuit.h"
+#include "QuantumCircuit/circuit/quantum_circuit.h"
 
 namespace qsteedcpp {
 

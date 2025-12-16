@@ -2,7 +2,7 @@ from qsteed.qsteedcpp import DAGCircuit as Cpp_DAGCircuit
 from qsteed.qsteedcpp import InstructionNode as Cpp_InstructionNode
 from qsteed.qsteedcpp import MeasureNode as Cpp_MeasureNode
 from qsteed.qsteedcpp import QuantumCircuit, CircuitInstruction
-from qsteed.qsteedcpp.expression import Expr
+from qsteed.qsteedcpp import Expr
 from qsteed.utils.gates import gate_classes as GATE_CLASSES
 
 def QuantumCircuit_to_cppDag(circuit: QuantumCircuit) -> Cpp_DAGCircuit:

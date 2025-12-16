@@ -1,7 +1,7 @@
-#include "unroll/rules/three_qubit_gate_rules.h"
-#include "unroll/rule_manager.h"
-#include "unroll/decomposition_rules.h"
-#include "circuit/circuit_instruction.h"
+#include "Passes/unroll/rules/three_qubit_gate_rules.h"
+#include "Passes/unroll/rule_manager.h"
+#include "Passes/unroll/decomposition_rules.h"
+#include "QuantumCircuit/circuit/circuit_instruction.h"
 #include "QuantumCircuit/gates/standard_gates.h"
 
 namespace qsteedcpp {

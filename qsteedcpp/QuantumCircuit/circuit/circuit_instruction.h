@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
-#include "gates/base_gate.h"
+#include "QuantumCircuit/gates/base_gate.h"
 
 namespace qsteedcpp {
 

@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
-#include "sabre/model/layout.h"
-#include "sabre/sabre_routing.h"
+#include "model/layout.h"
+#include "sabre_routing.h"
 
 #include "vendor/prettyprint.hpp"
 

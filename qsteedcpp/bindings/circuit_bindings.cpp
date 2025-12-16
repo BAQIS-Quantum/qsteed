@@ -219,12 +219,12 @@ void bind_quantum_circuit(py::module& m) {
         .def("is_measurement", &CircuitInstruction::is_measurement)
         .def("is_barrier", &CircuitInstruction::is_barrier)
 
-        .def("get_matrix", [](const CircuitInstruction& self) {
+        .def("get_matrix", [](const CircuitInstruction& self) -> Eigen::MatrixXcd {
             return self.get_matrix().eigen_matrix();
-        })
-        .def_property_readonly("matrix", [](const CircuitInstruction& self) {
+        }, "Get the unitary matrix representation of this instruction")
+        .def_property_readonly("matrix", [](const CircuitInstruction& self) -> Eigen::MatrixXcd {
             return self.get_matrix().eigen_matrix();
-        })
+        }, "The unitary matrix representation of this instruction")
 
         // Copy support
         .def("clone", &CircuitInstruction::clone, "Create a deep copy of this instruction")
