@@ -4,6 +4,7 @@
 #include <pybind11/complex.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl_bind.h>
+#include <pybind11/eigen.h>
 #include <sstream>
 #include <variant>
 #include <type_traits>
@@ -217,6 +218,13 @@ void bind_quantum_circuit(py::module& m) {
         .def("is_gate", &CircuitInstruction::is_gate)
         .def("is_measurement", &CircuitInstruction::is_measurement)
         .def("is_barrier", &CircuitInstruction::is_barrier)
+
+        .def("get_matrix", [](const CircuitInstruction& self) {
+            return self.get_matrix().eigen_matrix();
+        })
+        .def_property_readonly("matrix", [](const CircuitInstruction& self) {
+            return self.get_matrix().eigen_matrix();
+        })
 
         // Copy support
         .def("clone", &CircuitInstruction::clone, "Create a deep copy of this instruction")

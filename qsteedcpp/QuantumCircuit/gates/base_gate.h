@@ -4,25 +4,29 @@
 #include <memory>
 #include <set>
 #include "expression/expr.h"
+#include "QuantumCircuit/gates/matrix.hpp"
 
 namespace qsteedcpp {
 
 // Gate type enumeration for efficient gate identification
 enum class GateType {
     // Single-qubit non-parametric gates
-    H, X, Y, Z, S, SDG, T, TDG,
+    H, X, Y, Z, S, SDG, T, TDG, ID, SX, SXDG, SY, SYDG, W, SW, SWDG,
 
     // Single-qubit parametric gates
     RX, RY, RZ, P, U3,
 
     // Two-qubit non-parametric gates
-    CNOT, CZ, SWAP, ISWAP,
+    CNOT, CZ, CY, CS, CT, SWAP, ISWAP,
 
     // Two-qubit parametric gates
     RXX, RYY, RZZ, CP,
 
     // Three-qubit gates
-    TOFFOLI,
+    TOFFOLI, FREDKIN,
+
+    // Multi-qubit gates
+    MCX, MCY, MCZ, MCRX, MCRY, MCRZ, CONTROLLED_U,
 
     // Custom/unknown gates
     CUSTOM
@@ -41,10 +45,12 @@ public:
     virtual ~Gate() = default;
 
     virtual GateType type() const = 0;
+
     virtual const char* name() const = 0;
 
-    // Pure virtual function - subclasses return their static qubit_count
     virtual int get_qubit_count() const = 0;
+
+    virtual Matrix get_matrix() const = 0;
 
     bool has_parameters() const { return !param_expressions_.empty(); }
     size_t parameter_count() const { return param_expressions_.size(); }

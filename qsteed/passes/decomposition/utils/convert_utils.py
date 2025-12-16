@@ -108,7 +108,7 @@ def circuit_to_unitary(circuit):
                     unit = general_kron(g.matrix, g.pos, num_qubit)
                 elif isinstance(g.pos, list) and len(g.pos) == 1:
                     unit = general_kron(g.matrix, g.pos[0], num_qubit)
-                elif isinstance(g.pos, list) and g.name == "CX":
+                elif isinstance(g.pos, list) and g.name == "cx":
                     unit = general_CNOT(num_qubit, g.pos[0], g.pos[1])
                 else:
                     raise (ValueError("The gate must be one-qubit gate or CNOT gate."))

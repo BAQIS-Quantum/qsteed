@@ -85,6 +85,7 @@ include_directories(
 add_library(quantum_circuit_lib STATIC ${QUANTUM_CIRCUIT_SOURCES})
 target_include_directories( quantum_circuit_lib PUBLIC
     "${QUANTUM_CIRCUIT_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/vendor/eigen"
 )
 target_link_libraries( quantum_circuit_lib PUBLIC
   Boost::headers

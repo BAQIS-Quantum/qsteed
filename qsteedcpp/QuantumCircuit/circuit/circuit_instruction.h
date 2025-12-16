@@ -186,6 +186,14 @@ public:
     
     std::string to_qasm(bool with_para = false) const;
 
+    Matrix get_matrix() const {
+        if (is_gate()) {
+            return std::get<std::unique_ptr<Gate>>(operation)->get_matrix();
+        } else {
+            throw std::runtime_error("Cannot get matrix for non-gate instruction.");
+        }
+    }
+
     CircuitInstruction clone() const {
         return CircuitInstruction(*this); // Now we can just use the copy constructor
     }
