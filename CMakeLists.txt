@@ -150,14 +150,23 @@ pybind11_add_module(${target} MODULE
 )
 
 
-target_link_libraries(${target} PRIVATE qsteed_core)
-
-set_target_properties(${target} PROPERTIES
+# Set rpath for the python module
+if(APPLE)
+  # On macOS, use @loader_path to find dylibs in the same directory
+  set_target_properties(${target} PROPERTIES
+    INSTALL_RPATH "@loader_path"
+  )
+else()
+  # On Linux, use $ORIGIN
+  set_target_properties(${target} PROPERTIES
     INSTALL_RPATH "$ORIGIN"
-)
+  )
+endif()
 
 install(TARGETS qsteed_core qsteedcpp
-        LIBRARY DESTINATION qsteed
+        RUNTIME DESTINATION qsteed  # For .dll on Windows
+        LIBRARY DESTINATION qsteed  # For .so, .dylib, .pyd
+        ARCHIVE DESTINATION qsteed  # For .lib (Windows import lib)
 )
 
 # Generate Stub
