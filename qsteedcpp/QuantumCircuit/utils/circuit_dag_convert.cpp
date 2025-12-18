@@ -15,6 +15,8 @@ static InstructionNode instruction_to_node(const CircuitInstruction& inst);
 DAGCircuit circuit_to_dag(const QuantumCircuit& circuit) {
     DAGCircuit dag;
 
+    std::set<qubit_t> used_qubits;
+
     for(const auto& inst : circuit.get_instructions()) {
         if (inst.is_measurement()) {
             const auto& meas = std::get<Measurement>(inst.operation);
@@ -24,9 +26,21 @@ DAGCircuit circuit_to_dag(const QuantumCircuit& circuit) {
         } else {
             InstructionNode node = instruction_to_node(inst);
             dag.add_instruction_node_end(node);
+
+            for (qubit_t q : node.qubit_pos) {
+                used_qubits.insert(q);
+            }
         }
     }
-    
+
+    // For qubits that are only measured but not used by any gates,
+    // add an edge from start to end to ensure the DAG knows about them
+    for (const auto& [qubit, clbit] : dag.measure) {
+        if (used_qubits.find(qubit) == used_qubits.end()) {
+            dag.add_edge(dag.start_node_pos, dag.end_node_pos, qubit);
+        }
+    }
+
     return dag;
 }
 
