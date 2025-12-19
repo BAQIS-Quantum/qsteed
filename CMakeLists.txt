@@ -149,6 +149,14 @@ pybind11_add_module(${target} MODULE
   ${TORCH_BINDING_SOURCES}  # This variable is set by the subdirectory
 )
 
+# Link the Python module to the core library
+target_link_libraries(${target} PRIVATE qsteed_core)
+
+# Set include directories for the Python module (inherits from qsteed_core, but explicit is better)
+target_include_directories(${target} PRIVATE
+    "${QSTEED_CPP_DIR}"
+    "${CMAKE_SOURCE_DIR}/vendor/eigen"
+)
 
 # Set rpath for the python module
 if(APPLE)

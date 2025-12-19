@@ -38,10 +38,8 @@ PYBIND11_MODULE(qsteedcpp, m) {
     py::implicitly_convertible<float, qsteedcpp::Expr>();
     py::implicitly_convertible<qsteedcpp::Parameter, qsteedcpp::Expr>();
 
-    // Bind circuit and instruction FIRST, so CircuitInstruction is a known type
     bind_quantum_circuit(m);
 
-    // Bind gates SECOND, as they will now be factories that return CircuitInstruction
     bind_gates(m);
 
     bind_passes(m);

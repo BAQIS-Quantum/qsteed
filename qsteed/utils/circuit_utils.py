@@ -19,7 +19,9 @@ Circuit utilities for compatibility with Quafu API
 """
 
 import numpy as np
+from typing import Optional
 from qsteed.qsteedcpp import QuantumCircuit
+from .circuit_drawer import draw_circuit
 
 
 def layered_circuit(self) -> np.ndarray:
@@ -41,20 +43,20 @@ def layered_circuit(self) -> np.ndarray:
     used_qubits = []
 
     for gate in gatelist:
-        # Skip non-gate instructions
-        if not gate.is_gate():
-            continue
-
         qubits = gate.qubits
 
+        # Skip measurements - will handle them separately using self.measures
+        if hasattr(gate, 'is_measurement') and callable(gate.is_measurement) and gate.is_measurement():
+            continue
+
         if len(qubits) == 1:
-            # Single qubit gate (including Delay)
+            # Single qubit gate/instruction (including delay, barrier on single qubit)
             pos = qubits[0]
             gateQlist[pos].append(gate)
             if pos not in used_qubits:
                 used_qubits.append(pos)
         else:
-            # Multi-qubit gate
+            # Multi-qubit gate/instruction
             pos1 = min(qubits)
             pos2 = max(qubits)
 
@@ -87,7 +89,7 @@ def layered_circuit(self) -> np.ndarray:
     # Sort used qubits
     used_qubits = sorted(used_qubits)
 
-    # Pad all qubit layers to the same depth
+    # Pad all qubit layers to the same depth before adding measurements
     if len(used_qubits) > 0:
         maxdepth = max([len(gateQlist[i]) for i in range(num)]) if max([len(gateQlist[i]) for i in range(num)], default=0) > 0 else 0
     else:
@@ -95,6 +97,25 @@ def layered_circuit(self) -> np.ndarray:
 
     for gates in gateQlist:
         gates.extend([None] * (maxdepth - len(gates)))
+
+    # Add measurements from self.measures dictionary
+    # Each measurement gets its own layer
+    # Find the measurement instruction from gatelist to add
+    measure_inst = None
+    for gate in gatelist:
+        if hasattr(gate, 'is_measurement') and callable(gate.is_measurement) and gate.is_measurement():
+            measure_inst = gate
+            break
+
+    if measure_inst is not None:
+        # Add measurement instruction to each measured qubit
+        for qubit_idx in self.measures.keys():
+            gateQlist[qubit_idx].append(measure_inst)
+
+        # Pad to align all measurements
+        maxdepth = max([len(gateQlist[i]) for i in range(num)])
+        for gates in gateQlist:
+            gates.extend([None] * (maxdepth - len(gates)))
 
     # Filter to only used qubits
     new_gateQlist = []
@@ -113,9 +134,32 @@ def layered_circuit(self) -> np.ndarray:
     return lc
 
 
-def attach_layered_circuit_method():
-    """Attach the layered_circuit method to QuantumCircuit class"""
+def draw(self, unicode=True):
+    """
+    Draw the quantum circuit as ASCII text
+
+    Args:
+        unicode: Use Unicode characters for better display (default True)
+
+    Returns:
+        str: ASCII representation of the circuit
+
+    Examples:
+        >>> circuit = QuantumCircuit(2)
+        >>> circuit.h(0)
+        >>> circuit.cnot(0, 1)
+        >>> print(circuit.draw())
+        q[0]: ──[H]─────■─────
+                        │
+        q[1]: ──────────[X]───
+    """
+    return draw_circuit(self)
+
+
+def attach_circuit_methods():
+    """Attach utility methods to QuantumCircuit class"""
     QuantumCircuit.layered_circuit = layered_circuit
+    QuantumCircuit.draw = draw
 
 
-__all__ = ['layered_circuit', 'attach_layered_circuit_method']
+__all__ = ['layered_circuit', 'draw', 'attach_circuit_methods']

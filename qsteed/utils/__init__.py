@@ -16,6 +16,7 @@
 
 from .random_circuit import RandomCircuit
 from .reverse_circuit import reverse_circuit
-from .circuit_utils import attach_layered_circuit_method
+from .circuit_utils import attach_circuit_methods
 
-attach_layered_circuit_method()
+# Attach utility methods to QuantumCircuit class
+attach_circuit_methods()

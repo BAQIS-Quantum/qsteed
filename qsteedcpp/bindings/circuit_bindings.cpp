@@ -226,8 +226,9 @@ void bind_quantum_circuit(py::module& m) {
             return self.get_matrix().eigen_matrix();
         }, "The unitary matrix representation of this instruction")
 
-        // Copy support
+
         .def("clone", &CircuitInstruction::clone, "Create a deep copy of this instruction")
+
         .def("__copy__", [](const CircuitInstruction& self) {
             return self.clone();
         })
@@ -253,6 +254,8 @@ void bind_quantum_circuit(py::module& m) {
         .def("num_clbits", &QuantumCircuit::num_clbits)
         .def("num_gates", &QuantumCircuit::num_gates)
         .def("size", &QuantumCircuit::size)
+        .def("print", &QuantumCircuit::print, "Print a human-readable representation of the circuit")
+
         .def_property_readonly("num", &QuantumCircuit::num_qubits)
         .def_property_readonly("gates", &QuantumCircuit::get_gates)
         .def_property_readonly("instructions", &QuantumCircuit::get_instructions)
