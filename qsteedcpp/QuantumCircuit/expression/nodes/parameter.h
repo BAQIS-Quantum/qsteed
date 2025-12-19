@@ -55,11 +55,11 @@ public:
     }
 
     // clone(): Create a true deep copy with independent state
-    // The cloned parameter has the same UUID and values but modifications won't affect each other
+    // The cloned parameter has a NEW UUID (separate instance) and same value
+    // Name is derived from UUID, so cloned parameter will have different name
     std::shared_ptr<Expression> clone() const override {
         auto p = std::make_shared<Parameter>(impl_->value_, impl_->trainable_);
-        // Preserve the UUID to maintain parameter identity
-        const_cast<Parameter*>(p.get())->impl_->uuid_ = impl_->uuid_;
+        // UUID is auto-generated in constructor (new unique ID)
         return p;
     }
 

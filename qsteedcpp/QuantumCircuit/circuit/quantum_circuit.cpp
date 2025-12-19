@@ -139,14 +139,12 @@ void QuantumCircuit::measure(const std::vector<int>& qubits, const std::vector<i
         throw std::invalid_argument("Number of qubits and clbits must match in measurement");
     }
 
-    for (int qubit : qubits) {
-        validate_qubit_index(qubit);
+    // Broadcast: create individual single-qubit measurements (Qiskit-style)
+    for (size_t i = 0; i < qubits.size(); ++i) {
+        validate_qubit_index(qubits[i]);
+        validate_clbit_index(clbits[i]);
+        instructions_.emplace_back(Measurement(qubits[i], clbits[i]));
     }
-    for (int clbit : clbits) {
-        validate_clbit_index(clbit);
-    }
-
-    instructions_.emplace_back(Measurement(qubits, clbits));
 }
 
 void QuantumCircuit::measure(const std::map<int, int>& qubit_clbit_map) {
@@ -179,7 +177,7 @@ void QuantumCircuit::measure_all() {
 
 std::vector<CircuitInstruction> QuantumCircuit::get_gates() const {
     std::vector<CircuitInstruction> gates_only;
-    gates_only.reserve(instructions_.size()); // Pre-allocate for efficiency
+    gates_only.reserve(instructions_.size());
 
     for (const auto& inst : instructions_) {
         if (inst.is_gate()) {
@@ -300,7 +298,6 @@ namespace {
                 break;
             }
             case Expression::Type::CONSTANT:
-                // Do nothing
                 break;
         }
     }

@@ -198,7 +198,7 @@ void bind_quantum_circuit(py::module& m) {
             return py::cast(gate_ptr->get_parameter_expressions());
         })
 
-        // Duration (only for Delay and XYResonance operations)
+        // Duration & Unit (only for Delay and XYResonance operations)
         .def_property_readonly("duration", [](const CircuitInstruction& inst) -> py::object {
             if (auto duration = inst.get_duration()) {
                 return py::cast(*duration);
@@ -206,7 +206,6 @@ void bind_quantum_circuit(py::module& m) {
             return py::none();
         })
 
-        // Unit (only for Delay and XYResonance operations)
         .def_property_readonly("unit", [](const CircuitInstruction& inst) -> py::object {
             if (auto unit = inst.get_unit()) {
                 return py::cast(*unit);

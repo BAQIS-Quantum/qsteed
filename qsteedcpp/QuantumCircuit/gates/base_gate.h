@@ -42,24 +42,11 @@ public:
     Gate(std::vector<Expr> exprs)
         : param_expressions_(std::move(exprs)) {}
 
-    // Copy constructor: deep copy parameters
-    Gate(const Gate& other) {
-        param_expressions_.reserve(other.param_expressions_.size());
-        for (const auto& expr : other.param_expressions_) {
-            param_expressions_.push_back(expr.clone());
-        }
-    }
-
-    Gate& operator=(const Gate& other) {
-        if (this != &other) {
-            param_expressions_.clear();
-            param_expressions_.reserve(other.param_expressions_.size());
-            for (const auto& expr : other.param_expressions_) {
-                param_expressions_.push_back(expr.clone());
-            }
-        }
-        return *this;
-    }
+    // Default copy constructor: shallow copy (shares parameters via shared_ptr)
+    Gate(const Gate&) = default;
+    Gate& operator=(const Gate&) = default;
+    Gate(Gate&&) = default;
+    Gate& operator=(Gate&&) = default;
 
     virtual ~Gate() = default;
 
@@ -109,6 +96,7 @@ public:
         return Derived::qubit_count;
     }
 
+    // Clone: shallow copy (shares parameters via shared_ptr)
     std::unique_ptr<Gate> clone() const override {
         return std::make_unique<Derived>(static_cast<const Derived&>(*this));
     }

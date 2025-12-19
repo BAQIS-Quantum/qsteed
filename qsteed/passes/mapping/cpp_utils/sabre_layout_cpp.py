@@ -1,9 +1,10 @@
 from qsteed.qsteedcpp import SabreLayout as Cpp_SabreLayout
 from qsteed.qsteedcpp import CouplingCircuit as Cpp_CouplingCircuit
 import qsteed.qsteedcpp as qsteedcpp
+from qsteed.qsteedcpp import DAGCircuit
+from qsteed.qsteedcpp import QuantumCircuit
 from typing import Union, List
 from .dag_converter import *
-from .qc_converter import *
 
 from qsteed.passes.basepass import BasePass
 from qsteed.graph.couplinggraph import CouplingGraph

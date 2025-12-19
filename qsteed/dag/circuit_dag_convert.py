@@ -182,10 +182,6 @@ def node_to_gate(node_in_dag):
     if gate_name == "barrier":
         return gate_class(node_in_dag.pos)
 
-    # args = node_in_dag.pos
-    # if node_in_dag.paras:
-    #     args += node_in_dag.paras
-
     # parameters first, then qubits
     if node_in_dag.paras:
         args = node_in_dag.paras + node_in_dag.pos
