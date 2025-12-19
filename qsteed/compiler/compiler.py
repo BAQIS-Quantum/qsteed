@@ -200,8 +200,7 @@ class Compiler:
             qubit_num = logical_circuit.num
         elif isinstance(input_qasm, str) and 'OPENQASM 2.0' in input_qasm:
             qreg_name, creg_name, qubit_num, cbit_num = qreg_creg(input_qasm)
-            logical_circuit = quafuQC(qubit_num, cbit_num)
-            logical_circuit.from_openqasm(input_qasm)
+            logical_circuit = quafuQC.from_openqasm(input_qasm)
         else:
             raise TypeError("The input_circuit needs to be quafu QuantumCircuit class or openQASM 2.0 string.")
 

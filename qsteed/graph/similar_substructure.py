@@ -68,8 +68,7 @@ def similar_structure(circuit: str, vqpus: list):
     """
 
     qreg_name, creg_name, qubit_num, cbit_num = qreg_creg(circuit)
-    qc = QuantumCircuit(qubit_num, cbit_num)
-    qc.from_openqasm(circuit)
+    qc = QuantumCircuit.from_openqasm(circuit)
 
     # Convert the quantum circuit to a graph representation
     g1 = circuit_to_graph(qc)
