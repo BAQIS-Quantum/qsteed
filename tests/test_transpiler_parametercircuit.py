@@ -63,7 +63,7 @@ class TestParameterizedCircuitTranspile:
         pq.rx(theta[1] - 4. * theta[0] + theta[2] * theta[0], 2)
         pq.measure([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])
         print("original circuit:")
-        # pq.draw_circuit()
+        print(pq.draw())
 
         passes = [
             UnrollTo2Qubit(),
@@ -79,7 +79,7 @@ class TestParameterizedCircuitTranspile:
         transpiler = Transpiler(passflow, initial_model)
         transpiled_circuit = transpiler.transpile(pq)
         assert transpiled_circuit is not None
-        # transpiled_circuit.draw_circuit()
+        print(transpiled_circuit.draw())
 
         initial_variables = transpiler.model.datadict['variables']
         assert initial_variables is not None
@@ -101,4 +101,4 @@ class TestParameterizedCircuitTranspile:
             initial_variables[i].set_value(new_value)
 
         print('Compiled circuit updated parameters:')
-        # transpiled_circuit.draw_circuit()
+        print(transpiled_circuit.draw())

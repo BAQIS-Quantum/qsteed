@@ -254,7 +254,6 @@ void bind_quantum_circuit(py::module& m) {
         .def("num_clbits", &QuantumCircuit::num_clbits)
         .def("num_gates", &QuantumCircuit::num_gates)
         .def("size", &QuantumCircuit::size)
-        .def("print", &QuantumCircuit::print, "Print a human-readable representation of the circuit")
 
         .def_property_readonly("num", &QuantumCircuit::num_qubits)
         .def_property_readonly("gates", &QuantumCircuit::get_gates)
@@ -304,7 +303,16 @@ void bind_quantum_circuit(py::module& m) {
         .def("measure", py::overload_cast<const std::map<int, int>&>(&QuantumCircuit::measure), py::arg("qubit_clbit_map"), "Measure qubits to classical bits using a dictionary mapping")
         .def("measure_all", &QuantumCircuit::measure_all)
         .def("barrier", &QuantumCircuit::barrier, py::arg("qubits") = std::vector<int>{})
-        .def("to_openqasm", &QuantumCircuit::to_openqasm, py::arg("with_para") = false, "Exports the circuit to an OpenQASM 2.0 string.");
+        .def("to_openqasm", &QuantumCircuit::to_openqasm, py::arg("with_para") = false, "Exports the circuit to an OpenQASM 2.0 string.")
+
+        // Copy support for deepcopy
+        .def("clone", &QuantumCircuit::clone, "Create a deep copy of this circuit")
+        .def("__copy__", [](const QuantumCircuit& self) {
+            return self.clone();
+        })
+        .def("__deepcopy__", [](const QuantumCircuit& self, py::dict) {
+            return self.clone();
+        }, py::arg("memo"));
 
 
 

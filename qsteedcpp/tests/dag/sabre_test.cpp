@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <boost/graph/graph_utility.hpp>
 #include <iostream>
-#include "sabre/sabre_layout.h"
-#include "DAG/dag.h"
-#include "sabre/model/coupling.h"
+#include "Passes/sabre/sabre_layout.h"
+#include "QuantumCircuit/DAG/dag.h"
+#include "Passes/sabre/model/coupling.h"
 
 class SabreTest : public ::testing::Test {
 protected:
@@ -53,7 +53,6 @@ TEST_F(SabreTest, CouplingCircuitCreationTest) {
     CouplingCircuit c_circuit = CreateTestCouplingCircuit();
     
     // Test coupling circuit creation
-    // The original test just prints, so we verify it doesn't throw
     EXPECT_NO_THROW(c_circuit.print());
 }
 

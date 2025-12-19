@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "circuit/quantum_circuit.h"
+#include "QuantumCircuit/circuit/quantum_circuit.h"
 #include "Passes/unroll/unroll_pass.h"
 
 using namespace qsteedcpp;
@@ -19,9 +19,7 @@ TEST_F(UnrollTest, Swap) {
     QuantumCircuit circuit(3);
     circuit.swap(0, 1);
 
-    // circuit.print();
     pass_->run(circuit);
-    // circuit.print();
 
     EXPECT_EQ(circuit.size(), 3);
     for (const auto& inst : circuit.get_instructions()) {
@@ -37,9 +35,7 @@ TEST_F(UnrollTest, Mixed) {
     circuit.cnot(1, 2);
     circuit.measure(0, 0);
 
-    circuit.print();
     pass_->run(circuit);
-    circuit.print();
 
     EXPECT_EQ(circuit.size(), 6);
 }
@@ -52,9 +48,7 @@ TEST_F(UnrollTest, Recursive) {
     circuit.cnot(1, 2);
     circuit.ccx(0, 1, 2);
     
-    circuit.print();
     pass_->run(circuit);
-    // circuit.print();
 
 }
 

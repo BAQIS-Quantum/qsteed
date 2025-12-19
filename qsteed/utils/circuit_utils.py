@@ -50,13 +50,11 @@ def layered_circuit(self) -> np.ndarray:
             continue
 
         if len(qubits) == 1:
-            # Single qubit gate/instruction (including delay, barrier on single qubit)
             pos = qubits[0]
             gateQlist[pos].append(gate)
             if pos not in used_qubits:
                 used_qubits.append(pos)
         else:
-            # Multi-qubit gate/instruction
             pos1 = min(qubits)
             pos2 = max(qubits)
 
@@ -134,12 +132,12 @@ def layered_circuit(self) -> np.ndarray:
     return lc
 
 
-def draw(self, unicode=True):
+def draw(self) -> str:
     """
     Draw the quantum circuit as ASCII text
 
     Args:
-        unicode: Use Unicode characters for better display (default True)
+        self (QuantumCircuit): The quantum circuit to draw
 
     Returns:
         str: ASCII representation of the circuit
@@ -149,9 +147,7 @@ def draw(self, unicode=True):
         >>> circuit.h(0)
         >>> circuit.cnot(0, 1)
         >>> print(circuit.draw())
-        q[0]: ──[H]─────■─────
-                        │
-        q[1]: ──────────[X]───
+
     """
     return draw_circuit(self)
 

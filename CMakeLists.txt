@@ -137,7 +137,6 @@ add_subdirectory(qsteedcpp)
 # set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 
 # --- Python Bindings ---
-# Build the Python binding module, which is now just a thin wrapper
 set(QSTEED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qsteedcpp") # Define path to C++ sources
 set(target qsteedcpp)
 pybind11_add_module(${target} MODULE
@@ -146,13 +145,11 @@ pybind11_add_module(${target} MODULE
   "${QSTEED_CPP_DIR}/bindings/circuit_bindings.cpp"
   "${QSTEED_CPP_DIR}/bindings/pass_bindings.cpp"
   "${QSTEED_CPP_DIR}/bindings/expression_bindings.cpp"
-  ${TORCH_BINDING_SOURCES}  # This variable is set by the subdirectory
+  ${TORCH_BINDING_SOURCES}
 )
 
-# Link the Python module to the core library
 target_link_libraries(${target} PRIVATE qsteed_core)
 
-# Set include directories for the Python module (inherits from qsteed_core, but explicit is better)
 target_include_directories(${target} PRIVATE
     "${QSTEED_CPP_DIR}"
     "${CMAKE_SOURCE_DIR}/vendor/eigen"

@@ -24,7 +24,7 @@ class TestDAGConversion:
     def test_circuit_to_dag_and_back(self):
         qc = get_random_circuit(gates_number=20)
         assert qc is not None
-        # qc.draw_circuit()  # draw_circuit not available in qsteedcpp
+        print(qc.draw())
 
         dag = circuit_to_dag(qc)
         # draw_dag(dag)  # You can uncomment the lines locally to display the DAG diagram.
@@ -32,13 +32,13 @@ class TestDAGConversion:
 
         re_qc = dag_to_circuit(dag, qubits=qc.num)
         assert re_qc is not None
-        # re_qc.draw_circuit()
+        print(re_qc.draw())
         assert len(qc.gates) == len(re_qc.gates), "Number of gates should be the same"
 
     def test_nodelist_to_dag(self):
         qc = get_random_circuit(gates_number=20)
         assert qc is not None
-        # qc.draw_circuit()
+        print(qc.draw())
 
         nodes_list = [gate_to_node(gate, specific_label=i) for i, gate in enumerate(qc.gates)]
         dag = nodelist_to_dag(nodes_list)

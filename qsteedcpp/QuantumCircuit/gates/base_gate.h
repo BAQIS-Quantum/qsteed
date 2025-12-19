@@ -42,6 +42,25 @@ public:
     Gate(std::vector<Expr> exprs)
         : param_expressions_(std::move(exprs)) {}
 
+    // Copy constructor: deep copy parameters
+    Gate(const Gate& other) {
+        param_expressions_.reserve(other.param_expressions_.size());
+        for (const auto& expr : other.param_expressions_) {
+            param_expressions_.push_back(expr.clone());
+        }
+    }
+
+    Gate& operator=(const Gate& other) {
+        if (this != &other) {
+            param_expressions_.clear();
+            param_expressions_.reserve(other.param_expressions_.size());
+            for (const auto& expr : other.param_expressions_) {
+                param_expressions_.push_back(expr.clone());
+            }
+        }
+        return *this;
+    }
+
     virtual ~Gate() = default;
 
     virtual GateType type() const = 0;

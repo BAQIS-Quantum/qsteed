@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
-#include "AST/ast.hpp"
-#include "AST/gate.hpp"
+#include "ast.hpp"
+#include "gate.hpp"
 
 namespace qsteedcpp {
 namespace qarser {

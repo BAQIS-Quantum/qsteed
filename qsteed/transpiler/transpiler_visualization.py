@@ -203,17 +203,17 @@ def draw_allpass_circuits(info_dict, only_original_and_last=False):
             print("*" * 100)
             print(f"Drawing the circuit before and after {key}:", pass_info["Pass Name"])
             print("Circuit Before:")
-            pass_info["Circuit Before"].draw_circuit()
+            print(pass_info["Circuit Before"].draw())
             print("Circuit After:")
-            pass_info["Circuit After"].draw_circuit()
+            print(pass_info["Circuit After"].draw())
             print()
     last_circuit = info_dict[f"Pass_{len(info_dict) - 2}"]["Circuit After"]
     print("*" * 100)
     print("Drawing the original circuit and the last circuit:")
     print("Original Circuit:")
-    original_circuit.draw_circuit()
+    print(original_circuit.draw())
     print("Last Circuit:")
-    last_circuit.draw_circuit()
+    print(last_circuit.draw())
     print("*" * 100)
 
 
@@ -230,11 +230,11 @@ def draw_pass_info(info_dict, pass_idx):
             continue
         if key == "Circuit Before":
             print(key, ":")
-            value.draw_circuit()
+            print(value.draw())
             continue
         if key == "Circuit After":
             print(key, ":")
-            value.draw_circuit()
+            print(value.draw())
             continue
         if key == "Layout Before":
             print(key, ":")
@@ -260,13 +260,13 @@ def draw_pass_info(info_dict, pass_idx):
 
         print(key, ":", value)
 
-    # print(f"Drawing the circuit before and after Pass_{pass_idx}:",end=" ")
-    # print(info_dict[f"Pass_{pass_idx}"]["Pass Name"])
-    # print("Circuit Before:")
-    # info_dict[f"Pass_{pass_idx}"]["Circuit Before"].draw_circuit()
-    # print("Circuit After:")
-    # info_dict[f"Pass_{pass_idx}"]["Circuit After"].draw_circuit()
-    # print("*" * 100)
+    print(f"Drawing the circuit before and after Pass_{pass_idx}:",end=" ")
+    print(info_dict[f"Pass_{pass_idx}"]["Pass Name"])
+    print("Circuit Before:")
+    print(info_dict[f"Pass_{pass_idx}"]["Circuit Before"].draw())
+    print("Circuit After:")
+    print(info_dict[f"Pass_{pass_idx}"]["Circuit After"].draw())
+    print("*" * 100)
 
 
 def dynamic_draw(info_dict, short_info):

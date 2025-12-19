@@ -5,7 +5,6 @@ set(QSTEED_CPP_ROOT "${CMAKE_SOURCE_DIR}/qsteedcpp")
 # Circuit tests
 add_executable(circuit_test
     "circuit/expression_test.cpp"
-    "circuit/test_circuit_drawer.cpp"
 )
 target_link_libraries(circuit_test PRIVATE
     GTest::gtest_main

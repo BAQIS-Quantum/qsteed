@@ -15,9 +15,6 @@ virtualization manager, and a task scheduler.
 
 ## Installation
 
-### Need to install [pyquafu](https://github.com/ScQ-Cloud/pyquafu)
-```bash
-pip install 'pyquafu>=0.4.1'
 ```
 ### Install from PyPI
 You can install QSteed via pip:
@@ -29,12 +26,12 @@ pip install qsteed
 You can directly download the [source code](https://github.com/BAQIS-Quantum/qsteed/archive/refs/heads/master.zip) from GitHub
 or clone the repository using the following command.
 ```bash
-git clone https://github.com/BAQIS-Quantum/QSteed.git
+git clone --recursive https://github.com/BAQIS-Quantum/QSteed.git
 ```
 Change to the qsteed directory install using the following command:
 ```bash
-pip install -r requirements.txt
-python setup.py install   # or: pip install .
+cd qsteed
+pip install .
 ```
 
 ## Example

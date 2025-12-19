@@ -27,9 +27,13 @@ public:
     Expr& operator=(const Expr&) = default;
     Expr& operator=(Expr&&) = default;
 
-    // 访问内部 Expression（供后端使用）
     const Expression* get() const { return expr_.get(); }
     std::shared_ptr<Expression> get_shared() const { return expr_; }
+
+    // Deep copy: creates a completely independent copy including parameters
+    Expr clone() const {
+        return Expr(expr_->clone());
+    }
 
     std::set<std::string> get_parameter_uuids() const {
         return expr_->get_parameter_uuids();

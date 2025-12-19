@@ -34,7 +34,7 @@ class TestUnitaryDecompose:
         ud.decompose()
         gates_list = ud.gates_list
         quafuQC = ud.quafuQC
-      #   quafuQC.draw_circuit()
+        print(quafuQC.draw())
 
         # Quantum circuit conversion to unitary matrix
         quafuU = cu.circuit_to_unitary(quafuQC)

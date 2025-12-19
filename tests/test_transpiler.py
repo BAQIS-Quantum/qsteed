@@ -33,7 +33,7 @@ class TestTranspiler:
         assert qc is not None
         # qc.plot_circuit()
         # plt.show()
-        # qc.draw_circuit()
+        print(qc.draw())
 
     def test_backend_model(self):
         """Test the generation of the initial backend model."""
@@ -62,7 +62,7 @@ class TestTranspiler:
         print('qsteed time (s):', time.time() - st)
         print('qsteed depth:', len(transpiled_circuit.layered_circuit().T) - 1)
         print('qsteed swap count', transpiler.model.datadict['add_swap_count'])
-        # transpiled_circuit.draw_circuit()
+        print(transpiled_circuit.draw())
         # transpiled_circuit.plot_circuit()
         # plt.show()
 
@@ -76,6 +76,6 @@ class TestTranspiler:
         transpiler = Transpiler(initial_model=initial_model)
         transpiled_circuit = transpiler.transpile(qc, optimization_level=1)
         assert transpiled_circuit is not None
-        # transpiled_circuit.draw_circuit()
+        print(transpiled_circuit.draw())
         # transpiled_circuit.plot_circuit()
         # plt.show()

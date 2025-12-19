@@ -14,9 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .circuit_utils import attach_circuit_methods
+attach_circuit_methods()
+
 from .random_circuit import RandomCircuit
 from .reverse_circuit import reverse_circuit
-from .circuit_utils import attach_circuit_methods
-
-# Attach utility methods to QuantumCircuit class
-attach_circuit_methods()

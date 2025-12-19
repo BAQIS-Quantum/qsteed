@@ -17,7 +17,6 @@
 
 class DrawConfig:
     def __init__(self):
-        # Unicode box drawing characters (Qiskit style)
         self.h_wire = "─"
         self.v_wire = "│"
         self.top_left = "┌"
@@ -28,7 +27,7 @@ class DrawConfig:
         self.right_connect = "├"
         self.double_h_wire = "═"
         self.double_v_wire = "║"
-        self.measure_v_wire = "╥"  # Special character for measurement
+        self.measure_v_wire = "╥"
         # self.control_dot = "■"
         self.control_dot = "◉"
         self.swap_symbol = "X"

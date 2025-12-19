@@ -39,8 +39,6 @@ target_precompile_headers(qsteed_core PUBLIC "${QSTEED_CPP_DIR}/pch.h")
 
 # Conditionally build and link the Torch backend
 if(BUILD_TORCH_BACKEND)
-    # This assumes the root CMakeLists.txt has already found Torch
-    # and set up the necessary variables.
     add_subdirectory(backends)
 
     # Link torch libs into the core lib

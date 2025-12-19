@@ -2,7 +2,6 @@
 #include <sstream>
 #include "quantum_circuit.h"
 #include "QuantumCircuit/gates/standard_gates.h"
-#include "circuit_drawer.h"
 #include "Qarser/parser.h"
 #include "Qarser/SA/analyzer.hpp"
 #include "Qarser/AST/qasm_to_circuit.hpp"
@@ -252,10 +251,6 @@ void QuantumCircuit::add_gate(std::unique_ptr<Gate> gate, const std::vector<int>
     instructions_.emplace_back(std::move(gate), qubits);
 }
 
-void QuantumCircuit::print() const {
-    CircuitDrawer drawer(instructions_, num_qubits_, num_clbits_);
-    std::cout << drawer.draw() << std::endl;
-}
 
 std::set<std::string> QuantumCircuit::get_all_parameter_uuids() const {
     std::set<std::string> all_uuids;
@@ -364,6 +359,15 @@ std::string QuantumCircuit::to_openqasm(bool with_para) const {
     }
 
     return ss.str();
+}
+
+QuantumCircuit QuantumCircuit::clone() const {
+    QuantumCircuit cloned(num_qubits_, num_clbits_);
+    cloned.instructions_.reserve(instructions_.size());
+    for (const auto& inst : instructions_) {
+        cloned.instructions_.push_back(inst.clone());
+    }
+    return cloned;
 }
 
 } // namespace qsteedcpp

@@ -170,4 +170,4 @@ class RandomCircuit:
 # tests
 # rqc = RandomCircuit(num_qubit=4, depth=6, gates_number=20, max_qubit=2, gates_list=['cswap'])
 # qc = rqc.random_circuit()
-# qc.draw_circuit()
+# print(qc.draw())

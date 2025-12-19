@@ -93,7 +93,9 @@ namespace qsteedcpp {
         std::vector<Parameter> get_variables() const;
 
         std::string to_openqasm(bool with_para = false) const;
-        void print() const;
+
+        // Clone method for deep copy support
+        QuantumCircuit clone() const;
 
     private:
         void validate_qubit_index(int qubit) const;
