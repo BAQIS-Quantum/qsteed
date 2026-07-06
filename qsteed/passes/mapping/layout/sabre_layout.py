@@ -24,6 +24,9 @@ from qsteed.graph.couplinggraph import CouplingGraph
 from qsteed.passes.basepass import BasePass
 from qsteed.passes.datadict import DataDict
 from qsteed.passes.mapping.baselayout import Layout
+from qsteed.passes.mapping.layout.overall_layout_dense import OverallLayoutDense
+from qsteed.passes.mapping.layout.overall_layout_fidelity import OverallLayoutFidelity
+from qsteed.passes.mapping.layout.overall_layout_random import OverallLayoutRandom
 from qsteed.passes.mapping.routing.sabre_routing import SabreRouting
 from qsteed.utils.reverse_circuit import reverse_circuit
 
@@ -39,10 +42,11 @@ class SabreLayout(BasePass):
     """
 
     def __init__(self, coupling_list: List = None,
-                 heuristic="distance",
+                 heuristic: str = "distance",
                  routing_pass=None,
-                 max_iterations=3,
-                 sabre_initial_layout=None):
+                 max_iterations: int = 3,
+                 sabre_initial_layout: Layout = None,
+                 initial_layout_method: str = "random"):
         """SabreLayout initializer.
 
         Args:
@@ -56,6 +60,9 @@ class SabreLayout(BasePass):
                                   If max_iterations=0, only perform one forward SabreRouting
             sabre_initial_layout (Layout): The initial layout of the SABER algorithm.
                                            A suitable initial layout can reduce the number of SWAP gates.
+            initial_layout_method (str): 'random': RandomLayout;
+                                         'fidelity': FidelityLayout;
+                                         'dense': DenseLayout
         """
         super().__init__()
 
@@ -66,6 +73,7 @@ class SabreLayout(BasePass):
         self.sabre_initial_layout = sabre_initial_layout
         self.model = None
         self.heuristic = heuristic
+        self.initial_layout_method = initial_layout_method
 
     def set_model(self, model):
         """Set the model, including information such as backend and layout.
@@ -123,16 +131,45 @@ class SabreLayout(BasePass):
         measure_nodes = dag.get_measure_nodes()
         dag.remove_measure_nodes()
 
-        if self.model.get_layout()["final_layout"] is None:
-            layout = Layout()
-            # Method1: Choose a trivial initial_layout.
-            # layout.generate_trivial_layout(virtual_qubits=dag.circuit_qubits)
-            # Method2: Choose a random initial_layout.
-            layout.generate_random_layout(len(dag.qubits_used), self.coupling_graph.num_qubits)
-            # TODO: The required qubits are less than the number of physical qubits
-            # Complete mapping, even if the actual number of qubits used in the line is less than the hardware qubits.
-            # if len(layout.p2v) < self.coupling_graph.num_qubits:
-            self.model.set_layout({'initial_layout': layout})
+        if self.sabre_initial_layout is not None:
+            self.model.set_layout({'initial_layout': self.sabre_initial_layout})
+            qubits_list = list(self.sabre_initial_layout.p2v.keys())
+            used_subgraph = self.coupling_graph.subgraph(qubits_list)
+            self.model.set_used_subgraph(used_subgraph)
+        elif self.model.get_layout()["final_layout"] is not None:
+            # final_layout may come from the previous pass
+            self.model.set_layout({'initial_layout': self.model.get_layout()["final_layout"]})
+            qubits_list = list(self.model.get_layout()["final_layout"].p2v.keys())
+            used_subgraph = self.coupling_graph.subgraph(qubits_list)
+            self.model.set_used_subgraph(used_subgraph)
+
+        if self.model.get_layout()["initial_layout"] is None:
+            if len(dag.qubits_used) == self.coupling_graph.num_qubits:
+                layout = Layout()
+                # Method1: Choose a trivial initial_layout.
+                # layout.generate_trivial_layout(virtual_qubits=dag.circuit_qubits)
+                # Method2: Choose a random initial_layout.
+                layout.generate_random_layout(len(dag.qubits_used), self.coupling_graph.num_qubits)
+                self.model.set_layout({'initial_layout': layout})
+                self.model.set_used_subgraph(self.coupling_graph)
+            elif len(dag.qubits_used) < self.coupling_graph.num_qubits:
+                if self.initial_layout_method == 'random':
+                    layout = OverallLayoutRandom(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
+                elif self.initial_layout_method == 'fidelity':
+                    layout = OverallLayoutFidelity(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
+                elif self.initial_layout_method == 'dense':
+                    layout = OverallLayoutDense(coupling_graph=self.coupling_graph, qubits_list=dag.qubits_used)
+                else:
+                    raise ValueError("initial_layout_method can only be 'random', 'fidelity' or 'dense'.")
+
+                subgraph = layout.overall_layout()
+                weight = list(list(subgraph.edges(data=True))[0][2].keys())[0]
+                sub_coupling_list = [(u, v, data[weight]) for u, v, data in subgraph.edges(data=True)]
+                used_subgraph = CouplingGraph(sub_coupling_list)
+                self.model.set_layout({'initial_layout': layout})
+                self.model.set_used_subgraph(used_subgraph)
+            else:
+                raise ValueError("The required qubits are more than the number of physical qubits.")
 
         if self.routing_pass is None:
             self.routing_pass = SabreRouting(heuristic=self.heuristic, modify_dag=False)
@@ -156,7 +193,8 @@ class SabreLayout(BasePass):
         self.routing_pass.modify_dag = True
         self.nodes_label = []
         physical_dag = self.run_single(dag)
-        physical_circuit = dag_to_circuit(physical_dag, physical_dag.circuit_qubits)
+        # physical_circuit = dag_to_circuit(physical_dag, physical_dag.circuit_qubits)
+        physical_circuit = dag_to_circuit(physical_dag, max(physical_dag.qubits_used) + 1)
 
         # Add measurement, i.e. mapping of physical qubits to classical qubits
         p2c = {}  # mapping for physical qubits to classic qubits

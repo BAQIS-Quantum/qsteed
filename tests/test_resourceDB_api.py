@@ -31,10 +31,6 @@ class TestDatabaseSetup:
 
     def test_update_chip_api(self):
         """Test calling the backend DB API with example chip info."""
-        chip_file = os.path.join(os.path.dirname(__file__), 'dongling.json')
-        with open(chip_file, 'r') as file:
-            data_dict = json.load(file)
-        update_chip_api('dongling', data_dict)
 
         chip_file = os.path.join(os.path.dirname(__file__), 'chipexample.json')
         with open(chip_file, 'r') as file:

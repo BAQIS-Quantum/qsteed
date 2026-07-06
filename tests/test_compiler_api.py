@@ -26,24 +26,25 @@ class TestCallCompiler:
         qasm = """
         OPENQASM 2.0;
         include "qelib1.inc";
-        qreg q[10];
+        qreg q[4];
         creg meas[4];
-        h q[3];
-        cx q[3],q[5];
-        cx q[5],q[8];
-        cx q[8],q[2];
-        barrier q[3],q[5],q[8],q[2];
-        measure q[3] -> meas[0];
-        measure q[5] -> meas[1];
-        measure q[8] -> meas[2];
-        measure q[2] -> meas[3];
+        h q[0];
+        cx q[0],q[1];
+        cx q[1],q[2];
+        cx q[2],q[3];
+        barrier q[0],q[1],q[2],q[3];
+        measure q[0] -> meas[0];
+        measure q[1] -> meas[1];
+        measure q[2] -> meas[2];
+        measure q[3] -> meas[3];
         """
         task_info = {
             "circuit": qasm,
             "transpile": True,
-            "qpu_name": 'example',
-            "optimization_level": 2,
+            "qpu_name": 'baihua',
+            "optimization_level": 3,
             "task_type": 'qc',
+            "vqpu_preferred": 'priority'
         }
         compiled_info = call_compiler_api(**task_info)
 

@@ -19,8 +19,9 @@ from typing import List
 
 import numpy as np
 from quafu.elements import Instruction
-from quafu.elements.element_gates import MCRZGate, CXGate, HGate, ToffoliGate, CPGate, CZGate, SGate, SdgGate, RZGate, \
+from quafu.elements.element_gates import CXGate, HGate, ToffoliGate, CPGate, CZGate, SGate, SdgGate, RZGate, \
     CRZGate
+from quafu.elements.element_gates.element_gates import MCRZGate
 
 from qsteed.passes.basepass import UnrollPass
 

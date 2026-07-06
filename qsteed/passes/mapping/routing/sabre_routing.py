@@ -97,7 +97,8 @@ class SabreRouting(BasePass):
             model (Model): The given model includes information such as backend and layout.
         """
         self.model = model
-        self.coupling_graph = self.model.get_backend().get_property('coupling_graph')
+        # self.coupling_graph = self.model.get_backend().get_property('coupling_graph')
+        self.coupling_graph = self.model.get_backend().get_property('used_subgraph')
 
         if self.coupling_graph is None:
             if self.coupling_list is not None:

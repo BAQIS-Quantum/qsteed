@@ -17,42 +17,42 @@
 from typing import List
 
 from quafu.elements import Instruction
-from quafu.elements.element_gates import U3Gate
-from quafu.elements.element_gates.rotation import RXGate, RYGate, RZGate
+from quafu.elements.element_gates import SwapGate, CZGate, HGate
 
 from qsteed.passes.basepass import UnrollPass
-from qsteed.passes.decomposition.unitary_decompose import UnitaryDecompose
 
 
-class U3Decompose(UnrollPass):
-    """The U3Decompose pass.
-    convert U3 gate to {Rx, RY, RZ}.
+class SwapToCZH(UnrollPass):
+    """The SwapToCZH pass.
+    convert SWAP gate to {CZ, H}.
 
-    U3 gate decomposition rule:
-    U3 decomposition method: ZYZ or ZXZ or XYX or XZX
+    SWAP gate decomposition rule:
+    q[0]  --x--      q[0]  --H--◆--H--◆--H--◆--H--
+            |    ≡              |     |     |
+    q[1]  --x--      q[1]  -----◆--H--◆--H--◆-----
     """
 
-    def __init__(self, one_qubit_decompose: str = 'XYX') -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.original = U3Gate(0, 0, 0, 0).name.lower()
-        self.basis = [RXGate(0, 0).name.lower(), RYGate(0, 0).name.lower(), RZGate(0, 0).name.lower()]
-        self.one_qubit_decompose = one_qubit_decompose
+        self.original = SwapGate.name.lower()
+        self.basis = [CZGate.name.lower(), HGate.name.lower()]
 
     def run(self, op: Instruction) -> List[Instruction]:
         rule = []
-        if isinstance(op, U3Gate):
+        if isinstance(op, SwapGate):
             if isinstance(op.pos, list):
                 pos = op.pos[0]
             else:
                 pos = op.pos
-
-            uc = UnitaryDecompose(op.matrix, [0], one_qubit_decompose=self.one_qubit_decompose)
-            uc.decompose()
-            gates = uc.quafuQC.gates
-
-            for g in gates:
-                g.pos = [pos]
-                rule.append(g)
+            rule.append(HGate(pos[0]))
+            rule.append(CZGate(op.pos[0], op.pos[1]))
+            rule.append(HGate(pos[0]))
+            rule.append(HGate(pos[1]))
+            rule.append(CZGate(op.pos[0], op.pos[1]))
+            rule.append(HGate(pos[0]))
+            rule.append(HGate(pos[1]))
+            rule.append(CZGate(op.pos[0], op.pos[1]))
+            rule.append(HGate(pos[0]))
         else:
             rule.append(op)
         self.rule = rule

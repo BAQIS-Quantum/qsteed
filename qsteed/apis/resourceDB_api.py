@@ -16,6 +16,7 @@
 
 
 from qsteed.resourcemanager.database_sql.backend_dbAPI import call_backend_db_api
+from qsteed.resourcemanager.quafu_chip_transform import transform_quafu_chip
 
 
 def update_chip_api(chip_name: str = None, chip_info_dict=None):

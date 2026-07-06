@@ -81,6 +81,18 @@ class CouplingGraph:
             self._qubits_list = list(self.graph.nodes())
         return self._qubits_list
 
+    @property
+    def coupling_list(self)-> list:
+        """Get a list of edges with their fidelity values.
+
+        This property returns a list of tuples, where each tuple represents an edge
+        in the coupling graph along with its associated fidelity value.
+
+        Returns:
+            list: A list of tuples in the form (q0, q1, fidelity)
+        """
+        return[(u, v, data['fidelity']) for u, v, data in self.graph.edges(data=True)]
+
     def subgraph(self, node_list):
         """Get the subgraph of this graph.
 
@@ -90,8 +102,10 @@ class CouplingGraph:
         Returns:
             sub_coupling (CouplingGraph)
         """
-        sub_coupling = CouplingGraph()
-        sub_coupling.graph = self.graph.subgraph(node_list)
+        weight = list(list(self.graph.edges(data=True))[0][2].keys())[0]
+        sub_coupling_list = [(u, v, data[weight]) for u, v, data in self.graph.edges(data=True) if
+                             u in node_list and v in node_list]
+        sub_coupling = CouplingGraph(sub_coupling_list)
         return sub_coupling
 
     def is_connected(self):
@@ -114,6 +128,19 @@ class CouplingGraph:
             if not self.is_connected():
                 raise ValueError("Error: This coupling diagram is not connected.")
             self._distance_matrix = nx.floyd_warshall_numpy(self.graph)
+
+            # Find the maximum value of the node number
+            max_node = max(self.graph.nodes)
+
+            new_matrix = np.zeros((max_node + 1, max_node + 1))
+
+            # Fill the corresponding part of the new matrix with the original distance matrix
+            for i, node_i in enumerate(sorted(self.graph.nodes)):
+                for j, node_j in enumerate(sorted(self.graph.nodes)):
+                    new_matrix[node_i, node_j] = self._distance_matrix[i, j]
+
+            self._distance_matrix = new_matrix
+
         return self._distance_matrix
 
     def shortest_undirected_path(self, source_qubit, target_qubit):
@@ -141,9 +168,11 @@ class CouplingGraph:
         """
         if self._path_fidelity is None:
             self._path_fidelity = {}
-            nodes = len(self.graph.nodes)
-            for n1 in range(nodes - 1):
-                for n2 in range(n1 + 1, nodes):
+            nodes = list(self.graph.nodes)
+            nodes_num = len(nodes)
+            for k in range(nodes_num - 1):
+                for j in range(k + 1, nodes_num):
+                    n1, n2 = nodes[k], nodes[j]
                     swap_path = nx.shortest_path(self.graph, n1, n2)
                     if len(swap_path) == 2:  # not need swap
                         self._path_fidelity[(n1, n2)] = np.log(self.edge_dict[(swap_path[0], swap_path[1])])

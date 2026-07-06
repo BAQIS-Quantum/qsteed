@@ -16,39 +16,40 @@
 
 
 from qsteed.backends.chipinfo import ChipInfo
-from qsteed.resourcemanager.database_sql.sql_models import QPU, SubQPU, StdQPU, VQPU
 from qsteed.resourcemanager.database_sql.build_sql import save_qpu_data, save_subqpu_data, save_stdqpu_data, \
     save_vqpu_data
 from qsteed.resourcemanager.database_sql.initialize_app_db import app, db
+from qsteed.resourcemanager.database_sql.sql_models import QPU, SubQPU, StdQPU, VQPU
 
 
 def update_sql(backend: str = None, chip_info_dict: dict = None):
     with app.app_context():
         chip_info = ChipInfo(backend, chip_info_dict)
         chip_info.initialize_chip()
+        backend_name = chip_info.name
         db.create_all()
 
         # QPU
-        qpu = QPU.query.filter_by(qpu_name=backend).first()
+        qpu = QPU.query.filter_by(qpu_name=backend_name).first()
         if qpu:
             if str(qpu.calibration_time) == chip_info.calibration_time:
                 print('Calibration information unchanged. Please check calibration time.')
             else:  # Update data
                 print('Calibration information has changed, update QPU data')
                 save_qpu_data(chip_info, qpu_id=qpu.id)
-                qpu = QPU.query.filter_by(qpu_name=backend).first()
+                qpu = QPU.query.filter_by(qpu_name=backend_name).first()
                 # save_benchmark_data(qpu)
 
         else:  # Create data
             print('Create QPU data.')
             save_qpu_data(chip_info)
-            qpu = QPU.query.filter_by(qpu_name=backend).first()
+            qpu = QPU.query.filter_by(qpu_name=backend_name).first()
             # save_benchmark_data(qpu)
 
         # StdQPU
-        stdqpu = StdQPU.query.filter_by(qpu_name=backend).first()
+        stdqpu = StdQPU.query.filter_by(qpu_name=backend_name).first()
         if stdqpu:
-            qpu = QPU.query.filter_by(qpu_name=backend).first()
+            qpu = QPU.query.filter_by(qpu_name=backend_name).first()
             if str(qpu.calibration_time) == str(stdqpu.calibration_time):
                 print('Calibration information unchanged, QPU/StdQPU data unchanged.')
             else:  # Update data
@@ -66,13 +67,13 @@ def update_sql(backend: str = None, chip_info_dict: dict = None):
             print('Create StdQPU data.')
             save_stdqpu_data(qpu)
 
-        qpu = QPU.query.filter_by(qpu_name=backend).first()
-        stdqpu = StdQPU.query.filter_by(qpu_name=backend).first()
+        qpu = QPU.query.filter_by(qpu_name=backend_name).first()
+        stdqpu = StdQPU.query.filter_by(qpu_name=backend_name).first()
         qpu.qpu2std.append(stdqpu)
         stdqpu.std2qpu = qpu
 
         # SubQPU
-        subqpu = SubQPU.query.filter_by(qpu_name=backend).first()
+        subqpu = SubQPU.query.filter_by(qpu_name=backend_name).first()
         if subqpu:
             print("Reset all SubQPU of the %s" % qpu.qpu_name + ", using calibration data from " + str(
                 qpu.calibration_time))
@@ -83,25 +84,43 @@ def update_sql(backend: str = None, chip_info_dict: dict = None):
             save_subqpu_data(qpu, reset=True)
             print("SubQPU data are created successfully.")
 
-        subqpus = SubQPU.query.filter_by(qpu_name=backend).all()
-        stdqpu = StdQPU.query.filter_by(qpu_name=backend).first()
+        # Get all records and sort them in ascending order by primary key value.
+        records = SubQPU.query.order_by(SubQPU.id).all()
+        # Update primary key values one by one to consecutive integers.
+        new_id = 1
+        for record in records:
+            record.id = new_id
+            db.session.add(record)
+            new_id += 1
+        db.session.commit()
+
+        subqpus = SubQPU.query.filter_by(qpu_name=backend_name).all()
+        stdqpu = StdQPU.query.filter_by(qpu_name=backend_name).first()
         for subqpu in subqpus:
             stdqpu.std2sub = [subqpu]
 
         # VQPU
-        vqpu = VQPU.query.filter_by(qpu_name=backend).first()
-        VQPU.query.filter_by(qpu_name=backend).delete()
+        vqpu = VQPU.query.filter_by(qpu_name=backend_name).first()
+        VQPU.query.filter_by(qpu_name=backend_name).delete()
         db.session.commit()
         if vqpu:
             print("Reset all VQPU of the %s" % qpu.qpu_name + ", using calibration data from " + str(
                 qpu.calibration_time))
+            vqpus = []
             for subqpu in subqpus:
-                save_vqpu_data(subqpu, cal_bm='cal')
+                obj = save_vqpu_data(subqpu, cal_bm='cal')
+                vqpus.append(obj)
+            db.session.bulk_save_objects(vqpus)
+            db.session.commit()
             print("VQPU data are updated successfully.")
         else:
             print("There is no VQPU data for the %s, create VQPU data." % qpu.qpu_name)
+            vqpus = []
             for subqpu in subqpus:
-                save_vqpu_data(subqpu, cal_bm='cal')
+                obj = save_vqpu_data(subqpu, cal_bm='cal')
+                vqpus.append(obj)
+            db.session.bulk_save_objects(vqpus)
+            db.session.commit()
             print("VQPU data are created successfully.")
 
         # Get all records and sort them in ascending order by primary key value.

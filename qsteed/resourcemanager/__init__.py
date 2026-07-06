@@ -16,4 +16,5 @@
 
 
 from .build_library import BuildLibrary
+from .quafu_chip_transform import transform_quafu_chip
 from .database_sql import *

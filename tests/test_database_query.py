@@ -78,8 +78,8 @@ class TestDatabaseQuery:
 
 
 if __name__ == "__main__":
-    name = "example"
-    num = 3
+    name = "baihua"
+    num = 4
     t = TestDatabaseQuery()
     t.test_query_subqpu(qpu_name=name, qubits_num=num)
     t.test_query_vqpu(qpu_name=name, qubits_num=num)

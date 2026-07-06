@@ -28,7 +28,7 @@ def call_compiler_api(circuit: str = None,
                       passflow: PassFlow = None,
                       task_type: str = "qc",
                       repeat: int = 1,
-                      vqpu_preferred: str = "fidelity",  # "structure"
+                      vqpu_preferred: str = "fidelity",  # "fidelity", "structure", "priority"
                       **task_info,
                       ):
     """
@@ -56,6 +56,7 @@ def call_compiler_api(circuit: str = None,
                       from which the best transpilation result is selected (subsequent versions will provide).
         vqpu_preferred (str): "fidelity": Choose the VQPU with the highest fidelity.
                               "structure": Choose the VQPU whose qubits coupling structure best matches the task.
+                              "priority": Prefer VQPUs that match priority_qubits, then choose by fidelity.
         task_info (dict): The above parameters can be packaged
 
     Returns:

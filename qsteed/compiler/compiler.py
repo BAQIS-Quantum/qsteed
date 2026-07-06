@@ -19,6 +19,7 @@ import configparser
 import operator
 import re
 import time
+from ast import literal_eval
 from functools import reduce
 
 from quafu import QuantumCircuit as quafuQC
@@ -34,12 +35,8 @@ from qsteed.passes.model import Model
 from qsteed.passflow.passflow import PassFlow
 from qsteed.resourcemanager.database_sql.database_query import query_vqpu, query_qpu, query_specified_vqpu, \
     generate_specified_vqpu
-from qsteed.resourcemanager.database_sql.instantiating import get_qpu, get_vqpu, get_subqpu
+from qsteed.resourcemanager.database_sql.instantiating import get_qpu, get_vqpu
 from qsteed.transpiler.transpiler import Transpiler
-
-QPUs = get_qpu()
-VQPUs = get_vqpu()
-SubQPUs = get_subqpu()
 
 CONFIG_FILE = get_config()
 CONFIG = configparser.ConfigParser()
@@ -61,7 +58,7 @@ class Compiler:
                  passflow: PassFlow = None,
                  task_type: str = "qc",
                  repeat: int = 1,
-                 vqpu_preferred: str = "fidelity",  # "structure"
+                 vqpu_preferred: str = "fidelity",  # "fidelity", "structure", "priority"
                  vqpus: list = None,
                  ):
         self.circuit = circuit
@@ -101,18 +98,19 @@ class Compiler:
         if self.transpile:
             transpiled_openqasm, used_vqpu, transpiled_circuit_depth, swap_count = self.call_transpiler(self.circuit)
             # Reset qubits to real physical qubits
-            qpu = query_qpu(QPUs, qpu_name=used_vqpu.qpu_name)
+            qpu = query_qpu(get_qpu(), qpu_name=used_vqpu.qpu_name)
             compiled_openqasm = reset_real_qubits(transpiled_openqasm, len(qpu[0].int_to_qubit), used_vqpu.vq_to_q)
         else:
             compiled_openqasm, used_vqpu, transpiled_circuit_depth, swap_count = self.call_untranspiler(self.circuit)
             q_to_vq = {q: vq for vq, q in used_vqpu.vq_to_q.items()}
             transpiled_openqasm = reset_real_qubits(compiled_openqasm, len(q_to_vq), q_to_vq)
 
-            qpu = query_qpu(QPUs, qpu_name=used_vqpu.qpu_name)
+            qpu = query_qpu(get_qpu(), qpu_name=used_vqpu.qpu_name)
 
         # Calculate compile time
         compile_time = time.time() - compile_begin_time
 
+        # step4. Program verification
         # Check if openqasm satisfies the qubit coupling graph of the hardware
         # and check the number of single-qubit and two-qubit gates.
         check_qasm, single_nums, two_nums = check_openqasm(compiled_openqasm, qpu[0].structure,
@@ -149,17 +147,19 @@ class Compiler:
 
     def find_available_vqpus(self, qubits_num):
         # Finding available vqpus
+        qpus = get_qpu()
+        vqpus = self.vqpus if self.vqpus is not None else get_vqpu()
         if self.qubits_list is None:
-            available_vqpus = query_vqpu(VQPUs, qpu_name=self.qpu_name, qubits_num=qubits_num)
+            available_vqpus = query_vqpu(vqpus, qpu_name=self.qpu_name, qubits_num=qubits_num)
             if len(available_vqpus) == 0:
                 raise ValueError("ERROR: No available VQPU found.")
         else:
             if self.qpu_name is None:
                 raise ValueError("ERROR: If specifying a qubits list, it is necessary to also specify which backend.")
             else:
-                available_vqpus = query_specified_vqpu(VQPUs, qpu_name=self.qpu_name, qubits_list=self.qubits_list)
+                available_vqpus = query_specified_vqpu(vqpus, qpu_name=self.qpu_name, qubits_list=self.qubits_list)
                 if len(available_vqpus) == 0:
-                    available_vqpus = generate_specified_vqpu(QPUs, qpu_name=self.qpu_name,
+                    available_vqpus = generate_specified_vqpu(qpus, qpu_name=self.qpu_name,
                                                               qubits_list=self.qubits_list)
 
         return available_vqpus
@@ -169,6 +169,8 @@ class Compiler:
         sorted_vqpus = _sort_vqpus(available_vqpus, sort_attribute='coupling_list')
         if self.vqpu_preferred == "fidelity":
             optimal_vqpu = sorted_vqpus[0]
+        elif self.vqpu_preferred == "priority":
+            optimal_vqpu = self._select_priority_vqpu(sorted_vqpus, qubit_num)
         elif self.vqpu_preferred == "structure":
             keep_num = 10
             if len(sorted_vqpus) < keep_num:
@@ -176,10 +178,37 @@ class Compiler:
             keep_vqpus = similar_structure(self.circuit, sorted_vqpus[0:keep_num])
             optimal_vqpu = keep_vqpus[0][0]
         else:
-            raise ValueError("'vqpu_preferred' can only be 'fidelity' or 'structure'.")
+            raise ValueError("'vqpu_preferred' can only be 'fidelity', 'structure', or 'priority'.")
         return optimal_vqpu
 
+    def _select_priority_vqpu(self, sorted_vqpus, qubit_num: int = None):
+        if qubit_num is None:
+            return sorted_vqpus[0]
+
+        qpu_map = {qpu.qpu_name.lower(): qpu for qpu in get_qpu() if qpu.qpu_name is not None}
+        priority_groups_by_qpu = {}
+
+        for qpu_name, qpu in qpu_map.items():
+            priority_groups = _normalize_priority_groups(qpu.priority_qubits)
+            priority_groups_by_qpu[qpu_name] = [
+                set(group) for group in priority_groups if len(group) == qubit_num
+            ]
+
+        for vqpu in sorted_vqpus:
+            qpu_name = vqpu.qpu_name.lower() if vqpu.qpu_name is not None else None
+            priority_groups = priority_groups_by_qpu.get(qpu_name, [])
+            if not priority_groups:
+                continue
+
+            vqpu_qubits = set(_vqpu_physical_qubits(vqpu))
+            for priority_group in priority_groups:
+                if vqpu_qubits == priority_group:
+                    return vqpu
+
+        return sorted_vqpus[0]
+
     def call_transpiler(self, circuit: str):
+        # step1. Standardized circuit
         # Calculate the physical and classical bits actually used by the circuit
         qubits, cbits = actually_bits(circuit)
 
@@ -192,9 +221,6 @@ class Compiler:
         new_circuit = StandardizedCircuit(input_qasm)
         input_qasm = new_circuit.standardized_circuit()
 
-        # Finding available vqpus
-        # available_vqpus = self.find_available_vqpus(len(qubits))
-
         if isinstance(input_qasm, quafuQC):
             logical_circuit = input_qasm
             qubit_num = logical_circuit.num
@@ -205,9 +231,12 @@ class Compiler:
         else:
             raise TypeError("The input_circuit needs to be quafu QuantumCircuit class or openQASM 2.0 string.")
 
+        # step2. Optimal VQPU selector
         used_vqpu = self.get_optimal_vqpu(qubit_num=qubit_num)
+
+        # step3. Transpiler
         initial_model = self._set_backend_model(used_vqpu)
-        transpiler = Transpiler(initial_model=initial_model)
+        transpiler = Transpiler(passflow = self.passflow, initial_model=initial_model)
         transpiled_circuit = transpiler.transpile(logical_circuit, optimization_level=self.optimization_level)
         transpiled_openqasm = transpiled_circuit.to_openqasm(with_para=True)
 
@@ -240,7 +269,7 @@ class Compiler:
                 used_vqpu = vqpu
                 break
         if used_vqpu is None:
-            used_vqpu = generate_specified_vqpu(QPUs, qpu_name=self.qpu_name, qubits_list=used_qubits)[0]
+            used_vqpu = generate_specified_vqpu(get_qpu(), qpu_name=self.qpu_name, qubits_list=used_qubits)[0]
 
         # Standardized input circuit openqasm, adding measures and barriers at the end.
         new_circuit = StandardizedCircuit(circuit)
@@ -269,6 +298,51 @@ def _sort_vqpus(vqpus, sort_attribute=None):
         return reduce(operator.mul, (item[2] for item in getattr(vqpu, sort_attribute)), 1)
 
     return sorted(vqpus, key=calculate_product, reverse=True)
+
+
+def _normalize_priority_groups(priority_qubits):
+    if not priority_qubits:
+        return []
+
+    if isinstance(priority_qubits, str):
+        try:
+            priority_qubits = literal_eval(priority_qubits)
+        except (SyntaxError, ValueError):
+            return []
+
+    if not isinstance(priority_qubits, (list, tuple, set)):
+        return []
+
+    normalized = []
+    for group in priority_qubits:
+        if isinstance(group, (list, tuple, set)):
+            qubits = group
+        else:
+            qubits = [group]
+
+        clean_group = []
+        for qubit in qubits:
+            try:
+                qubit = int(qubit)
+            except (TypeError, ValueError):
+                continue
+            if qubit not in clean_group:
+                clean_group.append(qubit)
+
+        if clean_group:
+            normalized.append(clean_group)
+
+    return normalized
+
+
+def _vqpu_physical_qubits(vqpu):
+    if isinstance(vqpu.vq_to_q, dict) and vqpu.vq_to_q:
+        return [vqpu.vq_to_q[index] for index in sorted(vqpu.vq_to_q)]
+
+    qubits = set()
+    for edge in vqpu.coupling_list or []:
+        qubits.update(edge[:2])
+    return sorted(qubits)
 
 
 def _set_backend_model(vqpu):

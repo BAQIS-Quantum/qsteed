@@ -15,13 +15,10 @@
 # limitations under the License.
 
 
-import configparser
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from qsteed.config.config_to_dict import config_to_dict
-from qsteed.config.get_config import get_config
+from qsteed.resourcemanager.database_sql.database_operations import get_database_uri
 
 # def initialize_app_db(mysql_config: dict = None):
 #     if mysql_config is None:
@@ -46,17 +43,13 @@ db = SQLAlchemy()
 
 
 def initialize_app_db(mysql_config: dict = None):
-    if mysql_config is None:
-        config_file = get_config()
-        config = configparser.ConfigParser()
-        config.read(config_file)
-        config_dict = config_to_dict(config)
-        mysql_config = config_dict['MySQL']['mysql_config']
-
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + mysql_config["user"] + ':' \
-                                            + mysql_config["password"] + '@' + mysql_config["host"] + \
-                                            '/' + mysql_config["database"]
+    if mysql_config is None:
+        app.config['SQLALCHEMY_DATABASE_URI'] = get_database_uri()
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + mysql_config["user"] + ':' \
+                                                + mysql_config["password"] + '@' + mysql_config["host"] + \
+                                                '/' + mysql_config["database"]
     db.init_app(app)
     return app
 

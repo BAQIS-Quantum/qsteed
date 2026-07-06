@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/github/license/BAQIS-Quantum/qsteed.svg?)](https://opensource.org/licenses/Apache-2.0)
 [![Current Release](https://img.shields.io/github/release/BAQIS-Quantum/qsteed.svg?)](https://github.com/BAQIS-Quantum/qsteed/releases)
-![Python versions](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue)
+![Python versions](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 [![Downloads](https://img.shields.io/pypi/dm/qsteed.svg?)](https://pypi.org/project/qsteed/)
 
 [//]: # (![PyPI - Python Version]&#40;https://img.shields.io/pypi/pyversions/qsteed&#41;)
@@ -15,26 +15,17 @@ virtualization manager, and a task scheduler.
 
 ## Installation
 
-### Need to install [pyquafu](https://github.com/ScQ-Cloud/pyquafu)
+### Install from source
+Install this local project from the `qsteed-mini` subproject directory:
 ```bash
-pip install 'pyquafu>=0.4.1'
-```
-### Install from PyPI
-You can install QSteed via pip:
-```bash
-pip install qsteed
+cd qsteed-mini
+pip install .
 ```
 
-### Install from source
-You can directly download the [source code](https://github.com/BAQIS-Quantum/qsteed/archive/refs/heads/master.zip) from GitHub
-or clone the repository using the following command.
+For development, use editable mode:
 ```bash
-git clone https://github.com/BAQIS-Quantum/QSteed.git
-```
-Change to the qsteed directory install using the following command:
-```bash
-pip install -r requirements.txt
-python setup.py install   # or: pip install .
+cd qsteed-mini
+pip install -e .
 ```
 
 ## Example
@@ -49,8 +40,6 @@ from qsteed import *
 rqc = RandomCircuit(num_qubit=5, gates_number=100, gates_list=['cx', 'rx', 'rz', 'ry', 'h'])
 qc = rqc.random_circuit()
 
-# Set chip information (the number of chip qubits needs to be consistent
-# with the number of quantum circuit qubits)
 basis_gates = ['cx', 'rx', 'ry', 'rz', 'id', 'h']
 c_list = [(2, 3, 0.982), (3, 2, 0.982), (3, 4, 0.973), (4, 3, 0.973), 
           (0, 1, 0.98), (1, 0, 0.98), (1, 2, 0.97), (2, 1, 0.97)]
@@ -90,7 +79,7 @@ transpiled_circuit = transpiler.transpile(qc, optimization_level=3)
 
 ### Quantum Compiler
 > ⚠️<span style="color:#8B0000"> **Warning**</span>   
-> The quantum compiler requires MySQL database support, see section [Deployment](#deployment).
+> The quantum compiler requires a resource database. QSteed supports SQLite or MySQL; see section [Deployment](#deployment).
 
 Using the `Compiler`, you can compile quantum circuits onto a real quantum chip.
 ```python
@@ -133,14 +122,22 @@ task_info = {
     "circuit": qasm,
     "transpile": True,
     "qpu_name": 'example',
-    "optimization_level": 2,
+    "optimization_level": 3,
     "task_type": 'qc',
+    "vqpu_preferred": "fidelity",  # "priority"(default), "fidelity" or "structure".
 }
 compiled_info = call_compiler_api(**task_info)
 print('Compiled openqasm:\n', compiled_info[0])
 print('Measurement qubits to cbits:\n', compiled_info[1])
 print('Compiled circuit information:\n', compiled_info[2])
 ```
+
+#### VQPU selection strategy
+The compiler supports three VQPU selection strategies:
+
+- `fidelity`: choose the VQPU with the highest fidelity score.
+- `structure`: choose the VQPU whose coupling structure best matches the task circuit.
+- `priority`: prefer VQPUs that match the chip's `priority_qubits`; if no priority match is found, fall back to `fidelity`.
 
 
 ## Deployment
@@ -157,12 +154,24 @@ qsteed-config
 ```
 You can also manually copy the `config.ini` to the `~\QSteed` directory.
 
-### <span style="font-size:larger;">II.</span> Configure MySQL Service
-#### 1. Install MySQL. 
+### <span style="font-size:larger;">II.</span> Configure resource database
+Open the configuration file `config.ini` and select the database backend in section `[Database]`.
+The default configuration uses SQLite:
+```bash
+db_type = "sqlite"
+sqlite_config = {"path": "~/QSteed/qsteed.db"}
+```
+
+To use MySQL instead, set:
+```bash
+db_type = "mysql"
+```
+
+#### 1. Install MySQL if using MySQL
 You can download the appropriate [MySQL Community Server](https://dev.mysql.com/downloads/mysql/) from the MySQL official website.
 For detailed installation instructions, see the official [documentation](https://dev.mysql.com/doc/refman/8.4/en/installing.html).
 
-#### 2. Set MySQL user information
+#### 2. Set MySQL user information if using MySQL
 [//]: # (After installing QSteed, a folder named `QSteed` will be created in the root directory. )
 [//]: # (Inside this folder, there is a configuration file called `config.ini`. )
 Open the configuration file `config.ini` and enter your MySQL user information into the `mysql_config` property under section `[MySQL]`.
@@ -175,7 +184,7 @@ mysql_config = {"host": "localhost",
                }
 ```
 
-#### 3. Start MySQL service
+#### 3. Start MySQL service if using MySQL
 Different platforms have different startup methods. For details, see [Getting Started with MySQL](https://dev.mysql.com/doc/mysql-getting-started/en/).
 
 
@@ -184,7 +193,7 @@ Different platforms have different startup methods. For details, see [Getting St
 > ⚠️<span style="color:#8B0000"> **Warning**</span>   
 > If this is your first time installing QSteed, please make sure to perform the following database initialization steps after the installation is complete.
 
-After the MySQL service starts and the `config.ini` file is configured, 
+After the database backend is configured, 
 initialize the quantum computing resource virtualization database by running the following command:
 ```python
 from qsteed.first_build_db import first_build_db
@@ -194,6 +203,10 @@ or run the following command in the terminal:
 ```bash
 qsteed-build-db
 ```
+
+If the SQLite database file, for example `~/QSteed/qsteed.db`, is deleted manually, the compiler cannot use it until
+the resource database is rebuilt. Re-run the database initialization and chip update steps before calling
+`Compiler` or `call_compiler_api`.
 
 ### <span style="font-size:larger;">IV.</span> Configure quantum chip information
 #### 1. Add a chip
@@ -239,17 +252,42 @@ with open(chip_file, 'r') as file:
     data_dict = json.load(file)
 update_chip_api('example', data_dict)
 ```
-For the data structure of the chip, see file [chipexample.json](tests/chipexample.json) or 
-[dongling.json](tests/dongling.json).
+For the data structure of the chip, see file [chipexample.json](tests/chipexample.json).
+
+#### Update database from Quafu cloud chip data
+If chip data is fetched from the Quafu cloud through `quarkstudio`, QSteed provides a transformer that converts
+the raw cloud chip information into the resource database format.
+
+Install `quarkstudio` separately if you need to fetch data from the cloud:
+```bash
+pip install quarkstudio
+```
+
+Example:
+```python
+import os
+
+from quark import Task
+from qsteed.apis.resourceDB_api import transform_quafu_chip, update_chip_api
+
+token = os.environ["QUARK_TOKEN"]
+tmgr = Task(token=token)
+
+info = tmgr.backend("Baihua")
+chip_dict = transform_quafu_chip(info)
+
+# The system_id must match the chip configuration in ~/QSteed/config.ini.
+chip_dict["system_id"] = 9
+
+update_chip_api(chip_name="Baihua", chip_info_dict=chip_dict)
+```
 
 
 ## Real quantum device deployment cases
-QSteed has been successfully deployed to the [Quafu Quantum Cloud Computing Cluster](https://quafu.baqis.ac.cn/), 
+QSteed has been successfully deployed to the [Quafu Superconducting Quantum Computing](https://quafu-sqc.baqis.ac.cn/), 
 supporting the compilation and optimization of user tasks into quantum circuits 
 executable by quantum processors. 
-You can submit tasks through the [Quafu Composer](https://quafu.baqis.ac.cn/#/composer) web interface,
-[Pyquafu](https://scq-cloud.github.io/) client, 
-or [QuarkStudio](https://www.yuque.com/wuming-6g8w2/ghzgfk/azika5xqlpxig3q3?singleDoc#) client.
+You can submit tasks through the [QuarkStudio](https://quafu-sqc.readthedocs.io/en/latest/) client.
 
 If you want to learn more about real quantum device deployment or customize a deployment plan, please contact us.
 

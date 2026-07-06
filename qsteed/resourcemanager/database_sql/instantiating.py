@@ -26,19 +26,19 @@ VQPUs = []
 
 
 def get_qpu():
-    return QPUs
+    return instantiating_qpu(app)
 
 
 def get_stdqpu():
-    return StdQPUs
+    return instantiating_stdqpu(app)
 
 
 def get_subqpu():
-    return SubQPUs
+    return instantiating_subqpu(app)
 
 
 def get_vqpu():
-    return VQPUs
+    return instantiating_vqpu(app)
 
 
 def instantiating_qpu(app: Flask):
@@ -82,8 +82,3 @@ def update_memory_database():
         SubQPUs = SubQPU.query.all()
         return QPUs, StdQPUs, SubQPUs, VQPUs
 
-
-instantiating_qpu(app)
-instantiating_subqpu(app)
-instantiating_stdqpu(app)
-instantiating_vqpu(app)
