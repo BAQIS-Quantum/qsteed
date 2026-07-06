@@ -16,15 +16,15 @@ virtualization manager, and a task scheduler.
 ## Installation
 
 ### Install from source
-Install this local project from the `qsteed-mini` subproject directory:
+Install this local project from the `qsteed` subproject directory:
 ```bash
-cd qsteed-mini
+git clone -b qsteed-for-quafu-sqc https://github.com/BAQIS-Quantum/qsteed.git
+cd qsteed
 pip install .
 ```
 
 For development, use editable mode:
 ```bash
-cd qsteed-mini
 pip install -e .
 ```
 
