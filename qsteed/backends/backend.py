@@ -34,6 +34,9 @@ class Backend:
         basis_gates (Optional[List[str]]): List of basis gates supported.
         pulse (Optional[bool]): Indicates if the backend supports pulse level operations.
         calibration_time (Optional[str]): The calibration time.
+        used_subgraph (Optional[CouplingGraph]): Connected physical subgraph selected for
+            the current circuit.  Its size equals the number of circuit qubits, so
+            routing never uses idle physical qubits outside this subgraph.
 
     Attributes:
         _properties (dict): A dictionary containing all the properties of the backend.
@@ -52,6 +55,7 @@ class Backend:
                  pulse: bool = False,
                  calibration_time: Optional[float] = None,
                  status: str = None,
+                 used_subgraph: CouplingGraph = None,
                  ):
 
         # Setting up bidirectional coupling graph.
@@ -80,6 +84,7 @@ class Backend:
             "pulse": pulse,
             "calibration_time": calibration_time,
             "status": status,
+            "used_subgraph": used_subgraph,
         }
 
     def get_all_properties(self):
@@ -90,7 +95,7 @@ class Backend:
         """Return the value of the specified property."""
         return self._properties.get(property_name, None)
 
-    def set_property(self, property_name: str, value: Union[str, int, float, List]):
+    def set_property(self, property_name: str, value: Union[str, int, float, List, None]):
         """Set a new value for the specified property."""
         if property_name in self._properties:
             self._properties[property_name] = value

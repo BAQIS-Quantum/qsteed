@@ -16,6 +16,7 @@
 
 
 import configparser
+import os
 
 import pymysql
 
@@ -32,18 +33,57 @@ def get_mysql_config():
     return mysql_config
 
 
+def _get_config_dict():
+    config_file = get_config()
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    return config_to_dict(config)
+
+
+def get_database_config():
+    """Read database settings and normalize for mysql/sqlite."""
+    config_dict = _get_config_dict()
+    database_section = config_dict.get('Database', {})
+    db_type = str(database_section.get('db_type', 'mysql')).lower()
+
+    if db_type == 'sqlite':
+        sqlite_config = database_section.get('sqlite_config', {})
+        sqlite_path = sqlite_config.get('path', '~/QSteed/qsteed.db')
+        sqlite_path = os.path.abspath(os.path.expanduser(sqlite_path))
+        return {'db_type': 'sqlite', 'sqlite_path': sqlite_path}
+
+    mysql_config = config_dict['MySQL']['mysql_config']
+    return {'db_type': 'mysql', 'mysql_config': mysql_config}
+
+
+def get_database_uri():
+    db_config = get_database_config()
+    if db_config['db_type'] == 'sqlite':
+        sqlite_dir = os.path.dirname(db_config['sqlite_path'])
+        if sqlite_dir:
+            os.makedirs(sqlite_dir, exist_ok=True)
+        return f"sqlite:///{db_config['sqlite_path']}"
+
+    mysql_config = db_config['mysql_config']
+    return 'mysql+pymysql://' + mysql_config["user"] + ':' \
+           + mysql_config["password"] + '@' + mysql_config["host"] + \
+           '/' + mysql_config["database"]
+
+
 def check_database(db_name: str = None):
     """Check if the database exists"""
+    db_config = get_database_config()
+    if db_config['db_type'] == 'sqlite':
+        sqlite_path = db_config['sqlite_path']
+        return (sqlite_path,) if os.path.exists(sqlite_path) else None
 
-    mysql_config = get_mysql_config()
-    # Create database connection
+    mysql_config = db_config['mysql_config']
     connection = pymysql.connect(
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password']
     )
 
-    # Create cursor object
     cursor = connection.cursor()
     check_database_query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s"
     cursor.execute(check_database_query, (db_name,))
@@ -54,26 +94,43 @@ def check_database(db_name: str = None):
 
 
 def database_operations(mysql_config: dict = None, create=True, reset=False, delete=False):
-    if mysql_config is None:
-        mysql_config = get_mysql_config()
-        # mysql_config = eval(mysql_config)
+    if mysql_config is not None:
+        db_config = {'db_type': 'mysql', 'mysql_config': mysql_config}
+    else:
+        db_config = get_database_config()
 
-    # Create database connection
+    if db_config['db_type'] == 'sqlite':
+        sqlite_path = db_config['sqlite_path']
+        sqlite_dir = os.path.dirname(sqlite_path)
+        if sqlite_dir:
+            os.makedirs(sqlite_dir, exist_ok=True)
+
+        if reset and os.path.exists(sqlite_path):
+            os.remove(sqlite_path)
+            print(f"SQLite database {sqlite_path} reset successfully.")
+        elif delete and os.path.exists(sqlite_path):
+            os.remove(sqlite_path)
+            print(f"SQLite database {sqlite_path} deleted successfully.")
+        elif create:
+            if not os.path.exists(sqlite_path):
+                open(sqlite_path, 'a', encoding='utf-8').close()
+                print(f"SQLite database {sqlite_path} created successfully.")
+            else:
+                print(f"SQLite database {sqlite_path} already exists.")
+        return
+
+    mysql_config = db_config['mysql_config']
     connection = pymysql.connect(
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password']
     )
 
-    # Create cursor object
     cursor = connection.cursor()
-
-    # Check if the database exists
     check_database_query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s"
     cursor.execute(check_database_query, (mysql_config['database'],))
     result = cursor.fetchone()
 
-    # If the database does not exist, create the database
     if result is None and create is True:
         create_database_query = fr"CREATE DATABASE {mysql_config['database']}"
         cursor.execute(create_database_query)
@@ -82,13 +139,11 @@ def database_operations(mysql_config: dict = None, create=True, reset=False, del
     elif result is not None and create is True:
         print(fr"Database {mysql_config['database']} already exists.")
 
-    # Delete the database
     elif delete is True and result:
         drop_database_query = fr"DROP DATABASE {mysql_config['database']}"
         cursor.execute(drop_database_query)
         print(fr"Database {mysql_config['database']} deleted successfully.")
 
-    # If you reset the database, delete it and recreate it
     elif reset is True and result:
         drop_database_query = fr"DROP DATABASE {mysql_config['database']}"
         cursor.execute(drop_database_query)
@@ -97,27 +152,28 @@ def database_operations(mysql_config: dict = None, create=True, reset=False, del
         cursor.execute(create_database_query)
         print(fr"Database {mysql_config['database']} reset successfully.")
 
-    # Close cursor and database connection
     cursor.close()
     connection.close()
 
 
 def delete_db(db_name: str = None):
-    mysql_config = get_mysql_config()
+    db_config = get_database_config()
+    if db_config['db_type'] == 'sqlite':
+        sqlite_path = db_name or db_config['sqlite_path']
+        sqlite_path = os.path.abspath(os.path.expanduser(sqlite_path))
+        if os.path.exists(sqlite_path):
+            os.remove(sqlite_path)
+        return
 
-    # Create database connection
+    mysql_config = db_config['mysql_config']
     connection = pymysql.connect(
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password']
     )
 
-    # Create cursor object
     cursor = connection.cursor()
-
     drop_database_query = fr"DROP DATABASE {db_name}"
     cursor.execute(drop_database_query)
-
-    # Close cursor and database connection
     cursor.close()
     connection.close()

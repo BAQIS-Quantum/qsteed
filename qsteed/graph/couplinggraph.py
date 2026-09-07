@@ -47,11 +47,12 @@ class CouplingGraph:
             else:
                 raise TypeError("Error: The input coupling_list is wrong.")
 
-        for pair in coupling_list:
-            reverse_pair = (pair[1], pair[0])
-            if reverse_pair not in coupling_list:
-                self.is_bidirectional = False
-                break
+        if coupling_list is not None:
+            for pair in coupling_list:
+                reverse_pair = (pair[1], pair[0])
+                if reverse_pair not in coupling_list:
+                    self.is_bidirectional = False
+                    break
 
         self._edge_dict = None
         self._path_fidelity = None
@@ -81,6 +82,11 @@ class CouplingGraph:
             self._qubits_list = list(self.graph.nodes())
         return self._qubits_list
 
+    @property
+    def coupling_list(self):
+        """Get coupling edges as ``(source, target, fidelity)`` tuples."""
+        return [(u, v, data['fidelity']) for u, v, data in self.graph.edges(data=True)]
+
     def subgraph(self, node_list):
         """Get the subgraph of this graph.
 
@@ -91,7 +97,11 @@ class CouplingGraph:
             sub_coupling (CouplingGraph)
         """
         sub_coupling = CouplingGraph()
-        sub_coupling.graph = self.graph.subgraph(node_list)
+        sub_coupling.graph = self.graph.subgraph(node_list).copy()
+        sub_coupling.is_bidirectional = all(
+            sub_coupling.graph.has_edge(target, source)
+            for source, target in sub_coupling.graph.edges()
+        )
         return sub_coupling
 
     def is_connected(self):
@@ -101,7 +111,11 @@ class CouplingGraph:
             nx.is_directed(self.graph) (bool):
             True if the nodes in the graph are connected, False otherwise
         """
-        return nx.is_directed(self.graph)
+        if self.graph.number_of_nodes() == 0:
+            return False
+        if isinstance(self.graph, nx.DiGraph):
+            return nx.is_strongly_connected(self.graph)
+        return nx.is_connected(self.graph)
 
     def neighbors(self, qubit):
         """Returns the nearest neighbors of a given physical qubit in this graph."""
@@ -113,7 +127,13 @@ class CouplingGraph:
         if self._distance_matrix is None:
             if not self.is_connected():
                 raise ValueError("Error: This coupling diagram is not connected.")
-            self._distance_matrix = nx.floyd_warshall_numpy(self.graph)
+            compact_matrix = nx.floyd_warshall_numpy(self.graph)
+            nodes = list(self.graph.nodes())
+            max_node = max(nodes)
+            self._distance_matrix = np.zeros((max_node + 1, max_node + 1))
+            for row, source in enumerate(nodes):
+                for column, target in enumerate(nodes):
+                    self._distance_matrix[source, target] = compact_matrix[row, column]
         return self._distance_matrix
 
     def shortest_undirected_path(self, source_qubit, target_qubit):
@@ -141,9 +161,9 @@ class CouplingGraph:
         """
         if self._path_fidelity is None:
             self._path_fidelity = {}
-            nodes = len(self.graph.nodes)
-            for n1 in range(nodes - 1):
-                for n2 in range(n1 + 1, nodes):
+            nodes = list(self.graph.nodes)
+            for index, n1 in enumerate(nodes[:-1]):
+                for n2 in nodes[index + 1:]:
                     swap_path = nx.shortest_path(self.graph, n1, n2)
                     if len(swap_path) == 2:  # not need swap
                         self._path_fidelity[(n1, n2)] = np.log(self.edge_dict[(swap_path[0], swap_path[1])])

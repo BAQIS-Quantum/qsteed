@@ -34,12 +34,8 @@ from qsteed.passes.model import Model
 from qsteed.passflow.passflow import PassFlow
 from qsteed.resourcemanager.database_sql.database_query import query_vqpu, query_qpu, query_specified_vqpu, \
     generate_specified_vqpu
-from qsteed.resourcemanager.database_sql.instantiating import get_qpu, get_vqpu, get_subqpu
+from qsteed.resourcemanager.database_sql.instantiating import get_qpu, get_vqpu
 from qsteed.transpiler.transpiler import Transpiler
-
-QPUs = get_qpu()
-VQPUs = get_vqpu()
-SubQPUs = get_subqpu()
 
 CONFIG_FILE = get_config()
 CONFIG = configparser.ConfigParser()
@@ -101,14 +97,14 @@ class Compiler:
         if self.transpile:
             transpiled_openqasm, used_vqpu, transpiled_circuit_depth, swap_count = self.call_transpiler(self.circuit)
             # Reset qubits to real physical qubits
-            qpu = query_qpu(QPUs, qpu_name=used_vqpu.qpu_name)
+            qpu = query_qpu(get_qpu(), qpu_name=used_vqpu.qpu_name)
             compiled_openqasm = reset_real_qubits(transpiled_openqasm, len(qpu[0].int_to_qubit), used_vqpu.vq_to_q)
         else:
             compiled_openqasm, used_vqpu, transpiled_circuit_depth, swap_count = self.call_untranspiler(self.circuit)
             q_to_vq = {q: vq for vq, q in used_vqpu.vq_to_q.items()}
             transpiled_openqasm = reset_real_qubits(compiled_openqasm, len(q_to_vq), q_to_vq)
 
-            qpu = query_qpu(QPUs, qpu_name=used_vqpu.qpu_name)
+            qpu = query_qpu(get_qpu(), qpu_name=used_vqpu.qpu_name)
 
         # Calculate compile time
         compile_time = time.time() - compile_begin_time
@@ -149,17 +145,19 @@ class Compiler:
 
     def find_available_vqpus(self, qubits_num):
         # Finding available vqpus
+        qpus = get_qpu()
+        vqpus = self.vqpus if self.vqpus is not None else get_vqpu()
         if self.qubits_list is None:
-            available_vqpus = query_vqpu(VQPUs, qpu_name=self.qpu_name, qubits_num=qubits_num)
+            available_vqpus = query_vqpu(vqpus, qpu_name=self.qpu_name, qubits_num=qubits_num)
             if len(available_vqpus) == 0:
                 raise ValueError("ERROR: No available VQPU found.")
         else:
             if self.qpu_name is None:
                 raise ValueError("ERROR: If specifying a qubits list, it is necessary to also specify which backend.")
             else:
-                available_vqpus = query_specified_vqpu(VQPUs, qpu_name=self.qpu_name, qubits_list=self.qubits_list)
+                available_vqpus = query_specified_vqpu(vqpus, qpu_name=self.qpu_name, qubits_list=self.qubits_list)
                 if len(available_vqpus) == 0:
-                    available_vqpus = generate_specified_vqpu(QPUs, qpu_name=self.qpu_name,
+                    available_vqpus = generate_specified_vqpu(qpus, qpu_name=self.qpu_name,
                                                               qubits_list=self.qubits_list)
 
         return available_vqpus
@@ -240,7 +238,7 @@ class Compiler:
                 used_vqpu = vqpu
                 break
         if used_vqpu is None:
-            used_vqpu = generate_specified_vqpu(QPUs, qpu_name=self.qpu_name, qubits_list=used_qubits)[0]
+            used_vqpu = generate_specified_vqpu(get_qpu(), qpu_name=self.qpu_name, qubits_list=used_qubits)[0]
 
         # Standardized input circuit openqasm, adding measures and barriers at the end.
         new_circuit = StandardizedCircuit(circuit)

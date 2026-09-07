@@ -4,6 +4,7 @@ matplotlib>=3.5.2
 networkx>=2.6.3
 numpy>=1.20.3,<2.0.0
 Pillow>=10.4.0
+pyquafu==0.4.4
 graphviz>=0.14.2
 rich>=13.7.1
 scipy>=1.8.1
@@ -12,3 +13,5 @@ sqlalchemy>=2.0.28
 flask>=3.0.2
 pymysql>=1.1.0
 flask_sqlalchemy>=3.1.1
+quarkcircuit>=0.5.5
+quarkstudio>=7.3.9
