@@ -22,6 +22,8 @@ from qsteed.resourcemanager.database_sql.instantiating import update_memory_data
 
 def backend_db_api(backend: str = None, chip_info_dict: dict = None):
     update_sql(backend, chip_info_dict)
+    print("Update in-memory database information.")
+    return update_memory_database()
 
 
 def call_backend_db_api(backend=None,
@@ -36,7 +38,8 @@ def call_backend_db_api(backend=None,
     """
     if database == "initialize":
         initialize_database()
-    elif database == "update":
-        backend_db_api(backend, chip_info_dict)
         print("Update in-memory database information.")
-        update_memory_database()
+        return update_memory_database()
+    elif database == "update":
+        return backend_db_api(backend, chip_info_dict)
+    raise ValueError("The database operation must be 'initialize' or 'update'.")
