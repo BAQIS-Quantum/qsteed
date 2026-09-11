@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/github/license/BAQIS-Quantum/qsteed.svg?)](https://opensource.org/licenses/Apache-2.0)
 [![Current Release](https://img.shields.io/github/release/BAQIS-Quantum/qsteed.svg?)](https://github.com/BAQIS-Quantum/qsteed/releases)
-![Python versions](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
+![Python versions](https://img.shields.io/badge/python-%3E%3D%203.10-blue)
 [![Downloads](https://img.shields.io/pypi/dm/qsteed.svg?)](https://pypi.org/project/qsteed/)
 
 [//]: # (![PyPI - Python Version]&#40;https://img.shields.io/pypi/pyversions/qsteed&#41;)
