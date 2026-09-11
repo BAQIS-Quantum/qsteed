@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import random
+from collections.abc import Iterable
 
 
 class Layout:
@@ -45,25 +46,38 @@ class Layout:
         self.v2p = {k: k for k in range(virtual_qubits)}
         self.p2v = {k: k for k in range(virtual_qubits)}
 
-    def generate_random_layout(self, virtual_qubits: int = None, physical_qubits: int = None):
+    def generate_random_layout(self, virtual_qubits=None, physical_qubits=None):
         """
         Args:
-            virtual_qubits (int): the number of virtual qubits in a circuit
-            physical_qubits (int): the number of physical qubits in a chip
+            virtual_qubits (int or Iterable[int]): Number or labels of virtual qubits.
+            physical_qubits (int or Iterable[int]): Number or labels of physical qubits.
 
         raise: The number of virtual qubits in the circuit cannot be greater than
                 the number of physical qubits in the chip.
 
         """
-        if virtual_qubits <= physical_qubits:
-            virtual_qubit = random.sample(range(virtual_qubits), virtual_qubits)
-            physical_qubit = random.sample(range(physical_qubits), virtual_qubits)
-            for v, q in zip(virtual_qubit, physical_qubit):
-                self.v2p[v] = q
-            self.p2v = {p: v for v, p in self.v2p.items()}
-        else:
+        virtual_qubit = self._normalise_qubits(virtual_qubits, 'virtual_qubits')
+        physical_qubit = self._normalise_qubits(physical_qubits, 'physical_qubits')
+        if len(virtual_qubit) > len(physical_qubit):
             raise ValueError('Error: The number of virtual qubits in the circuit cannot be greater than '
                              'the number of physical qubits in the chip.')
+        shuffled_virtual = random.sample(virtual_qubit, len(virtual_qubit))
+        selected_physical = random.sample(physical_qubit, len(virtual_qubit))
+        self.v2p = dict(zip(shuffled_virtual, selected_physical))
+        self.p2v = {p: v for v, p in self.v2p.items()}
+
+    @staticmethod
+    def _normalise_qubits(qubits, argument_name):
+        if isinstance(qubits, int):
+            if qubits < 0:
+                raise ValueError(f'{argument_name} cannot be negative.')
+            return list(range(qubits))
+        if isinstance(qubits, Iterable):
+            result = list(qubits)
+            if len(result) != len(set(result)):
+                raise ValueError(f'{argument_name} contains duplicate qubit labels.')
+            return result
+        raise TypeError(f'{argument_name} must be an int or an iterable of qubit labels.')
 
     def from_v2p_dict(self, input_dict: dict = None):
         """

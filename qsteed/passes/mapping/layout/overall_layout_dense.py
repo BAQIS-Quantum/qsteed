@@ -14,6 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from qsteed.graph.subgraph import max_dense_subgraph
+from qsteed.passes.mapping.overall_layout import OverallLayout
 
-from .baselayout import Layout
-from .overall_layout import OverallLayout
+
+class OverallLayoutDense(OverallLayout):
+    """Choose the connected physical subgraph with greatest edge density."""
+
+    def overall_layout(self):
+        subgraph = max_dense_subgraph(self.get_graph(), self.num_qubits)
+        return self._set_mapping_from_subgraph(subgraph)

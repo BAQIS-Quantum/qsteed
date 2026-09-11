@@ -32,14 +32,10 @@ from qsteed.config.get_config import get_config
 from qsteed.graph.similar_substructure import similar_structure
 from qsteed.passes.model import Model
 from qsteed.passflow.passflow import PassFlow
-from qsteed.resourcemanager.database_sql.database_query import query_vqpu, query_qpu, query_specified_vqpu, \
+from qsteed.resourcemanager.database_sql.database_query import query_vqpu, query_specified_vqpu, \
     generate_specified_vqpu
-from qsteed.resourcemanager.database_sql.instantiating import get_qpu, get_vqpu, get_subqpu
+from qsteed.resourcemanager.database_sql.instantiating import get_resource_snapshot
 from qsteed.transpiler.transpiler import Transpiler
-
-QPUs = get_qpu()
-VQPUs = get_vqpu()
-SubQPUs = get_subqpu()
 
 CONFIG_FILE = get_config()
 CONFIG = configparser.ConfigParser()
@@ -75,6 +71,7 @@ class Compiler:
         self.task_type = task_type
         self.vqpu_preferred = vqpu_preferred
         self.transpile = transpile
+        self._resource_snapshot = None
 
         if self.qpu_name is None and self.qpu_id is not None:
             self.qpu_name = system_id_name[self.qpu_id]
@@ -86,9 +83,11 @@ class Compiler:
             raise ValueError("When specifying 'qubits_list', you must specify either 'qpu_name' or 'qpu_id'.")
 
     def compile(self):
-
         # Compile input_circuit
         compile_begin_time = time.time()
+        # Pin one complete resource version for the whole compilation. A
+        # concurrent database refresh only affects tasks started afterwards.
+        self._resource_snapshot = get_resource_snapshot()
 
         # Determine the type of circuit
         if isinstance(self.circuit, quafuQC):
@@ -101,22 +100,22 @@ class Compiler:
         if self.transpile:
             transpiled_openqasm, used_vqpu, transpiled_circuit_depth, swap_count = self.call_transpiler(self.circuit)
             # Reset qubits to real physical qubits
-            qpu = query_qpu(QPUs, qpu_name=used_vqpu.qpu_name)
-            compiled_openqasm = reset_real_qubits(transpiled_openqasm, len(qpu[0].int_to_qubit), used_vqpu.vq_to_q)
+            qpu = self._get_qpu(used_vqpu.qpu_name)
+            compiled_openqasm = reset_real_qubits(transpiled_openqasm, len(qpu.int_to_qubit), used_vqpu.vq_to_q)
         else:
             compiled_openqasm, used_vqpu, transpiled_circuit_depth, swap_count = self.call_untranspiler(self.circuit)
             q_to_vq = {q: vq for vq, q in used_vqpu.vq_to_q.items()}
             transpiled_openqasm = reset_real_qubits(compiled_openqasm, len(q_to_vq), q_to_vq)
 
-            qpu = query_qpu(QPUs, qpu_name=used_vqpu.qpu_name)
+            qpu = self._get_qpu(used_vqpu.qpu_name)
 
         # Calculate compile time
         compile_time = time.time() - compile_begin_time
 
         # Check if openqasm satisfies the qubit coupling graph of the hardware
         # and check the number of single-qubit and two-qubit gates.
-        check_qasm, single_nums, two_nums = check_openqasm(compiled_openqasm, qpu[0].structure,
-                                                           len(qpu[0].int_to_qubit))
+        check_qasm, single_nums, two_nums = check_openqasm(compiled_openqasm, qpu.structure,
+                                                           len(qpu.int_to_qubit))
         try:
             int(check_qasm)
         except:
@@ -149,17 +148,39 @@ class Compiler:
 
     def find_available_vqpus(self, qubits_num):
         # Finding available vqpus
+        snapshot = self._get_resource_snapshot()
+        qpus = snapshot.qpus
         if self.qubits_list is None:
-            available_vqpus = query_vqpu(VQPUs, qpu_name=self.qpu_name, qubits_num=qubits_num)
+            if self.vqpus is None:
+                available_vqpus = snapshot.get_vqpus(
+                    qpu_name=self.qpu_name,
+                    qubits_num=qubits_num,
+                )
+            else:
+                available_vqpus = query_vqpu(
+                    self.vqpus,
+                    qpu_name=self.qpu_name,
+                    qubits_num=qubits_num,
+                )
             if len(available_vqpus) == 0:
                 raise ValueError("ERROR: No available VQPU found.")
         else:
             if self.qpu_name is None:
                 raise ValueError("ERROR: If specifying a qubits list, it is necessary to also specify which backend.")
             else:
-                available_vqpus = query_specified_vqpu(VQPUs, qpu_name=self.qpu_name, qubits_list=self.qubits_list)
+                if self.vqpus is None:
+                    available_vqpus = snapshot.get_vqpus_for_qubits(
+                        qpu_name=self.qpu_name,
+                        qubits_list=self.qubits_list,
+                    )
+                else:
+                    available_vqpus = query_specified_vqpu(
+                        self.vqpus,
+                        qpu_name=self.qpu_name,
+                        qubits_list=self.qubits_list,
+                    )
                 if len(available_vqpus) == 0:
-                    available_vqpus = generate_specified_vqpu(QPUs, qpu_name=self.qpu_name,
+                    available_vqpus = generate_specified_vqpu(qpus, qpu_name=self.qpu_name,
                                                               qubits_list=self.qubits_list)
 
         return available_vqpus
@@ -240,7 +261,11 @@ class Compiler:
                 used_vqpu = vqpu
                 break
         if used_vqpu is None:
-            used_vqpu = generate_specified_vqpu(QPUs, qpu_name=self.qpu_name, qubits_list=used_qubits)[0]
+            used_vqpu = generate_specified_vqpu(
+                self._get_resource_snapshot().qpus,
+                qpu_name=self.qpu_name,
+                qubits_list=used_qubits,
+            )[0]
 
         # Standardized input circuit openqasm, adding measures and barriers at the end.
         new_circuit = StandardizedCircuit(circuit)
@@ -250,6 +275,17 @@ class Compiler:
         swap_count = 0
 
         return compiled_openqasm, used_vqpu, compiled_circuit_depth, swap_count
+
+    def _get_resource_snapshot(self):
+        if self._resource_snapshot is None:
+            self._resource_snapshot = get_resource_snapshot()
+        return self._resource_snapshot
+
+    def _get_qpu(self, qpu_name):
+        qpu = self._get_resource_snapshot().get_qpu(qpu_name)
+        if qpu is None:
+            raise NameError("The " + str(qpu_name) + " is not found.")
+        return qpu
 
     def _set_backend_model(self, vqpu):
         backend_properties = {

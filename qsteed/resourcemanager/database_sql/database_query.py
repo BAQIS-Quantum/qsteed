@@ -16,13 +16,21 @@
 
 
 from qsteed.resourcemanager.database_sql.sql_models import SubQPU, VQPU
+from qsteed.resourcemanager.database_sql.resource_cache import normalize_qpu_name
 from qsteed.resourcemanager.utils import virtual_qubits
 from qsteed.graph.couplinggraph import CouplingGraph
 
 
+def _matches_qpu_name(item, qpu_name):
+    item_name = normalize_qpu_name(getattr(item, 'qpu_name', None))
+    query_name = normalize_qpu_name(qpu_name)
+    return item_name is not None and query_name is not None and item_name == query_name
+
+
 def query_qpu(qpus, qpu_name: str = None):
-    # find_qpus = list(filter(lambda item: item.qpu_name == qpu_name, qpus))
-    qpu_list = [item for item in qpus if item.qpu_name.lower() == qpu_name.lower()]
+    if normalize_qpu_name(qpu_name) is None:
+        raise ValueError("The qpu_name is not specified.")
+    qpu_list = [item for item in qpus if _matches_qpu_name(item, qpu_name)]
     if len(qpu_list) == 0:
         raise NameError("The " + qpu_name + " is not found.")
     else:
@@ -33,7 +41,7 @@ def query_vqpu(vqpus, qpu_name: str = None, qubits_num: int = None):
     if qpu_name is None and qubits_num is not None:
         return [item for item in vqpus if item.qubits_num == qubits_num]
     elif qpu_name is not None and qubits_num is not None:
-        return [item for item in vqpus if item.qpu_name.lower() == qpu_name.lower()
+        return [item for item in vqpus if _matches_qpu_name(item, qpu_name)
                 and item.qubits_num == qubits_num]
     else:
         raise ValueError("The qubits_num is not specified.")
@@ -42,7 +50,7 @@ def query_vqpu(vqpus, qpu_name: str = None, qubits_num: int = None):
 def query_specified_vqpu(vqpus, qpu_name: str = None, qubits_list: list = None):
     if qpu_name is not None and qubits_list is not None:
         vqpu_list = [item for item in vqpus
-                     if item.qpu_name.lower() == qpu_name.lower()
+                     if _matches_qpu_name(item, qpu_name)
                      and set(q[0] for q in item.coupling_list) | set(q[1] for q in item.coupling_list) == set(
                 qubits_list)]
         return vqpu_list
@@ -75,7 +83,7 @@ def query_subqpu(subqpus, qpu_name: str = None, qubits_num: int = None):
     if qpu_name is None and qubits_num is not None:
         return [item for item in subqpus if item.qubits_num == qubits_num]
     elif qpu_name is not None and qubits_num is not None:
-        return [item for item in subqpus if item.qpu_name.lower() == qpu_name.lower()
+        return [item for item in subqpus if _matches_qpu_name(item, qpu_name)
                 and item.qubits_num == qubits_num]
     else:
         raise ValueError("The qubits_num is not specified.")
@@ -84,7 +92,7 @@ def query_subqpu(subqpus, qpu_name: str = None, qubits_num: int = None):
 def query_specified_subqpu(subqpus, qpu_name: str = None, qubits_list: list = None):
     if qpu_name is not None and qubits_list is not None:
         subqpu_list = [item for item in subqpus
-                       if item.qpu_name.lower() == qpu_name.lower()
+                       if _matches_qpu_name(item, qpu_name)
                        and set(q[0] for q in item.substructure_CAL) | set(q[1] for q in item.substructure_CAL) == set(
                 qubits_list)]
         return subqpu_list

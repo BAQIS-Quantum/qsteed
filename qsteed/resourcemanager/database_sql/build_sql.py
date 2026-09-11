@@ -16,6 +16,8 @@
 
 
 import configparser
+import warnings
+from datetime import date, datetime
 
 import networkx as nx
 
@@ -25,7 +27,40 @@ from qsteed.resourcemanager.database_sql.initialize_app_db import db
 from qsteed.config.get_config import get_config
 from qsteed.graph.couplinggraph import CouplingGraph
 from qsteed.resourcemanager.utils import virtual_qubits
-import warnings
+
+
+def _to_datetime(value, field_name: str = "datetime"):
+    """Normalize common timestamp inputs to Python datetime for SQLAlchemy."""
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, date):
+        return datetime.combine(value, datetime.min.time())
+    if not isinstance(value, str):
+        warnings.warn(f"{field_name} has unsupported type: {type(value)}; set to None.")
+        return None
+
+    text = value.strip()
+    if not text:
+        return None
+
+    # Support ISO-like forms, including trailing Z.
+    iso_text = text.replace("Z", "+00:00")
+    try:
+        return datetime.fromisoformat(iso_text)
+    except ValueError:
+        pass
+
+    # Fallback to common datetime formats.
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M:%S", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
+            continue
+
+    warnings.warn(f"Failed to parse {field_name}: {value}; set to None.")
+    return None
 
 
 # import matplotlib
@@ -78,7 +113,7 @@ def save_qpu_data(chip_info, qpu_id=None):
             'qubit_to_int': qubit_to_int,
             'int_to_qubit': int_to_qubit,
             'structure': structure,
-            'calibration_time': chip_info.calibration_time,
+            'calibration_time': _to_datetime(chip_info.calibration_time, field_name='calibration_time'),
             'benchmark_time': None,
             'benchmark_data': None,
             'priority_qubits': chip_info.priority_qubits,
@@ -381,4 +416,3 @@ def _map_string_to_tuple(s, dimension=1):
         col = int(numbers[half_length:])
     tuple_node = (row, col)
     return tuple_node
-

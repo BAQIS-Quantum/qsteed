@@ -23,7 +23,7 @@ from quafu.elements import Barrier, Delay, XYResonance, Measure
 from quafu.elements.element_gates import CXGate, RXGate, RYGate, RZGate, IdGate, CPGate, CZGate, ISwapGate
 
 from qsteed.passes.basepass import BasePass
-from qsteed.passes.unroll.rules_library import Rules_dict, CX_rules
+from qsteed.passes.unroll.rules_library import CX_rules, H_rules, RZ_rules, Rules_dict, Swap_rules
 
 
 class UnrollToBasis(BasePass):
@@ -49,12 +49,32 @@ class UnrollToBasis(BasePass):
         self.qubits = None
         self.global_phase = 0
 
+        self.rules_dict = copy.deepcopy(Rules_dict)
         if CZGate.name.lower() in self.basis_gates:
-            Rules_dict.update(CX_rules[CZGate.name.lower()])
+            self.rules_dict.update(CX_rules[CZGate.name.lower()])
+            swap_candidates = Swap_rules[CZGate.name.lower()]
         elif ISwapGate.name.lower() in self.basis_gates:
-            Rules_dict.update(CX_rules[ISwapGate.name.lower()])
+            self.rules_dict.update(CX_rules[ISwapGate.name.lower()])
+            swap_candidates = Swap_rules[CXGate.name.lower()]
         elif CPGate(0, 1, 0).name.lower() in self.basis_gates:
-            Rules_dict.update(CX_rules[CPGate(0, 1, 0).name.lower()])
+            self.rules_dict.update(CX_rules[CPGate(0, 1, 0).name.lower()])
+            swap_candidates = Swap_rules[CXGate.name.lower()]
+        else:
+            swap_candidates = Swap_rules[CXGate.name.lower()]
+
+        self._select_alternative_rule('h', H_rules)
+        self._select_alternative_rule('rz', RZ_rules)
+        self._select_alternative_rule('swap', swap_candidates)
+
+    def _select_alternative_rule(self, original, candidates):
+        """Select a direct rule for this basis, retaining a recursive fallback."""
+        basis_set = set(self.basis_gates)
+        selected = candidates[0]
+        for candidate in candidates:
+            if set(candidate[0]).issubset(basis_set):
+                selected = candidate
+                break
+        self.rules_dict[original] = copy.deepcopy(selected)
 
     def run(self, circuit: QuantumCircuit) -> QuantumCircuit:
         gates = circuit.gates
@@ -85,11 +105,12 @@ class UnrollToBasis(BasePass):
             pass
         else:
             try:
-                Rules_dict[gate.name.lower()][0]
+                self.rules_dict[gate.name.lower()][0]
             except KeyError:
                 print("Error: The instruction %s has no unrolling rule." % gate.name)
-            basis = Rules_dict[gate.name.lower()][0]
-            rule_class = Rules_dict[gate.name.lower()][1]
+                raise
+            basis = self.rules_dict[gate.name.lower()][0]
+            rule_class = self.rules_dict[gate.name.lower()][1]
             rule = rule_class.run(gate)
             self.global_phase += rule_class.global_phase
             if set(basis).issubset(set(self.basis_gates)):

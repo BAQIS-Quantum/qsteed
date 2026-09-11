@@ -19,7 +19,7 @@ from collections import defaultdict
 from math import pi
 
 from quafu import QuantumCircuit
-from quafu.elements.element_gates import QuantumGate
+from quafu.elements import QuantumGate
 from quafu.elements.element_gates import pauli
 
 

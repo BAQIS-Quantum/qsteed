@@ -22,13 +22,19 @@ from qsteed.resourcemanager.database_sql.initialize_app_db import db, app
 
 def initialize_database():
     with app.app_context():
+        db.session.remove()
+        db.engine.dispose()
         database_operations(reset=True)
         db.create_all()
-        db.session.commit()
-        initialize_qpu()
-        initialize_stdqpu()
-        initialize_subqpu()
-        initialize_vqpu()
+        try:
+            initialize_qpu()
+            initialize_stdqpu()
+            initialize_subqpu()
+            initialize_vqpu()
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
 
 
 def initialize_qpu():

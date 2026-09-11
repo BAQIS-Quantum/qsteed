@@ -17,8 +17,9 @@
 import operator
 import time
 from functools import reduce
+from types import SimpleNamespace
 
-from qsteed.resourcemanager.database_sql.database_query import query_subqpu, query_vqpu
+from qsteed.resourcemanager.database_sql.database_query import query_qpu, query_subqpu, query_vqpu
 from qsteed.resourcemanager.database_sql.instantiating import get_qpu, get_subqpu, get_vqpu
 
 qpus = get_qpu()
@@ -50,6 +51,16 @@ class TestDatabaseQuery:
         print("All vqpus with %s qubits." % qubits_num)
         for s in vqpu:
             print(s.coupling_list)
+
+    def test_query_ignores_empty_placeholder_rows(self):
+        placeholder = SimpleNamespace(qpu_name=None, qubits_num=None)
+        qpu = SimpleNamespace(qpu_name='Dongling')
+        subqpu = SimpleNamespace(qpu_name='Dongling', qubits_num=3)
+        vqpu = SimpleNamespace(qpu_name='Dongling', qubits_num=3)
+
+        assert query_qpu([placeholder, qpu], 'dongling') == [qpu]
+        assert query_subqpu([placeholder, subqpu], 'dongling', 3) == [subqpu]
+        assert query_vqpu([placeholder, vqpu], 'DONGLING', 3) == [vqpu]
 
     def _sort_vqpus(self, _vqpus, sort_attribute=None):
         """Helper function to sort VQPUs based on a specified attribute."""

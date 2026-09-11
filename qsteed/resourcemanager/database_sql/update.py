@@ -26,6 +26,7 @@ def update_sql(backend: str = None, chip_info_dict: dict = None):
     with app.app_context():
         chip_info = ChipInfo(backend, chip_info_dict)
         chip_info.initialize_chip()
+        backend = chip_info.name
         db.create_all()
 
         # QPU

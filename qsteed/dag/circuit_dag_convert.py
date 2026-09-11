@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import copy
-from typing import Any
+from typing import Any, List
 
 import networkx as nx
 import numpy as np

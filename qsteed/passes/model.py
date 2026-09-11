@@ -39,6 +39,10 @@ class Model:
         """Return the backend of the model."""
         return self._backend
 
+    def set_used_subgraph(self, subgraph):
+        """Set the exact physical subgraph used by the current circuit."""
+        self._backend.set_property('used_subgraph', subgraph)
+
     # def set_layout(self, layout: List[int]):
     #     """Set a new layout for the quantum system."""
     #     self._layout = layout

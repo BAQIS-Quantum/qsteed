@@ -97,7 +97,12 @@ class SabreRouting(BasePass):
             model (Model): The given model includes information such as backend and layout.
         """
         self.model = model
-        self.coupling_graph = self.model.get_backend().get_property('coupling_graph')
+        backend = self.model.get_backend()
+        # SabreLayout selects an exact-size connected region for n < N.
+        # Routing is deliberately restricted to that region, so p2v contains no
+        # empty physical positions and candidate SWAPs never leave the subgraph.
+        self.coupling_graph = (backend.get_property('used_subgraph') or
+                               backend.get_property('coupling_graph'))
 
         if self.coupling_graph is None:
             if self.coupling_list is not None:
@@ -105,6 +110,7 @@ class SabreRouting(BasePass):
                 if coupling_graph.is_bidirectional is False:
                     coupling_graph.do_bidirectional()
                 self.coupling_graph = coupling_graph
+                self.model.set_used_subgraph(coupling_graph)
             else:
                 raise ValueError("Error: There is no qubits coupling structure.")
 

@@ -15,75 +15,67 @@
 # limitations under the License.
 
 
-from flask import Flask
 from qsteed.resourcemanager.database_sql.sql_models import QPU, SubQPU, VQPU, StdQPU
 from qsteed.resourcemanager.database_sql.initialize_app_db import app
+from qsteed.resourcemanager.database_sql.resource_cache import ResourceCache
 
-SubQPUs = []
-StdQPUs = []
-QPUs = []
-VQPUs = []
+
+def _load_resources():
+    with app.app_context():
+        return (
+            QPU.query.all(),
+            StdQPU.query.all(),
+            SubQPU.query.all(),
+            VQPU.query.all(),
+        )
+
+
+_RESOURCE_CACHE = ResourceCache(_load_resources)
+
+
+def get_resource_snapshot():
+    """Return the current complete in-memory resource snapshot."""
+    return _RESOURCE_CACHE.current()
 
 
 def get_qpu():
-    return QPUs
+    return list(get_resource_snapshot().qpus)
 
 
 def get_stdqpu():
-    return StdQPUs
+    return list(get_resource_snapshot().stdqpus)
 
 
 def get_subqpu():
-    return SubQPUs
+    return list(get_resource_snapshot().subqpus)
 
 
 def get_vqpu():
-    return VQPUs
+    return list(get_resource_snapshot().vqpus)
 
 
-def instantiating_qpu(app: Flask):
-    with app.app_context():
-        global QPUs
-        if len(QPUs) == 0:
-            QPUs = QPU.query.all()
-        return QPUs
+def instantiating_qpu(_app=None):
+    return get_qpu()
 
 
-def instantiating_stdqpu(app: Flask):
-    with app.app_context():
-        global StdQPUs
-        if len(StdQPUs) == 0:
-            StdQPUs = StdQPU.query.all()
-        return StdQPUs
+def instantiating_stdqpu(_app=None):
+    return get_stdqpu()
 
 
-def instantiating_subqpu(app: Flask):
-    with app.app_context():
-        global SubQPUs
-        if len(SubQPUs) == 0:
-            SubQPUs = SubQPU.query.all()
-        return SubQPUs
+def instantiating_subqpu(_app=None):
+    return get_subqpu()
 
 
-def instantiating_vqpu(app: Flask):
-    with app.app_context():
-        global VQPUs
-        if len(VQPUs) == 0:
-            VQPUs = VQPU.query.all()
-        return VQPUs
+def instantiating_vqpu(_app=None):
+    return get_vqpu()
 
 
 def update_memory_database():
-    with app.app_context():
-        global QPUs, StdQPUs, SubQPUs, VQPUs
-        QPUs = QPU.query.all()
-        VQPUs = VQPU.query.all()
-        StdQPUs = StdQPU.query.all()
-        SubQPUs = SubQPU.query.all()
-        return QPUs, StdQPUs, SubQPUs, VQPUs
-
-
-instantiating_qpu(app)
-instantiating_subqpu(app)
-instantiating_stdqpu(app)
-instantiating_vqpu(app)
+    """Reload all resource tables and atomically publish one new snapshot."""
+    snapshot = _RESOURCE_CACHE.refresh()
+    return (
+        list(snapshot.qpus),
+        list(snapshot.stdqpus),
+        list(snapshot.subqpus),
+        list(snapshot.vqpus),
+    )

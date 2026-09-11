@@ -25,7 +25,7 @@ class SubQPU(db.Model):
     """
     __tablename__ = 'SubQPU'
 
-    id = db.Column(db.BIGINT, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     subqpu_name = db.Column(db.String(255), index=True, unique=True)
     qpu_name = db.Column(db.String(255), index=True)
     qpu_id = db.Column(db.Integer, index=True)
@@ -42,11 +42,11 @@ class SubQPU(db.Model):
     substructure_BM = db.Column(db.PickleType)
     substructure_reset = db.Column(db.PickleType)
 
-    VQPU_DBid = db.Column(db.BIGINT, ForeignKey('VQPU.id'))
-    StdQPU_DBid = db.Column(db.BIGINT, ForeignKey('StdQPU.id'))
+    VQPU_DBid = db.Column(db.Integer, ForeignKey('VQPU.id'))
+    StdQPU_DBid = db.Column(db.Integer, ForeignKey('StdQPU.id'))
 
-    sub2v = relationship("VQPU", back_populates="v2sub", foreign_keys=[VQPU_DBid])
-    sub2std = relationship("StdQPU", back_populates="std2sub", foreign_keys=[StdQPU_DBid])
+    sub2v = relationship("VQPU", back_populates="v2sub", foreign_keys=[VQPU_DBid], lazy='joined')
+    sub2std = relationship("StdQPU", back_populates="std2sub", foreign_keys=[StdQPU_DBid], lazy='joined')
 
 
 class StdQPU(db.Model):
@@ -54,7 +54,7 @@ class StdQPU(db.Model):
     """
     __tablename__ = 'StdQPU'
 
-    id = db.Column(db.BIGINT, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     stdqpu_name = db.Column(db.String(255), index=True, unique=True)
     qpu_name = db.Column(db.String(255), index=True, unique=True)
     qpu_id = db.Column(db.Integer, index=True, unique=True)
@@ -76,11 +76,11 @@ class StdQPU(db.Model):
     benchmark_time = db.Column(db.DateTime)
     benchmark_data = db.Column(db.PickleType)
 
-    QPU_DBid = db.Column(db.BIGINT, ForeignKey('QPU.id'))
+    QPU_DBid = db.Column(db.Integer, ForeignKey('QPU.id'))
 
-    std2qpu = relationship("QPU", back_populates='qpu2std', foreign_keys=[QPU_DBid])
+    std2qpu = relationship("QPU", back_populates='qpu2std', foreign_keys=[QPU_DBid], lazy='joined')
     std2sub = relationship('SubQPU', back_populates='sub2std',
-                              foreign_keys=[SubQPU.StdQPU_DBid])
+                              foreign_keys=[SubQPU.StdQPU_DBid], lazy='joined')
 
 
 class QPU(db.Model):
@@ -88,7 +88,7 @@ class QPU(db.Model):
     """
     __tablename__ = 'QPU'
 
-    id = db.Column(db.BIGINT, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     qpu_name = db.Column(db.String(255), index=True, unique=True)
     qpu_id = db.Column(db.Integer, index=True, unique=True)
     backend_type = db.Column(db.String(255))
@@ -107,13 +107,13 @@ class QPU(db.Model):
     benchmark_time = db.Column(db.DateTime)
     benchmark_data = db.Column(db.PickleType)
     priority_qubits = db.Column(db.PickleType)
-    tasks_num = db.Column(db.BIGINT)
+    tasks_num = db.Column(db.Integer)
     executing_tasks_list = db.Column(db.PickleType)
     assigned_tasks_list = db.Column(db.PickleType)
     estimated_free_time = db.Column(db.FLOAT)
 
     qpu2std = relationship('StdQPU', back_populates='std2qpu',
-                              foreign_keys=[StdQPU.QPU_DBid])
+                              foreign_keys=[StdQPU.QPU_DBid], lazy='joined')
 
 
 class VQPU(db.Model):
@@ -121,7 +121,7 @@ class VQPU(db.Model):
     """
     __tablename__ = 'VQPU'
 
-    id = db.Column(db.BIGINT, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     vqpu_name = db.Column(db.String(255), index=True, unique=True)
     qpu_name = db.Column(db.String(255), index=True)
     backend_type = db.Column(db.String(255))
@@ -134,4 +134,4 @@ class VQPU(db.Model):
     vq_to_q = db.Column(db.PickleType)
 
     v2sub = relationship('SubQPU', back_populates='sub2v',
-                            foreign_keys=[SubQPU.VQPU_DBid])
+                            foreign_keys=[SubQPU.VQPU_DBid], lazy='joined')

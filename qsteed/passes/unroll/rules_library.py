@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from quafu.elements.element_gates import CXGate, CZGate, ISwapGate, CPGate
+from quafu.elements.element_gates import CPGate, CXGate, CZGate, HGate, ISwapGate, RZGate, SwapGate
 
 from qsteed.passes.unroll import rules
 from qsteed.passes.unroll.rules import *
@@ -24,10 +24,16 @@ class_names = rules.__all__
 # Use globals() to get class objects and create a dictionary
 Rules_dict = {}
 # CX_rules = defaultdict(list)
+alternative_originals = {
+    CXGate.name.lower(),
+    HGate.name.lower(),
+    RZGate(0, 0).name.lower(),
+    SwapGate.name.lower(),
+}
 for class_name in class_names:
     class_obj = globals().get(class_name)
     if class_obj is not None:
-        if class_obj().original != CXGate.name.lower():
+        if class_obj().original not in alternative_originals:
             Rules_dict[class_obj().original] = [class_obj().basis, class_obj()]
         # else:
         #     CX_rules[class_obj().original].append([class_obj().basis, class_obj()])
@@ -39,3 +45,23 @@ for class_name in class_names:
 CX_rules = {CZGate.name.lower(): {CNOTToCZ().original: [CNOTToCZ().basis, CNOTToCZ()]},
             ISwapGate.name.lower(): {CNOTToISWAP().original: [CNOTToISWAP().basis, CNOTToISWAP()]},
             CPGate(0, 1, 0).name.lower(): {CNOTToCP().original: [CNOTToCP().basis, CNOTToCP()]}}
+
+H_rules = [
+    [HToRXRY().basis, HToRXRY()],
+    [HToRYRZ().basis, HToRYRZ()],
+]
+
+RZ_rules = [
+    [RZToRXRY().basis, RZToRXRY()],
+    [RZToSXRY().basis, RZToSXRY()],
+]
+
+Swap_rules = {
+    CZGate.name.lower(): [
+        [SwapToCZH().basis, SwapToCZH()],
+        [SwapToCZRXRY().basis, SwapToCZRXRY()],
+    ],
+    CXGate.name.lower(): [
+        [SwapToCNOT().basis, SwapToCNOT()],
+    ],
+}

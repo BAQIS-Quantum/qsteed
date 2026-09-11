@@ -14,6 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from qsteed.graph.subgraph import random_subgraph
+from qsteed.passes.mapping.overall_layout import OverallLayout
 
-from .baselayout import Layout
-from .overall_layout import OverallLayout
+
+class OverallLayoutRandom(OverallLayout):
+    """Choose a random connected physical subgraph of the required size."""
+
+    def overall_layout(self):
+        subgraph = random_subgraph(self.get_graph(), self.num_qubits)
+        return self._set_mapping_from_subgraph(subgraph)
