@@ -13,5 +13,3 @@ sqlalchemy>=2.0.28
 flask>=3.0.2
 pymysql>=1.1.0
 flask_sqlalchemy>=3.1.1
-quarkcircuit>=0.5.5
-quarkstudio>=7.3.9
