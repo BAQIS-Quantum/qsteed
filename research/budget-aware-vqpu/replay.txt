@@ -1,0 +1,12 @@
+0.10 seconds, common completed cases 36/36
+breadth +0.19% [18, 12, 6]
+fixed_4x2 +0.00% [17, 12, 7]
+screen +0.00% [16, 13, 7]
+0.25 seconds, common completed cases 36/36
+breadth +6.80% [26, 3, 7]
+fixed_4x2 +2.90% [23, 6, 7]
+screen +3.77% [22, 7, 7]
+0.50 seconds, common completed cases 36/36
+breadth +6.80% [26, 3, 7]
+fixed_4x2 +3.77% [24, 5, 7]
+screen +3.77% [23, 8, 5]
